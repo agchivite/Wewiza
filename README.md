@@ -1,8 +1,7 @@
 # Wewiza
 App to compare prices from various markets, examples:
 
-- API´s: Amazon & Aliexpress
-- Support by community: Mercadona, Alcampo, Auchan, Lidl, etc.
+- Create an API from: Mercadona, Carrefour, Dia, Ahorramas...
 
 ## Members
 - JiaCheng Zhang
