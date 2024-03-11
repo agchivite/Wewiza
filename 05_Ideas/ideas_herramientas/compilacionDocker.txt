@@ -1,0 +1,3 @@
+Docker Scratch lee en binarios, si compilamos una aplicación se queda el contenedor super chikito.
+
+- Microservicio (Contenedor de API REST + Contenedor de DataBase)
