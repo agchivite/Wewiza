@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "843319737495",
+    "project_id": "firstcompose-d4a7e",
+    "storage_bucket": "firstcompose-d4a7e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843319737495:android:4942c1c98f73b6dd0f7dd2",
+        "android_client_info": {
+          "package_name": "dev.sbytmacke.firstcompose"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843319737495-q8oka7soj9o11o9sf9rab9ne0m24j8p6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcrCIRXNoaMuokOawfmv4qnlnHH9E7yEk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843319737495-q8oka7soj9o11o9sf9rab9ne0m24j8p6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

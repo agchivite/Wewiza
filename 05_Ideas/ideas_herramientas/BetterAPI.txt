@@ -1,0 +1,7 @@
+Where to generate resource IDs (auto-incrementing IDs vs UUIDs)
+
+Generate meaningful identifiers. (Understandable not just readable)
+
+Provide meaningful response (that's actually pretty nice)
+
+Prefer returning a JSON object response instead of an array. This way you leave room for extension.
