@@ -20,7 +20,7 @@ Wewiza es una aplicación diseñada para comparar precios de diversos mercados. 
 
 ### APIs
 
-Utilizaremos APIs existentes como [Fake Store API](https://fakestoreapi.com/) y [FakeStore1](https://github.com/keikaavousi/fake-store-api).
+Crearemos dos API´s de dos mercadones o si nos vemos apresurados, utilizaremos APIs existentes como [Fake Store API](https://fakestoreapi.com/) y [FakeStore1](https://github.com/keikaavousi/fake-store-api).
 
 ### Base de Datos
 
