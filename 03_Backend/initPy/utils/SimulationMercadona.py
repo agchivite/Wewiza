@@ -30,6 +30,7 @@ class SimulationMercadona:
           print(f"Accediendo a la página: {url}")
 
           output_file = f'output{i}.txt'
+          url = f'https://tienda.mercadona.es/categories/{i}'
           self.driver.get(url)
 
           try:
