@@ -1,5 +1,0 @@
-En el linux servidor se instala el certificado para hacer https:
-Let´s Encrypt -> https://letsencrypt.org/es/
-Tarea en Cron para certificarlo cada X tiempo.
-
-Es posible contenerizar un contenedor solo para los certificados
