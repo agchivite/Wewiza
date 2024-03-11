@@ -1,2 +1,0 @@
-pymongo==4.6.1
-selenium==4.16.0
