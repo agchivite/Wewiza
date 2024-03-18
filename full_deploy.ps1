@@ -1,6 +1,6 @@
 # Multiple execution scripts by PowerShell
 
-docker network create public-wewiza-network
+#docker network create public-wewiza-network
 
 $script1 = "deploy_api_market_01.ps1"
 $script2 = "deploy_api_market_02.ps1"
