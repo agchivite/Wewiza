@@ -2,9 +2,9 @@ import os
 import requests
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
-from database.DatabaseManager import DatabaseManager
-from models.ProductFirst import ProductFirst
-from repositories.ProductRepository import ProductRepository
+from src.database.database_manager import DatabaseManager
+from src.models.product_first import ProductFirst
+from src.repositories.product_repository import ProductRepository
 
 DATABASE_NAME = "mercadona"
 COLLECTION = "products"
@@ -72,14 +72,14 @@ class SimulationMercadona:
                             print(product)
 
                         # Escribir la información en un archivo
-                        write_products_to_file(products, output_file)
+                        # write_products_to_file(products, output_file)
 
                         # Insertar los datos en MongoDB
                         insert_products_to_mongodb(products)
                 except Exception as e:
                     print(f"Error al procesar la página {i}: {e}")
                     output_file = f"{output_folder}/output{i}.txt"
-                    write_products_to_file(products, output_file)
+                    # write_products_to_file(products, output_file)
             else:
                 print(f"La página no existe: {url}")
 

@@ -1,7 +1,11 @@
 # FastAPI
 fastapi==0.68.0
-# Requests
+# HTTP Requests 
 requests==2.26.0
+# Selenium
+selenium==4.1.0
+# BeautifulSoup
+beautifulsoup4==4.10.0
 # Validación FASTAPI, pero explota si lo utilizo
 # pydantic==1.6.2 
 # Uvicorn Server

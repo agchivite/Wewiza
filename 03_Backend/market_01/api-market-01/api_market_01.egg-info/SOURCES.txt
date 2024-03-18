@@ -1,0 +1,14 @@
+setup.py
+api_market_01.egg-info/PKG-INFO
+api_market_01.egg-info/SOURCES.txt
+api_market_01.egg-info/dependency_links.txt
+api_market_01.egg-info/top_level.txt
+src/__init__.py
+src/database/__init__.py
+src/database/database_manager.py
+src/models/__init__.py
+src/models/category.py
+src/models/product.py
+src/models/product_first.py
+src/repositories/__init__.py
+src/repositories/product_repository.py
