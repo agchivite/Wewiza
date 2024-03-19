@@ -2,20 +2,14 @@ import os
 import requests
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
-from src.database.database_manager import DatabaseManager
 from src.models.product_first import ProductFirst
-from src.repositories.product_repository import ProductRepository
-
-DATABASE_NAME = "mercadona"
-COLLECTION = "products"
+from src.services.product_service import ProductService
 
 
-class SimulationMercadona:
-    def __init__(self, driver, connection_mongo):
+class ScrappingService:
+    def __init__(self, driver, product_service: ProductService):
         self.driver = driver
-        self.connection_mongo = connection_mongo
-        database_manager = DatabaseManager(self.connection_mongo, DATABASE_NAME)
-        self.product_repository = ProductRepository(database_manager, COLLECTION)
+        self.product_service = product_service
 
     def run_simulation(self, start_category, end_category):
         output_folder = "data"
@@ -64,7 +58,7 @@ class SimulationMercadona:
 
                         # Iterar sobre los elementos y extraer información
                         for product_html in products_html:
-                            product = process_product_html(product_html)
+                            product = self.map_product_html_to_model(product_html)
                             products.append(product)
 
                         # Imprimir la información de los productos
@@ -75,7 +69,7 @@ class SimulationMercadona:
                         # write_products_to_file(products, output_file)
 
                         # Insertar los datos en MongoDB
-                        insert_products_to_mongodb(products)
+                        self.insert_products_to_mongodb(products)
                 except Exception as e:
                     print(f"Error al procesar la página {i}: {e}")
                     output_file = f"{output_folder}/output{i}.txt"
@@ -86,50 +80,51 @@ class SimulationMercadona:
         # Cerrar el navegador
         self.driver.quit()
 
-        def process_product_html(product_html):
-            try:
-                name = product_html.find(
-                    "h4", class_="subhead1-r product-cell__description-name"
-                ).text
-                price = product_html.find(
-                    "p", class_="product-price__unit-price subhead1-b"
-                ).text
-                quantityPerPrice = product_html.find(
-                    "p", class_="product-price__extra-price subhead1-r"
-                ).text
-                quantity = product_html.find("span", class_="footnote1-r").text
-                # Obtener la URL de la imagen
-                image_wrapper = product_html.find(
-                    "div", class_="product-cell__image-wrapper"
-                )
-                image = (
-                    image_wrapper.find("img")["src"] if image_wrapper else "[no-image]"
-                )
+    def map_product_html_to_model(self, product_html):
+        try:
+            name = product_html.find(
+                "h4", class_="subhead1-r product-cell__description-name"
+            ).text
+            price = product_html.find(
+                "p", class_="product-price__unit-price subhead1-b"
+            ).text
+            quantityPerPrice = product_html.find(
+                "p", class_="product-price__extra-price subhead1-r"
+            ).text
+            quantity = product_html.find("span", class_="footnote1-r").text
+            # Obtener la URL de la imagen
+            image_wrapper = product_html.find(
+                "div", class_="product-cell__image-wrapper"
+            )
+            image = image_wrapper.find("img")["src"] if image_wrapper else "[no-image]"
 
-                # Crear instancia de la clase Producto y agregar a la lista
-                product = ProductFirst(name, price, quantityPerPrice, quantity, image)
-            except AttributeError as e:
-                print(f"Error al obtener datos del producto: {e}")
-                no_data = "[no-data]"
-                product = ProductFirst(no_data, no_data, no_data, no_data, image)
+            # Crear instancia de la clase Producto y agregar a la lista
+            product = ProductFirst(name, price, quantityPerPrice, quantity, image)
+        except AttributeError as e:
+            print(f"Error al obtener datos del producto: {e}")
+            no_data = "[no-data]"
+            product = ProductFirst(no_data, no_data, no_data, no_data, image)
 
-            return product
+        return product
 
-        def write_products_to_file(products, output_file):
-            with open(output_file, "w", encoding="utf-8") as file:
-                for product in products:
-                    file.write(str(product) + "\n")
-
-        def insert_products_to_mongodb(products):
+    def write_products_to_file(products, output_file):
+        with open(output_file, "w", encoding="utf-8") as file:
             for product in products:
-                product_data = {
-                    "name": product.name,
-                    "price": product.price,
-                    "quantityPerPrice": product.quantityPerPrice,
-                    "quantity": product.quantity,
-                    "image": product.image,
-                }
-                try:
-                    self.product_repository.insert_product(product_data)
-                except Exception as mongo_error:
-                    print(f"Error al insertar en MongoDB: {mongo_error}")
+                file.write(str(product) + "\n")
+
+    def insert_products_to_mongodb(self, products):
+        for product_model in products:
+            """
+            product_data = {
+                "name": product.name,
+                "price": product.price,
+                "quantityPerPrice": product.quantityPerPrice,
+                "quantity": product.quantity,
+                "image": product.image,
+            }
+            """
+
+            try:
+                self.product_service.create_product(product_model)
+            except Exception as mongo_error:
+                print(f"Error al insertar en MongoDB: {mongo_error}")

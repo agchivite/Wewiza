@@ -12,3 +12,8 @@ src/models/product.py
 src/models/product_first.py
 src/repositories/__init__.py
 src/repositories/product_repository.py
+src/schemas/__init__.py
+src/schemas/product_schema.py
+src/services/__init__.py
+src/services/product_service.py
+src/services/scrapping_service.py

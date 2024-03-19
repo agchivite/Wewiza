@@ -19,3 +19,5 @@ python-dotenv==1.0.1
 # Testing
 pytest==6.2.5
 pytest-mock==3.6.1
+# Results (Railway Orientated Programming): https://pypi.org/project/python-on-rails/
+python_on_rails==1.0.1
