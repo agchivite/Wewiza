@@ -20,6 +20,7 @@ class ProductService:
         only_numbers = only_numbers.replace(",", ".")
         price_float = float(only_numbers)
 
+        # TODO: fix we the correct attributes when use real product
         json_product = {
             "id": product.name,
             "category_id": product.name,
