@@ -6,7 +6,7 @@ from src.database.database_manager import DatabaseManager
 from src.repositories.product_repository import ProductRepository
 
 CONNECTION_MONGO = "mongodb://root:root@localhost:27021"
-DATABASE_NAME = "mercadona"
+DATABASE_NAME = "donamerca"
 COLLECTION_NAME = "products"
 
 # Chrome Service
