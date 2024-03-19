@@ -4,6 +4,7 @@ from src.models.product_first import ProductFirst
 
 from src.repositories.product_repository import ProductRepository
 import json
+import re
 
 
 class ProductService:
@@ -15,20 +16,18 @@ class ProductService:
         self.create_product()
 
     def create_product(self, product: ProductFirst):
-        import re
-
-        solo_numeros = re.sub(r"[^\d.,]", "", product.price)
-
-        solo_numeros = solo_numeros.replace(",", ".")
-        precio_float = float(solo_numeros)
+        only_numbers = re.sub(r"[^\d.,]", "", product.price)
+        only_numbers = only_numbers.replace(",", ".")
+        price_float = float(only_numbers)
 
         json_product = {
             "id": product.name,
             "category_id": product.name,
             "name": product.name,
-            "price": precio_float,
+            "currency": product.name,
+            "price": price_float,
             "measure": product.name,
-            "price_by_measure": precio_float,
+            "price_by_measure": price_float,
             "image_url": product.name,
             "store_name": product.name,
             "store_image_url": product.name,

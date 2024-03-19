@@ -80,6 +80,7 @@ class ScrappingService:
         # Cerrar el navegador
         self.driver.quit()
 
+    # TODO: hacer un mapper Dto para seleccionar los datos que queramos
     def map_product_html_to_model(self, product_html):
         try:
             name = product_html.find(
@@ -103,6 +104,7 @@ class ScrappingService:
         except AttributeError as e:
             print(f"Error al obtener datos del producto: {e}")
             no_data = "[no-data]"
+            # TODO: cambiar por el producto real y seguir el flujo de la insercción hasta la base de datos por si acaso
             product = ProductFirst(no_data, no_data, no_data, no_data, image)
 
         return product

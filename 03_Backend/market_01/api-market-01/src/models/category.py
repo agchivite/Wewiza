@@ -1,5 +1,5 @@
 from ast import List
-from models.Product import Product
+from src.models.product import Product
 
 
 class Category:

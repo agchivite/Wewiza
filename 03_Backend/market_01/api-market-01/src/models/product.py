@@ -4,6 +4,7 @@ class Product:
         id: str,
         category_id: str,
         name: str,
+        currency: str,
         price: float,
         measure: str,
         price_by_measure: float,
@@ -11,9 +12,10 @@ class Product:
         store_name: str,
         store_image_url: str,
     ):
-        self.name = name
         self.id = id
         self.category_id = category_id
+        self.name = name
+        self.currency = currency
         self.price = price
         self.measure = measure
         self.price_by_measure = price_by_measure
