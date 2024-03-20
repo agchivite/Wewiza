@@ -1,16 +1,16 @@
 FROM python:3.11-bullseye
 
-WORKDIR /api-wewiza
+WORKDIR /market_02
 
-COPY requirements.txt ./
+COPY /api_market_02/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8080
+EXPOSE 8082
 
 # Ruta actual copiar a la ruta de destino
 COPY . .
 
-CMD [ "python", "./main.py" ]
+CMD [ "python", "./api_market_02/main.py" ]
 # Esto es apra que la API se quede siempre activa, en caso de no utilizar ninguna dependencia de SERVER
 #CMD [ "sh", "-c", "python ./main.py & tail -f /dev/null" ] 
 

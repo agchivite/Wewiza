@@ -1,5 +1,5 @@
 from python_on_rails.result import Result
-from src.schemas.product_likes_schema import product_likes_schema
+from api_wewiza.src.schemas.product_likes_schema import product_likes_schema
 from api_wewiza.src.database.database_manager import DatabaseManager
 
 
@@ -20,11 +20,16 @@ class ProductLikesRepository:
         except Exception as e:
             return Result.failure(str(e))
 
-    def insert_product(self, product_data):
+    def insert_product_json(self, product_data_json):
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
-            result = collection.insert_one(product_data)
+
+            existing_product = collection.find_one({"uuid": product_data_json["uuid"]})
+            if existing_product:
+                return Result.failure("Product with the same UUID already exists")
+            print(product_data_json)
+            result = collection.insert_one(product_data_json)
             self.db_manager.close_database()
             return Result.success(result.inserted_id)
         except Exception as e:

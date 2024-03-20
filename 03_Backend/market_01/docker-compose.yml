@@ -1,13 +1,13 @@
 version: "3"
 services:
   api_market_01:
-    build: api_market_01/.
+    build: ./
     restart: always
     ports:
       - "8081:8081"
     environment:
       - PORT=8081
-    command: uvicorn main:app --host 0.0.0.0 --port 8081 --reload
+    command: uvicorn api_market_01.main:app --host 0.0.0.0 --port 8081 --reload
     depends_on:
       - mongo_market_01
     networks:

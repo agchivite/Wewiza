@@ -1,9 +1,10 @@
 from python_on_rails.result import Result
 from api_market_01.src.schemas.product_schema import product_schema
+from api_market_01.src.database.database_manager import DatabaseManager
 
 
 class ProductRepository:
-    def __init__(self, db_manager, collection_name):
+    def __init__(self, db_manager: DatabaseManager, collection_name):
         self.db_manager = db_manager
         self.collection_name = collection_name
         self.__setup_collection_validation()
@@ -38,6 +39,17 @@ class ProductRepository:
             return Result.success(products)
         except Exception as e:
             return Result.failure(str(e))
+
+    def get_todos_by_user_email(self, user_email):
+        database = self.db_manager.connect_database()
+        collection = database[self.collection_name]
+        filter = {"user_email": user_email}
+        todos = list(collection.find(filter))
+        # Convertimos ObjectId a string, si no Python no puede convertirlo
+        for todo in todos:
+            todo["_id"] = str(todo["_id"])
+        self.db_manager.close_database()
+        return todos
 
     def delete_product(self, query):
         try:
