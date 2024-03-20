@@ -1,3 +1,6 @@
+# TODO: Delete
+
+
 class ProductFirst:
     def __init__(self, name, price, quantityPerPrice, quantity, image):
         self.name = name

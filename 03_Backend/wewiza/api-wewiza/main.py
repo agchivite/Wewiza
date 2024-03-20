@@ -3,6 +3,8 @@ import requests
 
 app = FastAPI()
 
+# TODO: Especific Service and Database to Model Products with UUID and num_likes
+
 
 @app.get("/saludo")
 def enviar_saludo():

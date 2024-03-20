@@ -1,7 +1,4 @@
-from src.database.database_manager import DatabaseManager
 from src.models.product import Product
-from src.models.product_first import ProductFirst
-
 from src.repositories.product_repository import ProductRepository
 import json
 import re
@@ -15,57 +12,34 @@ class ProductService:
         print("Ok, inyection")
         self.create_product()
 
-    def create_product(self, product: ProductFirst):
-        only_numbers = re.sub(r"[^\d.,]", "", product.price)
-        only_numbers = only_numbers.replace(",", ".")
-        price_float = float(only_numbers)
+    def create_product(self, product: Product):
+        only_numbers_price = re.sub(r"[^\d.,]", "", product.price)
+        only_numbers_price = only_numbers_price.replace(",", ".")
+        price_float = float(only_numbers_price)
 
-        # TODO: fix we the correct attributes when use real product
+        only_numbers_price_by_measure = re.sub(r"[^\d.,]", "", product.price_by_measure)
+        only_numbers_price_by_measure = only_numbers_price_by_measure.replace(",", ".")
+        price_float_price_by_measure = float(only_numbers_price_by_measure)
+
         json_product = {
-            "id": product.name,
-            "category_id": product.name,
+            "id": product.id,
+            "category_id": product.category_id,
             "name": product.name,
-            "currency": product.name,
+            "currency": product.currency,
             "price": price_float,
-            "measure": product.name,
-            "price_by_measure": price_float,
-            "image_url": product.name,
-            "store_name": product.name,
-            "store_image_url": product.name,
+            "measure": product.measure,
+            "price_by_measure": price_float_price_by_measure,
+            "image_url": product.image_url,
+            "store_name": product.store_name,
+            "store_image_url": product.store_image_url,
         }
 
         result = self.product_repository.insert_product(json_product)
         if result.is_failure():
             print("Failed to insert product:", result.error)
+            # print(json.dumps(json_product, indent=4))
+            # TODO: return failure
         else:
             print("Product inserted successfully with ID:", result.value)
-
-        print("Pretty JSON good:")
-        # print(json.dumps(json_product, indent=4))
-
-        # return self.product_dao.create_product(product)
-
-        """
-        product_good = Product(
-            "product_01",
-            "catyegory_01",
-            "patata",
-            2.2,
-            "kg",
-            1.0,
-            "store_01",
-            "store_01",
-            "store_01_img",
-        )
-        json_good = {
-            "id": product_good.id,
-            "category_id": product_good.category_id,
-            "name": product_good.name,
-            "price": product_good.price,
-            "measure": product_good.measure,
-            "price_by_measure": product_good.price_by_measure,
-            "image_url": product_good.image_url,
-            "store_name": product_good.store_name,
-            "store_image_url": product_good.store_image_url,
-        }
-        """
+            # print(json.dumps(json_product, indent=4))
+            # TODO: return success
