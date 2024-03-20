@@ -1,7 +1,7 @@
 version: "3"
 services:
   api_market_02:
-    build: api-market-02/.
+    build: api_market_02/.
     restart: always
     ports:
       - "8082:8082"

@@ -1,7 +1,7 @@
 version: "3"
 services:
   api_wewiza:
-    build: api-wewiza/.
+    build: api_wewiza/.
     restart: always
     ports:
       - "8080:8080"
