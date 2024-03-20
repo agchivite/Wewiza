@@ -1,0 +1,38 @@
+version: "3"
+services:
+  api_wewiza:
+    build: ./
+    restart: always
+    ports:
+      - "8080:8080"
+      - "587:587" # SMTP for email
+    environment:
+      - PORT=8080
+    networks:
+      - public-wewiza-network
+      - private-wewiza-network
+    command: uvicorn api_wewiza.main:app --host 0.0.0.0 --port 8080 --reload
+
+  mongo_wewiza:
+    # apcheamitru/arm32v7-mongo:3.2.20
+    image: mongo:6.0.13
+    restart: always
+    ports:
+      - "27020:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: wewiza_db
+    volumes:
+      - mongo_database:/data/db # Directorio de datos de MongoDB
+    networks:
+      - private-wewiza-network
+
+volumes:
+  mongo_database:
+
+networks:
+  public-wewiza-network:
+    external: true
+  private-wewiza-network:
+    driver: bridge

@@ -1,0 +1,39 @@
+version: "3"
+services:
+  api_market_01:
+    build: ./
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+    command: uvicorn api_market_01.main:app --host 0.0.0.0 --port 8081 --reload
+    depends_on:
+      - mongo_market_01
+    networks:
+      - public-wewiza-network
+      - private-market-01-network
+
+  mongo_market_01:
+    # apcheamitru/arm32v7-mongo:3.2.20
+    image: mongo:6.0.13
+    restart: always
+    ports:
+      - "27021:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: market_01_db
+    volumes:
+      - mongo_database:/data/db # Directorio de datos de MongoDB
+    networks:
+      - private-market-01-network
+
+volumes:
+  mongo_database:
+
+networks:
+  public-wewiza-network:
+    external: true
+  private-market-01-network:
+    driver: bridge
