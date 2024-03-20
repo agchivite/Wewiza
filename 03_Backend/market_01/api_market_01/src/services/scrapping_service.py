@@ -96,7 +96,6 @@ class ScrappingService:
                 name,
                 name,
                 name,
-                name,
                 price_float,
                 name,
                 price_float_price_by_measure,
@@ -109,7 +108,6 @@ class ScrappingService:
             no_data = "[no-data]"
             # TODO: change to real product and follow the sequence of the program, to check possible errors
             product = Product(
-                no_data,
                 no_data,
                 no_data,
                 no_data,

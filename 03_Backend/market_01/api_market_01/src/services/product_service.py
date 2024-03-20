@@ -33,7 +33,6 @@ class ProductService:
             "uuid": product.uuid,
             "category_uuid": product.category_uuid,
             "name": product.name,
-            "currency": product.currency,
             "price": product.price,
             "measure": product.measure,
             "price_by_measure": product.price_by_measure,

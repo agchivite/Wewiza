@@ -6,7 +6,6 @@ product_schema = {
             "uuid",
             "category_uuid",
             "name",
-            "currency",
             "price",
             "measure",
             "price_by_measure",
@@ -24,10 +23,6 @@ product_schema = {
                 "description": "must be a string and is required",
             },
             "name": {
-                "bsonType": "string",
-                "description": "must be a string and is required",
-            },
-            "currency": {
                 "bsonType": "string",
                 "description": "must be a string and is required",
             },
