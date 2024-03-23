@@ -25,7 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +35,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -80,15 +78,14 @@ fun WelcomeScreen(
 fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController) {
     val context = LocalContext.current
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()
     ) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
         try {
             val account = task.getResult(ApiException::class.java)
             val credential = GoogleAuthProvider.getCredential(account.idToken, null)
 
-            viewModel.signInWithGoogleCredential(credential)
+            viewModel.signInWithGoogleCredential(credential, navController)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -224,25 +221,4 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TextInputs(
-    emailValue: TextFieldValue,
-    passwordValue: TextFieldValue,
-    onValuesChange: (email: TextFieldValue, password: TextFieldValue) -> Unit
-) {
-    Column {
-        TextField(
-            value = emailValue,
-            onValueChange = { onValuesChange(it, passwordValue) },
-            label = { Text("Correo") },
-            modifier = Modifier.padding(16.dp)
-        )
-        TextField(
-            value = passwordValue,
-            onValueChange = { onValuesChange(emailValue, it) },
-            label = { Text("Contraseña") },
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
+

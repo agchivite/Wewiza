@@ -19,7 +19,7 @@ import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 @Composable
 fun AppNavigation(){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = AppScreens.AboutUsScreen.route){
+    NavHost(navController = navController, startDestination = AppScreens.WelcomeScreen.route){
         composable(route = AppScreens.WelcomeScreen.route){
             WelcomeScreen(WelcomeScreenViewModel(), navController)
         }

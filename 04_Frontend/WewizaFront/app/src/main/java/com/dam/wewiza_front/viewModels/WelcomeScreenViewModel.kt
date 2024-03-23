@@ -5,7 +5,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -22,26 +21,25 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import java.util.UUID
 
-class WelcomeScreenViewModel: ViewModel() {
+class WelcomeScreenViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
-    private val _loading = MutableLiveData(false)
 
-    fun signInWithGoogleCredential(credential: AuthCredential){
+    fun signInWithGoogleCredential(credential: AuthCredential , navController: NavController) {
         viewModelScope.launch {
             try {
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener { task ->
-                        if (task.isSuccessful){
+                        if (task.isSuccessful) {
                             Log.i("Login", "Usuario logueado con google")
+                            navController.navigate(route = AppScreens.HomeScreen.route)
                         }
                     }
-                    .addOnFailureListener{
+                    .addOnFailureListener {
                         Log.i("Login", "error al loguear con google")
                     }
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
@@ -51,52 +49,56 @@ class WelcomeScreenViewModel: ViewModel() {
     fun loginWithGoogle(
         context: Context,
         launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-        navController: NavController
-    ) {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(Constants.FIREBASE_CLIENT_ID)
-            .requestEmail()
-            .build()
-
-        val googleClient = GoogleSignIn.getClient(context, gso)
-
-        launcher.launch(googleClient.signInIntent)
-        navController.navigate(route= AppScreens.HomeScreen.route)
+        navController: NavController,
+        ) {
 
 
-        /**
-        googleClient.signOut() // Asegurarse de que el usuario inicie sesión cada vez
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
-                    launcher.launch(googleClient.signInIntent)
+        viewModelScope.launch{
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(Constants.FIREBASE_CLIENT_ID)
+                .requestEmail()
+                .build()
+
+            val googleClient = GoogleSignIn.getClient(context, gso)
+
+            googleClient.signOut() //Cierra la sesion por si hubiera algun error, para iniciar con la cuenta deseada
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        launcher.launch(googleClient.signInIntent)
+                    }
                 }
-            }
-
-        */
+        }
     }
 
-    fun navigateToLoginScreen(navController: NavController){
-        navController.navigate(route= AppScreens.LoginScreen.route)
+    fun navigateToLoginScreen(navController: NavController) {
+        navController.navigate(route = AppScreens.LoginScreen.route)
     }
 
     fun navigateToRegisterScreen(navController: NavController) {
-        navController.navigate(route= AppScreens.RegisterScreen.route)
+        navController.navigate(route = AppScreens.RegisterScreen.route)
     }
-
-
-
-
 
 
     /**
      * NO deberia estar aqui esta funcion, la puse para una guarrada con el firebase, asi que XD
      */
-    fun addToFirestore(){
+    fun addToFirestore() {
         val db = FirebaseFirestore.getInstance()
         val groceryList = UsersGroceryList(
             name = "Mi lista de compras",
             products = listOf(
-                Product(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "ProductoPrueba", 2.99f, 14.90f, "Kg", "1", "", "", Store("MarketPrueba", "")  )
+                Product(
+                    UUID.randomUUID().toString(),
+                    UUID.randomUUID().toString(),
+                    "ProductoPrueba",
+                    2.99f,
+                    14.90f,
+                    "Kg",
+                    "1",
+                    "",
+                    "",
+                    Store("MarketPrueba", "")
+                )
             )
         )
 
@@ -109,7 +111,6 @@ class WelcomeScreenViewModel: ViewModel() {
                 println("Error al agregar la lista de compras: $e")
             }
     }
-
 
 
 }
