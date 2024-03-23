@@ -21,4 +21,4 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 # Services
 product_service = ProductService(product_repository)
 scrapping_service = ScrappingService(driver_chrome, product_service)
-scrapping_service.run_simulation(40, 45)
+scrapping_service.run_simulation(77, 78)

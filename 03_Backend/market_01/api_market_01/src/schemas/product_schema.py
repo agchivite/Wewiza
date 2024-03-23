@@ -7,8 +7,9 @@ product_schema = {
             "category_uuid",
             "name",
             "price",
+            "quantity_measure",
             "measure",
-            "price_by_measure",
+            "price_by_standard_measure",
             "image_url",
             "store_name",
             "store_image_url",
@@ -30,11 +31,15 @@ product_schema = {
                 "bsonType": "double",
                 "description": "must be a double and is required",
             },
+            "quantity_measure": {
+                "bsonType": "int",
+                "description": "must be a int and is required",
+            },
             "measure": {
                 "bsonType": "string",
                 "description": "must be a string and is required",
             },
-            "price_by_measure": {
+            "price_by_standard_measure": {
                 "bsonType": "double",
                 "description": "must be a double and is required",
             },
