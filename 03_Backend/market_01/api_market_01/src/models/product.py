@@ -23,5 +23,19 @@ class Product:
         self.store_name = store_name
         self.store_image_url = store_image_url
 
+    def dict(self):
+        return {
+            "uuid": self.uuid,
+            "category_uuid": self.category_uuid,
+            "name": self.name,
+            "price": self.price,
+            "quantity_measure": self.quantity_measure,
+            "measure": self.measure,
+            "price_by_standard_measure": self.price_by_standard_measure,
+            "image_url": self.image_url,
+            "store_name": self.store_name,
+            "store_image_url": self.store_image_url,
+        }
+
     def __str__(self):
         return f"Product: {self.name}"

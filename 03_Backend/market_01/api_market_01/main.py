@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from api_market_01.src.services.product_service import ProductService
 from api_market_01.src.database.database_manager import DatabaseManager
 from api_market_01.src.repositories.product_repository import ProductRepository
@@ -22,6 +22,13 @@ product_service = ProductService(product_repository)
 @app.get("/get_all_products")
 def get_all_products():
     return product_service.get_all_products()
+
+
+@app.post("/insert_new_scrapped_product")
+async def insert_new_scrapped_product(request: Request):
+    data = await request.json()
+    print(f"Received JSON data: {data}")
+    return {"message": "JSON received successfully"}
 
 
 @app.get("/saludo")
