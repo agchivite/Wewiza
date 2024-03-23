@@ -56,15 +56,12 @@ class ScrappingService:
                             product_model = self.map_product_html_to_model(product_html)
 
                             if product_model.name != "[no-data]":
-                                # TODO: mandarlo al servidor en vez de al mongodb local
                                 product_dict = product_model.dict()
                                 json_string = json.dumps(product_dict, indent=4)
-                                print(json_string)
 
-                                """
                                 response = requests.post(
-                                    "http://wewiza.ddns.net:8081/insert_new_product",
-                                    json=data,
+                                    "http://wewiza.ddns.net:8081/insert_new_scrapped_product",
+                                    json=json_string,
                                 )
                                 if response.status_code == 200:
                                     print(
@@ -74,12 +71,6 @@ class ScrappingService:
                                     print(
                                         f"Error inserting product to wewiza-server: {response.text}"
                                     )
-
-                                # TODO: eliminar
-                                self.product_service.create_product(product_model)
-                                print(product_model)
-                                """
-
                 except Exception as e:
                     print(f"Error al procesar la página {i}: {e}")
                     # output_file = f"{output_folder}/output{i}.txt"
