@@ -1,3 +1,4 @@
+import json
 import uuid
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
@@ -53,8 +54,23 @@ class ScrappingService:
 
                         for product_html in products_html:
                             product_model = self.map_product_html_to_model(product_html)
-                            self.product_service.create_product(product_model)
-                            print(product_model)
+
+                            if product_model.name != "[no-data]":
+                                product_dict = product_model.dict()
+                                json_string = json.dumps(product_dict, indent=4)
+
+                                response = requests.post(
+                                    "http://wewiza.ddns.net:8081/insert_new_scrapped_product",
+                                    json=json_string,
+                                )
+                                if response.status_code == 200:
+                                    print(
+                                        f"Product '{product_model.name}' inserted successfully to wewiza-server."
+                                    )
+                                else:
+                                    print(
+                                        f"Error inserting product to wewiza-server: {response.text}"
+                                    )
                 except Exception as e:
                     print(f"Error al procesar la página {i}: {e}")
                     # output_file = f"{output_folder}/output{i}.txt"
@@ -109,8 +125,10 @@ class ScrappingService:
 
             # Searching quantity in the left value of the measure
             for i in range(len(footnote1_r_splited_by_spaces)):
-                if footnote1_r_splited_by_spaces[i] == measure:
+                if footnote1_r_splited_by_spaces[i] in possible_measures:
                     quantity_measure = footnote1_r_splited_by_spaces[i - 1]
+                    if "(" in quantity_measure:
+                        quantity_measure = quantity_measure.replace("(", "")
                     break
 
             price_per_measure = 0.0
@@ -118,6 +136,10 @@ class ScrappingService:
                 price_per_measure = self.calculate_price_per_measure(
                     quantity_measure, measure, price
                 )
+
+            print(footnote1_r_splited_by_spaces)
+            print(price_per_measure)
+            print(quantity_measure)
 
             image_wrapper = product_html.find(
                 "div", class_="product-cell__image-wrapper"
