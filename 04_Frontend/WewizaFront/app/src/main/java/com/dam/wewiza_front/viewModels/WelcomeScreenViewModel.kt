@@ -10,6 +10,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.dam.wewiza_front.constants.Constants
+import com.dam.wewiza_front.models.Product
+import com.dam.wewiza_front.models.Store
+import com.dam.wewiza_front.models.UsersGroceryList
 import com.dam.wewiza_front.navigation.AppScreens
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -17,8 +20,10 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import java.lang.Exception
+import java.util.UUID
 
 class WelcomeScreenViewModel: ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
@@ -69,6 +74,42 @@ class WelcomeScreenViewModel: ViewModel() {
 
         */
     }
+
+    fun navigateToLoginScreen(navController: NavController){
+        navController.navigate(route= AppScreens.LoginScreen.route)
+    }
+
+    fun navigateToRegisterScreen(navController: NavController) {
+        navController.navigate(route= AppScreens.RegisterScreen.route)
+    }
+
+
+
+
+
+
+    /**
+     * NO deberia estar aqui esta funcion, la puse para una guarrada con el firebase, asi que XD
+     */
+    fun addToFirestore(){
+        val db = FirebaseFirestore.getInstance()
+        val groceryList = UsersGroceryList(
+            name = "Mi lista de compras",
+            products = listOf(
+                Product(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "ProductoPrueba", 2.99f, 14.90f, "Kg", "1", "", "", Store("MarketPrueba", "")  )
+            )
+        )
+
+        db.collection("lists")
+            .add(groceryList)
+            .addOnSuccessListener { documentReference ->
+                println("Lista de compras agregada con ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                println("Error al agregar la lista de compras: $e")
+            }
+    }
+
 
 
 }

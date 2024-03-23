@@ -122,7 +122,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
                     .padding(top = 100.dp)
             ) {
                 Button(
-                    onClick = {},
+                    onClick = {viewModel.navigateToLoginScreen(navController)},
                     modifier = Modifier
                         .padding(top = 20.dp)
                         .padding(start = 20.dp)
@@ -142,7 +142,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
 
 
                 Button(
-                    onClick = { },
+                    onClick = { viewModel.navigateToRegisterScreen(navController)},
                     modifier = Modifier
                         .padding(top = 15.dp)
                         .padding(start = 20.dp)
