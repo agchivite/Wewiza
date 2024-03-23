@@ -14,18 +14,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.dam.wewiza_front.R
 
 
 @Composable
 fun HomeScreen(
-
+    navController: NavController
 ) {
-
+    TopBar(navController)
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(navController: NavController) {
     Box(modifier = Modifier.run {
         fillMaxWidth()
         height(100.dp)
@@ -38,11 +39,5 @@ fun TopBar() {
             Text(text = "Bienvenido a Wewiza!!")
         }
     }
-}
-
-@Composable
-@Preview(showBackground = true)
-fun HomeScreenPreview() {
-    TopBar()
 }
 
