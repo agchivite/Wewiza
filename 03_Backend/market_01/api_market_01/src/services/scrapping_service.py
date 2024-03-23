@@ -1,3 +1,4 @@
+import uuid
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 from api_market_01.src.models.product import Product
@@ -72,46 +73,89 @@ class ScrappingService:
             price = product_html.find(
                 "p", class_="product-price__unit-price subhead1-b"
             ).text
-            quantityPerPrice = product_html.find(
-                "p", class_="product-price__extra-price subhead1-r"
-            ).text
-            quantity = product_html.find("span", class_="footnote1-r").text
+
+            # Sometimes the tag "footnote1-r" appears twice, so I join all in one
+            footnote1_r_tags = product_html.find_all("span", class_="footnote1-r")
+            texts = []
+            for tag in footnote1_r_tags:
+                text = tag.get_text(
+                    strip=True
+                )  # Tag text without spaces at the beginning and end
+                texts.append(text)
+
+            footnote1_r_in_one_text_by_spaces = " ".join(texts)
+            footnote1_r_splited_by_spaces = footnote1_r_in_one_text_by_spaces.split(" ")
+            possible_measures = [
+                "kg",
+                "g",
+                "L",
+                "ml",
+                "ud.",
+                "kg)",
+                "g)",
+                "L)",
+                "ml)",
+                "ud.)",
+            ]
+            measure = "failed_recollecting_measure"
+            quantity_measure = 0
+
+            for possible_measure in possible_measures:
+                if possible_measure in footnote1_r_splited_by_spaces:
+                    measure = possible_measure
+                    if ")" in measure:
+                        measure = measure.replace(")", "")
+                    break
+
+            # Searching quantity in the left value of the measure
+            for i in range(len(footnote1_r_splited_by_spaces)):
+                if footnote1_r_splited_by_spaces[i] == measure:
+                    quantity_measure = footnote1_r_splited_by_spaces[i - 1]
+                    break
+
+            price_per_measure = 0.0
+            if quantity_measure != 0:
+                price_per_measure = self.calculate_price_per_measure(
+                    quantity_measure, measure, price
+                )
+
             image_wrapper = product_html.find(
                 "div", class_="product-cell__image-wrapper"
             )
-            image = image_wrapper.find("img")["src"] if image_wrapper else "[no-image]"
+            image_url = (
+                image_wrapper.find("img")["src"] if image_wrapper else "[no-image]"
+            )
 
             only_numbers_price = re.sub(r"[^\d.,]", "", price)
             only_numbers_price = only_numbers_price.replace(",", ".")
             price_float = float(only_numbers_price)
 
-            only_numbers_price_by_measure = re.sub(r"[^\d.,]", "", price)
-            only_numbers_price_by_measure = only_numbers_price_by_measure.replace(
-                ",", "."
-            )
-            price_float_price_by_measure = float(only_numbers_price_by_measure)
+            # TODO: decidir en que categoría irá de nuestra base de datos, a lo mejor es buena idea poner un ID fijo en categorías y no UUID
+            category_uuid = "category_uuid"
 
-            # TODO: change to real product and follow the sequence of the program, to check possible errors
+            store_name = "Mercadona"
+            store_image_url = "https://mirasol-centre.com/nousite/wp-content/uploads/2017/05/logo-Mercadona.png"
             product = Product(
-                name,
-                name,
+                str(uuid.uuid4()),
+                category_uuid,
                 name,
                 price_float,
-                name,
-                price_float_price_by_measure,
-                name,
-                name,
-                name,
+                int(quantity_measure),
+                measure,
+                price_per_measure,
+                image_url,
+                store_name,
+                store_image_url,
             )
         except AttributeError as e:
             print(f"Error al obtener datos del producto: {e}")
             no_data = "[no-data]"
-            # TODO: change to real product and follow the sequence of the program, to check possible errors
             product = Product(
                 no_data,
                 no_data,
                 no_data,
                 0.0,
+                0,
                 no_data,
                 0.0,
                 no_data,
@@ -120,6 +164,32 @@ class ScrappingService:
             )
 
         return product
+
+    def calculate_price_per_measure(self, quantity, measure, price_per_measure):
+        quantity = int(quantity)
+        splited_euro = price_per_measure.split(" ")
+        price_per_measure = float(splited_euro[0].replace(",", "."))
+
+        if measure == "g":
+            quantity_in_kg = quantity / 1000
+            price_per_kg = price_per_measure / quantity_in_kg
+            return price_per_kg
+        elif measure == "kg":
+            price_per_kg = price_per_measure / quantity
+            return price_per_kg
+        elif measure == "ml":
+            quantity_in_liter = quantity / 1000
+            price_per_liter = price_per_measure / quantity_in_liter
+            return price_per_liter
+        elif measure == "l":
+            price_per_liter = price_per_measure / quantity
+            return price_per_liter
+        elif measure == "ud.":
+            # In Mercadona ud. is same as dozens eggs.
+            quantity_in_dozen = quantity / 12
+            return price_per_measure / quantity_in_dozen
+        else:
+            return "Measure is not valid"
 
     def write_products_to_file(products, output_file):
         with open(output_file, "w", encoding="utf-8") as file:

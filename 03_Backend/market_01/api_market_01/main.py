@@ -12,6 +12,7 @@ CONNECTION_MONGO = "mongodb://root:root@mongo_market_01:27017"
 DATABASE_NAME = "donamerca"
 COLLECTION_NAME = "products"
 
+# TODO: Dependency Injection with IoC
 # Fachade
 database_manager = DatabaseManager(CONNECTION_MONGO, DATABASE_NAME)
 product_repository = ProductRepository(database_manager, COLLECTION_NAME)

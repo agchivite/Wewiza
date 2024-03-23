@@ -22,20 +22,15 @@ class ProductService:
 
         return products_list_json
 
-    # TODO: Delete
-    def good_inyection(self):
-        print("Ok, inyection")
-        self.create_product()
-
-    # TODO: Refactor
     def create_product(self, product: Product):
         json_product = {
             "uuid": product.uuid,
             "category_uuid": product.category_uuid,
             "name": product.name,
             "price": product.price,
+            "quantity_measure": product.quantity_measure,
             "measure": product.measure,
-            "price_by_measure": product.price_by_measure,
+            "price_by_standard_measure": product.price_by_standard_measure,
             "image_url": product.image_url,
             "store_name": product.store_name,
             "store_image_url": product.store_image_url,
