@@ -80,7 +80,7 @@ class ScrappingService:
         json_string = json.dumps(product_dict, indent=4)
 
         response = requests.post(
-            "http://wewiza.ddns.net:8081/insert_new_scrapped_product",
+            "http://wewiza.ddns.net:81/insert_new_scrapped_product",
             json=json_string,
         )
         if response.status_code == 200:

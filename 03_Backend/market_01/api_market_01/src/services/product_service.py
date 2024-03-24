@@ -22,26 +22,11 @@ class ProductService:
 
         return products_list_json
 
-    def create_product(self, product: Product):
-        json_product = {
-            "uuid": product.uuid,
-            "category_uuid": product.category_uuid,
-            "name": product.name,
-            "price": product.price,
-            "quantity_measure": product.quantity_measure,
-            "measure": product.measure,
-            "price_by_standard_measure": product.price_by_standard_measure,
-            "image_url": product.image_url,
-            "store_name": product.store_name,
-            "store_image_url": product.store_image_url,
-        }
-
-        result = self.product_repository.insert_product(json_product)
+    def create_product_to_mongo_recieving_json(self, product_json: str):
+        result = self.product_repository.insert_product(product_json)
         if result.is_failure():
-            print("Failed to insert product:", result.error)
+            return result.error
             # print(json.dumps(json_product, indent=4))
-            # TODO: return failure
         else:
-            print("Product inserted successfully with UUID:", result.value)
+            return result.value
             # print(json.dumps(json_product, indent=4))
-            # TODO: return success
