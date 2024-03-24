@@ -13,13 +13,13 @@ class ScrappingService:
     def __init__(self, driver, product_service: ProductService):
         self.driver = driver
         self.product_service = product_service
+        self.output_folder = "log_error"
 
     def run_simulation(self, start_category, end_category):
-        """
-        output_folder = "data"
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-        """
+
+        # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
+        if not os.path.exists(self.output_folder):
+            os.makedirs(self.output_folder)
 
         for i in range(start_category, end_category + 1):
             url = f"https://tienda.mercadona.es/categories/{i}"
@@ -59,13 +59,15 @@ class ScrappingService:
                             )
 
                             if product_model.name != "[no-data]":
-                                self.send_to_wewiza_server(product_model)
+                                self.send_to_wewiza_server(product_model, id_category)
                                 # self.send_to_localhost_mongo(product_model)
 
                 except Exception as e:
                     print(f"Error al procesar la página {i}: {e}")
-                    # output_file = f"{output_folder}/output{i}.txt"
-                    # write_products_to_file(products, output_file)
+                    output_file = f"{self.output_folder}/output_category_{i}.txt"
+                    self.write_error_to_file(
+                        f"Error al procesar la página {i}: {e}", output_file
+                    )
             else:
                 print(f"La página no existe: {url}")
 
@@ -74,7 +76,7 @@ class ScrappingService:
     def send_to_localhost_mongo(self, product_model):
         self.product_service.create_product_to_mongo_recieving_json(product_model)
 
-    def send_to_wewiza_server(self, product_model: Product):
+    def send_to_wewiza_server(self, product_model: Product, id_category):
         product_dict = product_model.dict()
         json_string = json.dumps(product_dict, indent=4)
 
@@ -88,6 +90,11 @@ class ScrappingService:
             )
         else:
             print(f"Error inserting product to wewiza-server: {response.text}")
+            output_file = f"{self.output_folder}/output_{id_category}.txt"
+            self.write_error_to_file(
+                f"Error inserting product to wewiza-server: {response.text}",
+                output_file,
+            )
 
     def map_category_title_to_id(self, category_title):
         """
@@ -117,9 +124,20 @@ class ScrappingService:
             name = product_html.find(
                 "h4", class_="subhead1-r product-cell__description-name"
             ).text
-            price = product_html.find(
-                "p", class_="product-price__unit-price subhead1-b"
-            ).text
+
+            # Searching first for discount product
+            price = 0.0
+            discount_price = product_html.find(
+                "p",
+                class_="product-price__unit-price subhead1-b product-price__unit-price--discount",
+            )
+
+            if discount_price:
+                price = discount_price.text
+            else:
+                price = product_html.find(
+                    "p", class_="product-price__unit-price subhead1-b"
+                ).text
 
             # Sometimes the tag "footnote1-r" appears twice, so I join all in one
             footnote1_r_tags = product_html.find_all("span", class_="footnote1-r")
@@ -145,7 +163,7 @@ class ScrappingService:
                 "ud.)",
             ]
             measure = "failed_recollecting_measure"
-            quantity_measure = 0
+            quantity_measure = 0.0
 
             for possible_measure in possible_measures:
                 if possible_measure in footnote1_r_splited_by_spaces:
@@ -162,15 +180,13 @@ class ScrappingService:
                         quantity_measure = quantity_measure.replace("(", "")
                     break
 
+            quantity_measure = float(quantity_measure.replace(",", "."))
+
             price_per_measure = 0.0
-            if quantity_measure != 0:
+            if quantity_measure != 0.0:
                 price_per_measure = self.calculate_price_per_measure(
                     quantity_measure, measure, price, name
                 )
-
-            print(footnote1_r_splited_by_spaces)
-            print(price_per_measure)
-            print(quantity_measure)
 
             image_wrapper = product_html.find(
                 "div", class_="product-cell__image-wrapper"
@@ -190,7 +206,7 @@ class ScrappingService:
                 id_category,
                 name,
                 price_float,
-                int(quantity_measure),
+                float(quantity_measure),
                 measure,
                 price_per_measure,
                 image_url,
@@ -199,6 +215,10 @@ class ScrappingService:
             )
         except AttributeError as e:
             print(f"Error al obtener datos del producto: {e}")
+            output_file = f"{self.output_folder}/output_{id_category}.txt"
+            self.write_error_to_file(
+                f"Error al obtener datos del producto: {e}", output_file
+            )
             no_data = "[no-data]"
             product = Product(
                 no_data,
@@ -218,7 +238,6 @@ class ScrappingService:
     def calculate_price_per_measure(
         self, quantity, measure, price_per_measure, name_product
     ):
-        quantity = int(quantity)
         splited_euro = price_per_measure.split(" ")
         price_per_measure = float(splited_euro[0].replace(",", "."))
 
@@ -236,8 +255,9 @@ class ScrappingService:
         elif measure == "l":
             price_per_liter = price_per_measure / quantity
             return price_per_liter
-        elif measure == "ud." and name_product.lower().contains("huevo"):
-            # In Mercadona ud. is same as dozens eggs.
+        elif (
+            measure == "ud." and "huevo" in name_product.lower()
+        ):  # In Mercadona ud. is same as dozens eggs.
             quantity_in_dozen = quantity / 12
             return price_per_measure / quantity_in_dozen
         elif measure == "ud.":
@@ -246,7 +266,6 @@ class ScrappingService:
         else:
             return "Measure is not valid"
 
-    def write_products_to_file(products, output_file):
-        with open(output_file, "w", encoding="utf-8") as file:
-            for product in products:
-                file.write(str(product) + "\n")
+    def write_error_to_file(self, error, output_file):
+        with open(output_file, "a", encoding="utf-8") as file:
+            file.write(error + "\n")
