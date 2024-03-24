@@ -215,7 +215,9 @@ class ScrappingService:
 
         return product
 
-    def calculate_price_per_measure(self, quantity, measure, price_per_measure):
+    def calculate_price_per_measure(
+        self, quantity, measure, price_per_measure, name_product
+    ):
         quantity = int(quantity)
         splited_euro = price_per_measure.split(" ")
         price_per_measure = float(splited_euro[0].replace(",", "."))
@@ -234,10 +236,13 @@ class ScrappingService:
         elif measure == "l":
             price_per_liter = price_per_measure / quantity
             return price_per_liter
-        elif measure == "ud.":
+        elif measure == "ud." and name_product.lower().contains("huevo"):
             # In Mercadona ud. is same as dozens eggs.
             quantity_in_dozen = quantity / 12
             return price_per_measure / quantity_in_dozen
+        elif measure == "ud.":
+            # Other cases with ud., it going to calculate with standard ud. as 1
+            return price_per_measure / quantity
         else:
             return "Measure is not valid"
 
