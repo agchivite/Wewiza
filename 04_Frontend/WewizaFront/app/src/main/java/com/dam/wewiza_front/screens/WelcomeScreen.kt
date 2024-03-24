@@ -1,11 +1,7 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,12 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,16 +34,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.dam.wewiza_front.R
-import com.dam.wewiza_front.constants.Constants.FIREBASE_CLIENT_ID
 import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
 
@@ -77,27 +65,27 @@ val Butler = FontFamily(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WelcomeScreen(
-    viewModel: WelcomeScreenViewModel
+    viewModel: WelcomeScreenViewModel,
+    navController: NavController
 ) {
     Scaffold() {
-        BodyContent(viewModel)
+        BodyContent(viewModel, navController)
     }
 
 }
 
 @Composable
-fun BodyContent(viewModel: WelcomeScreenViewModel) {
+fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController) {
     val context = LocalContext.current
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()
     ) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
         try {
             val account = task.getResult(ApiException::class.java)
             val credential = GoogleAuthProvider.getCredential(account.idToken, null)
 
-            viewModel.signInWithGoogleCredential(credential)
+            viewModel.signInWithGoogleCredential(credential, navController)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -131,7 +119,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel) {
                     .padding(top = 100.dp)
             ) {
                 Button(
-                    onClick = {},
+                    onClick = {viewModel.navigateToLoginScreen(navController)},
                     modifier = Modifier
                         .padding(top = 20.dp)
                         .padding(start = 20.dp)
@@ -151,7 +139,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel) {
 
 
                 Button(
-                    onClick = { },
+                    onClick = { viewModel.navigateToRegisterScreen(navController)},
                     modifier = Modifier
                         .padding(top = 15.dp)
                         .padding(start = 20.dp)
@@ -206,7 +194,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel) {
 
                 Button(
                     onClick = {
-                        loginWithGoogle(context, launcher)
+                        viewModel.loginWithGoogle(context, launcher,navController)
                     },
                     modifier = Modifier
                         .height(40.dp)
@@ -232,45 +220,5 @@ fun BodyContent(viewModel: WelcomeScreenViewModel) {
     }
 }
 
-fun loginWithGoogle(
-    context: Context, launcher: ManagedActivityResultLauncher<Intent, ActivityResult>
-) {
-    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(FIREBASE_CLIENT_ID)
-        .requestEmail()
-        .build()
-
-    val googleClient = GoogleSignIn.getClient(context, gso)
-    googleClient.signOut() // Asegurarse de que el usuario inicie sesión cada vez
-        .addOnCompleteListener {
-            if (it.isSuccessful) {
-                launcher.launch(googleClient.signInIntent)
-            }
-        }
-}
 
 
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TextInputs(
-    emailValue: TextFieldValue,
-    passwordValue: TextFieldValue,
-    onValuesChange: (email: TextFieldValue, password: TextFieldValue) -> Unit
-) {
-    Column {
-        TextField(
-            value = emailValue,
-            onValueChange = { onValuesChange(it, passwordValue) },
-            label = { Text("Correo") },
-            modifier = Modifier.padding(16.dp)
-        )
-        TextField(
-            value = passwordValue,
-            onValueChange = { onValuesChange(emailValue, it) },
-            label = { Text("Contraseña") },
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
