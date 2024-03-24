@@ -9,7 +9,7 @@ app = FastAPI()
 
 # TODO: Swap in configuration if we are in docker
 CONNECTION_MONGO = "mongodb://root:root@mongo_market_01:27017"
-DATABASE_NAME = "donamerca"
+DATABASE_NAME = "mercadona"
 COLLECTION_NAME = "products"
 
 # TODO: Dependency Injection with IoC

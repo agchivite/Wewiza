@@ -3,8 +3,8 @@ from api_market_01.src.models.product import Product
 
 
 class Category:
-    def __init__(self, uuid: str, name: str, products: List[Product]):
-        self.uuid = uuid
+    def __init__(self, id: str, name: str, products: List[Product]):
+        self.id = id
         self.name = name
         self.products = products
 

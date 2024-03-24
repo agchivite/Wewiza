@@ -1,19 +1,31 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from api_market_02.src.services.product_service import ProductService
+from api_market_02.src.database.database_manager import DatabaseManager
+from api_market_02.src.repositories.product_repository import ProductRepository
 import requests
+import json
 
 app = FastAPI()
 
+# TODO: Swap in configuration if we are in docker
+CONNECTION_MONGO = "mongodb://root:root@mongo_market_02:27017"
+DATABASE_NAME = "ahorramas"
+COLLECTION_NAME = "products"
 
-@app.get("/saludo")
-def enviar_saludo():
-    return {"mensaje": "¡Hola! Bienvenido desde el Contenedor Market-02"}
+# TODO: Dependency Injection with IoC
+# Fachade
+database_manager = DatabaseManager(CONNECTION_MONGO, DATABASE_NAME)
+product_repository = ProductRepository(database_manager, COLLECTION_NAME)
+product_service = ProductService(product_repository)
 
 
-@app.get("/test")
-def enviar_saludo():
-    response = requests.get("http://api_market_01:8081/saludo")
-    message = "Desde Market 2: "
-    print(message)
-    print(response.json())
+@app.get("/get_all_products")
+def get_all_products():
+    return product_service.get_all_products()
 
-    return {message: response.json()}
+
+@app.post("/insert_new_scrapped_product")
+async def insert_new_scrapped_product(request: Request):
+    data = await request.json()
+    result = product_service.create_product_to_mongo_recieving_json(data)
+    return {"result": result}
