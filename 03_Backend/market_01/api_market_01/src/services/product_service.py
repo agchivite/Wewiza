@@ -23,7 +23,8 @@ class ProductService:
         return products_list_json
 
     def create_product_to_mongo_recieving_json(self, product_json: str):
-        print(json.dumps(product_json, indent=4))
+        # print(json.dumps(product_json, indent=4))
+        print(product_json)
 
         result = self.product_repository.insert_product(product_json)
         if result.is_failure():
