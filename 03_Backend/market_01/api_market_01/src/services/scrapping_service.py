@@ -40,6 +40,7 @@ class ScrappingService:
                         "css selector", ".category-detail__title.title1-b"
                     )
                     category_title = category_title_element.text.strip()
+                    id_category = self.map_category_title_to_id(category_title)
 
                     # Obtaining content page after JavaScript has loaded the data dynamically
                     page_source = self.driver.page_source
@@ -53,24 +54,15 @@ class ScrappingService:
                         products_html = soup.find_all("div", class_="product-cell")
 
                         for product_html in products_html:
-                            product_model = self.map_product_html_to_model(product_html)
+                            product_model = self.map_product_html_to_model(
+                                product_html, id_category
+                            )
 
                             if product_model.name != "[no-data]":
-                                product_dict = product_model.dict()
-                                json_string = json.dumps(product_dict, indent=4)
+                                # TODO: change to send_to_wewiza_server
+                                self.send_to_wewiza_server(product_model)
+                                # self.send_to_localhost_mongo(product_model)
 
-                                response = requests.post(
-                                    "http://wewiza.ddns.net:8081/insert_new_scrapped_product",
-                                    json=json_string,
-                                )
-                                if response.status_code == 200:
-                                    print(
-                                        f"Product '{product_model.name}' inserted successfully to wewiza-server."
-                                    )
-                                else:
-                                    print(
-                                        f"Error inserting product to wewiza-server: {response.text}"
-                                    )
                 except Exception as e:
                     print(f"Error al procesar la página {i}: {e}")
                     # output_file = f"{output_folder}/output{i}.txt"
@@ -80,8 +72,48 @@ class ScrappingService:
 
         self.driver.quit()
 
+    def send_to_localhost_mongo(self, product_model):
+        self.product_service.create_product(product_model)
+
+    def send_to_wewiza_server(self, product_model):
+        product_dict = product_model.dict()
+        json_string = json.dumps(product_dict, indent=4)
+
+        response = requests.post(
+            "http://wewiza.ddns.net:8081/insert_new_scrapped_product",
+            json=json_string,
+        )
+        if response.status_code == 200:
+            print(
+                f"Product '{product_model.name}' inserted successfully to wewiza-server."
+            )
+        else:
+            print(f"Error inserting product to wewiza-server: {response.text}")
+
+    def map_category_title_to_id(self, category_title):
+        """
+        All categories has a especific id_category pattern but Fruits and Vegetables has to be treated differently
+        """
+        if category_title == "Fruta":
+            return "frutas"
+        elif category_title == "Lechuga y ensalada preparada":
+            return "verduras"
+        elif category_title == "Verdura":
+            return "verduras"
+        else:
+            return (
+                category_title.replace("á", "a")
+                .replace("é", "e")
+                .replace("í", "i")
+                .replace("ó", "o")
+                .replace("ú", "u")
+                .replace(" ", "_")
+                .replace(",", "")
+                .lower()
+            )
+
     # TODO: make a mapper DTO
-    def map_product_html_to_model(self, product_html):
+    def map_product_html_to_model(self, product_html, id_category):
         try:
             name = product_html.find(
                 "h4", class_="subhead1-r product-cell__description-name"
@@ -152,14 +184,11 @@ class ScrappingService:
             only_numbers_price = only_numbers_price.replace(",", ".")
             price_float = float(only_numbers_price)
 
-            # TODO: decidir en que categoría irá de nuestra base de datos, a lo mejor es buena idea poner un ID fijo en categorías y no UUID
-            category_uuid = "category_uuid"
-
             store_name = "Mercadona"
             store_image_url = "https://mirasol-centre.com/nousite/wp-content/uploads/2017/05/logo-Mercadona.png"
             product = Product(
                 str(uuid.uuid4()),
-                category_uuid,
+                id_category,
                 name,
                 price_float,
                 int(quantity_measure),

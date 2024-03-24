@@ -21,4 +21,8 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 # Services
 product_service = ProductService(product_repository)
 scrapping_service = ScrappingService(driver_chrome, product_service)
-scrapping_service.run_simulation(77, 78)
+
+# Num id_categories are includes when scrapping
+start_category = 27
+end_category = 29
+scrapping_service.run_simulation(start_category, end_category)
