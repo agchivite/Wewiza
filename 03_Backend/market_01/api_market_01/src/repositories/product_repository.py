@@ -25,8 +25,10 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
             result = collection.insert_one(product_data)
+            # Because ObjectID needs to be converted to string
+            inserted_id = str(result.inserted_id)
             self.db_manager.close_database()
-            return Result.success(result.inserted_id)
+            return Result.success(inserted_id)
         except Exception as e:
             return Result.failure(str(e))
 

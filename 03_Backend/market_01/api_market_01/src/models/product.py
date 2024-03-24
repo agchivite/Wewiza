@@ -2,7 +2,7 @@ class Product:
     def __init__(
         self,
         uuid: str,
-        category_uuid: str,
+        category_id: str,
         name: str,
         price: float,
         quantity_measure: int,
@@ -13,7 +13,7 @@ class Product:
         store_image_url: str,
     ):
         self.uuid = uuid
-        self.category_uuid = category_uuid
+        self.category_id = category_id
         self.name = name
         self.price = price
         self.quantity_measure = quantity_measure
@@ -26,7 +26,7 @@ class Product:
     def dict(self):
         return {
             "uuid": self.uuid,
-            "category_uuid": self.category_uuid,
+            "category_id": self.category_id,
             "name": self.name,
             "price": self.price,
             "quantity_measure": self.quantity_measure,

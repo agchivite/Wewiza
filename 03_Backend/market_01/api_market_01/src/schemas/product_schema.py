@@ -4,7 +4,7 @@ product_schema = {
         "title": "Product Object Validation",
         "required": [
             "uuid",
-            "category_uuid",
+            "category_id",
             "name",
             "price",
             "quantity_measure",
@@ -19,7 +19,7 @@ product_schema = {
                 "bsonType": "string",
                 "description": "must be a string and is required",
             },
-            "category_uuid": {
+            "category_id": {
                 "bsonType": "string",
                 "description": "must be a string and is required",
             },

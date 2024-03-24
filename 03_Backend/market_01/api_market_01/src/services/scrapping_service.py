@@ -59,7 +59,6 @@ class ScrappingService:
                             )
 
                             if product_model.name != "[no-data]":
-                                # TODO: change to send_to_wewiza_server
                                 self.send_to_wewiza_server(product_model)
                                 # self.send_to_localhost_mongo(product_model)
 
@@ -73,9 +72,9 @@ class ScrappingService:
         self.driver.quit()
 
     def send_to_localhost_mongo(self, product_model):
-        self.product_service.create_product(product_model)
+        self.product_service.create_product_to_mongo_recieving_json(product_model)
 
-    def send_to_wewiza_server(self, product_model):
+    def send_to_wewiza_server(self, product_model: Product):
         product_dict = product_model.dict()
         json_string = json.dumps(product_dict, indent=4)
 

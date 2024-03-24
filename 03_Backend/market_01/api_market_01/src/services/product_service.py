@@ -16,17 +16,16 @@ class ProductService:
 
         products_list_json = result.value
 
-        # Convert ObjectId to String
+        # Removing _id key, we don't want it
         for product in products_list_json:
-            product["_id"] = str(product["_id"])
+            del product["_id"]
 
         return products_list_json
 
     def create_product_to_mongo_recieving_json(self, product_json: str):
-        # print(json.dumps(product_json, indent=4))
-        print(product_json)
+        product_dict = json.loads(product_json)
 
-        result = self.product_repository.insert_product(product_json)
+        result = self.product_repository.insert_product(product_dict)
         if result.is_failure():
             print("Failed to insert product:", result.error)
             return result.error
