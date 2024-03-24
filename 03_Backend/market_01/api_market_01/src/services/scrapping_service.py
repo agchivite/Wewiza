@@ -165,7 +165,7 @@ class ScrappingService:
             price_per_measure = 0.0
             if quantity_measure != 0:
                 price_per_measure = self.calculate_price_per_measure(
-                    quantity_measure, measure, price
+                    quantity_measure, measure, price, name
                 )
 
             print(footnote1_r_splited_by_spaces)
