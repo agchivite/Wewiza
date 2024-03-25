@@ -1,3 +1,5 @@
+# TODO: Organizar la presentación de este README.md usando la memoria principall en la carpeta 02_Documentacion
+
 # Wewiza
 
 Wewiza es una aplicación diseñada para comparar precios de diversos mercados. El objetivo principal es crear una API que integre datos de tiendas importantes como Mercadona, Carrefour, Dia, Ahorramas, etc., permitiendo a los usuarios comparar precios dentro de la aplicación.
