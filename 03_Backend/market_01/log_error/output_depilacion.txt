@@ -1,0 +1,4 @@
+Error al obtener datos del producto: 'float' object has no attribute 'replace'
+Error al obtener datos del producto: 'float' object has no attribute 'replace'
+Error al obtener datos del producto: 'float' object has no attribute 'replace'
+Error al obtener datos del producto: 'float' object has no attribute 'replace'
