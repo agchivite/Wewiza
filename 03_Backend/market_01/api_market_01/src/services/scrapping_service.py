@@ -13,7 +13,7 @@ class ScrappingService:
     def __init__(self, driver, product_service: ProductService):
         self.driver = driver
         self.product_service = product_service
-        self.output_folder = "log_error"
+        self.output_folder = "log_error_mercadona"
 
     def run_simulation(self, start_category, end_category):
 
@@ -26,7 +26,7 @@ class ScrappingService:
 
             response = requests.get(url)
             if response.status_code == 200:
-                print(f"Accediendo a la página: {url}")
+                print(f"Accessing to page: {url}")
 
                 output_file = f"output{i}.txt"
                 url = f"https://tienda.mercadona.es/categories/{i}"
@@ -49,7 +49,7 @@ class ScrappingService:
                     # Searching for a specific pattern that matches the 404 error message, to not search constantly
                     error_message = soup.find_all("div", class_="error-404")
                     if error_message and "404" in error_message.text:
-                        print(f"La página no existe: {url}")
+                        print(f"Page not found: {url}")
                     else:
                         products_html = soup.find_all("div", class_="product-cell")
 
@@ -63,13 +63,13 @@ class ScrappingService:
                                 # self.send_to_localhost_mongo(product_model)
 
                 except Exception as e:
-                    print(f"Error al procesar la página {i}: {e}")
+                    print(f"Error processing page {i}: {e}")
                     output_file = f"{self.output_folder}/output_category_{i}.txt"
                     self.write_error_to_file(
-                        f"Error al procesar la página {i}: {e}", output_file
+                        f"Error processing page {i}: {e}", output_file
                     )
             else:
-                print(f"La página no existe: {url}")
+                print(f"Page not found: {url}")
 
         self.driver.quit()
 
@@ -216,10 +216,10 @@ class ScrappingService:
                 store_image_url,
             )
         except AttributeError as e:
-            print(f"Error al obtener datos del producto: {e}")
+            print(f"Error obtaining data from product: {e}")
             output_file = f"{self.output_folder}/output_{id_category}.txt"
             self.write_error_to_file(
-                f"Error al obtener datos del producto: {e}", output_file
+                f"Error obtaining data from product: {e}", output_file
             )
             no_data = "[no-data]"
             product = Product(

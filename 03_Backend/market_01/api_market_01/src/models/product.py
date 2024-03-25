@@ -5,7 +5,7 @@ class Product:
         category_id: str,
         name: str,
         price: float,
-        quantity_measure: int,
+        quantity_measure: float,
         measure: str,
         price_by_standard_measure: float,
         image_url: str,
