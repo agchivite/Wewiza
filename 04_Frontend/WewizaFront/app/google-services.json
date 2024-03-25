@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "348348678536",
+    "project_id": "wewiza",
+    "storage_bucket": "wewiza.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:348348678536:android:d30dc43589dc622ae43a3d",
+        "android_client_info": {
+          "package_name": "com.dam.wewiza_front"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "348348678536-sr4horn983c8c77q0ab122ettjmovtuf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbI0SbIKXmjqeRL7RYPYKyfODvkrTJt2M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "348348678536-sr4horn983c8c77q0ab122ettjmovtuf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
