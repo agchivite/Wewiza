@@ -74,7 +74,9 @@ class ScrappingService:
         self.driver.quit()
 
     def send_to_localhost_mongo(self, product_model):
-        self.product_service.create_product_to_mongo_recieving_json(product_model)
+        product_dict = product_model.dict()
+        json_string = json.dumps(product_dict, indent=4)
+        self.product_service.create_product_to_mongo_recieving_json(json_string)
 
     def send_to_wewiza_server(self, product_model: Product, id_category):
         product_dict = product_model.dict()
@@ -207,7 +209,7 @@ class ScrappingService:
                 name,
                 price_float,
                 float(quantity_measure),
-                measure,
+                measure.lower(),
                 price_per_measure,
                 image_url,
                 store_name,
@@ -240,6 +242,8 @@ class ScrappingService:
     ):
         splited_euro = price_per_measure.split(" ")
         price_per_measure = float(splited_euro[0].replace(",", "."))
+
+        measure = measure.lower()
 
         if measure == "g":
             quantity_in_kg = quantity / 1000

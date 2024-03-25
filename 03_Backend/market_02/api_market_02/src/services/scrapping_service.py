@@ -9,80 +9,102 @@ import os
 import requests
 
 
-# TODO: Cambiar literalmente todo en función del nuevo market
 class ScrappingService:
     def __init__(self, driver, product_service: ProductService):
         self.driver = driver
         self.product_service = product_service
         self.output_folder = "log_error"
 
-    def run_simulation(self, start_category, end_category):
+    def run_simulation(self):
+        categories_dict = {
+            "aperitivos": ["patatas_fritas", "gourmet", "lisas"],
+            "zumos": ["zumos", "naranja", "pina"],
+        }
 
+        """
+        # TODO: Change to get static from relative path
+        categories_folder = "C:\\Users\\chivi\\Desktop\\git-ephemeral\\wewiza\\03_Backend\\market_02\\api_market_02\\static\\ahorramas_categories_ids_to_scrap"
+
+
+        for category_id_wewiza in os.listdir(categories_folder):
+            file_path = os.path.join(categories_folder, category_id_wewiza)
+
+            if os.path.isfile(file_path):
+                with open(file_path, "r") as f:
+                    contenido = f.read()
+
+                categories = contenido.split(";")
+                categories_dict[category_id_wewiza] = categories
+        """
+
+        self.scrap_categories(categories_dict)
+
+    def scrap_categories(self, categories_dict):
         # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
 
-        for i in range(start_category, end_category + 1):
-            url = f"https://tienda.mercadona.es/categories/{i}"
+        for category_id_wewiza, categories_list in categories_dict.items():
+            for categorie_ahorramas in categories_list:
+                url = f"https://www.ahorramas.com/on/demandware.store/Sites-Ahorramas-Site/es/Search-UpdateGrid?cgid={categorie_ahorramas}&pmin=0.01&start=0&sz=1500"
 
-            response = requests.get(url)
-            if response.status_code == 200:
-                print(f"Accediendo a la página: {url}")
+                response = requests.get(url)
+                if response.status_code == 200:
+                    print(f"Accediendo a la página: {url}")
 
-                output_file = f"output{i}.txt"
-                url = f"https://tienda.mercadona.es/categories/{i}"
-                self.driver.get(url)
+                    output_file = f"output{categorie_ahorramas}.txt"
+                    self.driver.get(url)
 
-                try:
-                    # Wait for the page to load
-                    self.driver.implicitly_wait(20)
+                    try:
+                        # Wait for the page to load
+                        self.driver.implicitly_wait(20)
 
-                    category_title_element = self.driver.find_element(
-                        "css selector", ".category-detail__title.title1-b"
-                    )
-                    category_title = category_title_element.text.strip()
-                    id_category = self.map_category_title_to_id(category_title)
+                        # Obtaining content page after JavaScript has loaded the data dynamically
+                        page_source = self.driver.page_source
+                        soup = BeautifulSoup(page_source, "html.parser")
 
-                    # Obtaining content page after JavaScript has loaded the data dynamically
-                    page_source = self.driver.page_source
-                    soup = BeautifulSoup(page_source, "html.parser")
-
-                    # Searching for a specific pattern that matches the 404 error message, to not search constantly
-                    error_message = soup.find_all("div", class_="error-404")
-                    if error_message and "404" in error_message.text:
-                        print(f"La página no existe: {url}")
-                    else:
-                        products_html = soup.find_all("div", class_="product-cell")
+                        # TODO: no me pilla bien los productos a partir de aquí...
+                        products_html = soup.find_all("div", class_="product-tile  ")
 
                         for product_html in products_html:
                             product_model = self.map_product_html_to_model(
-                                product_html, id_category
+                                product_html, category_id_wewiza
                             )
 
                             if product_model.name != "[no-data]":
-                                self.send_to_wewiza_server(product_model, id_category)
-                                # self.send_to_localhost_mongo(product_model)
+                                # TODO: change to server
+                                """
+                                self.send_to_wewiza_server(
+                                    product_model, category_id_wewiza
+                                )
+                                """
+                                self.send_to_localhost_mongo(product_model)
+                            else:
+                                print("Can not retrieve product data.")
 
-                except Exception as e:
-                    print(f"Error al procesar la página {i}: {e}")
-                    output_file = f"{self.output_folder}/output_category_{i}.txt"
-                    self.write_error_to_file(
-                        f"Error al procesar la página {i}: {e}", output_file
-                    )
-            else:
-                print(f"La página no existe: {url}")
-
+                    except Exception as e:
+                        print(f"Error al procesar la página: {e}")
+                        output_file = (
+                            f"{self.output_folder}/output_{category_id_wewiza}.txt"
+                        )
+                        self.write_error_to_file(
+                            f"Error al procesar la página: {e}", output_file
+                        )
+                else:
+                    print(f"La página no existe: {url}")
         self.driver.quit()
 
-    def send_to_localhost_mongo(self, product_model):
-        self.product_service.create_product_to_mongo_recieving_json(product_model)
+    def send_to_localhost_mongo(self, product_model: Product):
+        product_dict = product_model.dict()
+        json_string = json.dumps(product_dict, indent=4)
+        self.product_service.create_product_to_mongo_recieving_json(json_string)
 
     def send_to_wewiza_server(self, product_model: Product, id_category):
         product_dict = product_model.dict()
         json_string = json.dumps(product_dict, indent=4)
 
         response = requests.post(
-            "http://wewiza.ddns.net:81/insert_new_scrapped_product",
+            "http://wewiza.ddns.net:82/insert_new_scrapped_product",
             json=json_string,
         )
         if response.status_code == 200:
@@ -97,91 +119,67 @@ class ScrappingService:
                 output_file,
             )
 
-    def map_category_title_to_id(self, category_title):
-        """
-        All categories has a especific id_category pattern but Fruits and Vegetables has to be treated differently
-        """
-        if category_title == "Fruta":
-            return "frutas"
-        elif category_title == "Lechuga y ensalada preparada":
-            return "verduras"
-        elif category_title == "Verdura":
-            return "verduras"
-        else:
-            return (
-                category_title.replace("á", "a")
-                .replace("é", "e")
-                .replace("í", "i")
-                .replace("ó", "o")
-                .replace("ú", "u")
-                .replace(" ", "_")
-                .replace(",", "")
-                .lower()
-            )
+    def scrap_quantity_product_link(self, product_html):
+        try:
+            product_link = product_html.find("a", class_="product-pdp-link")
 
-    # TODO: make a mapper DTO
+            if product_link:
+                href = product_link.get("href")
+
+                if href.startswith("http"):
+                    full_url = "https://www.ahorramas.com" + href
+                    self.driver.get(full_url)
+                    return self.scrap_quantity_from_new_page()
+                else:
+                    print("El enlace no es válido.")
+                    return 0.0
+            else:
+                print("No se encontró el enlace del producto.")
+        except Exception as e:
+            print(f"Error al abrir el enlace del producto: {e}")
+
+    def scrap_quantity_from_new_page(self):
+        try:
+            three_paragraphs = self.driver.find_all("div", class_="collapse show")
+
+            only_we_get_the_second_paragraph = 0
+            for parraph in three_paragraphs:
+                only_we_get_the_second_paragraph += 1
+                if only_we_get_the_second_paragraph == 2:
+                    p = parraph.find("p").text
+                    p = (
+                        p.strip()
+                        .replace(":", "")
+                        .replace("KG", "")
+                        .strip()
+                        .replace(",", ".")
+                    )
+                    return float(p)
+
+        except Exception as e:
+            print(f"Error al obtener la cantidad del producto en la nueva página: {e}")
+            return 0.0
+
     def map_product_html_to_model(self, product_html, id_category):
         try:
-            name = product_html.find(
-                "h4", class_="subhead1-r product-cell__description-name"
-            ).text
+            name = product_html.find("h2", class_="link product-name-gtm").text
 
-            # Searching first for discount product
             price = 0.0
-            discount_price = product_html.find(
-                "p",
-                class_="product-price__unit-price subhead1-b product-price__unit-price--discount",
-            )
+            price = product_html.find("span", class_="value").text
 
-            if discount_price:
-                price = discount_price.text
-            else:
-                price = product_html.find(
-                    "p", class_="product-price__unit-price subhead1-b"
-                ).text
+            possible_measure = product_html.find(
+                "span", class_="units js-selector-units"
+            ).text
+            measure = "Failed to find measurement"
 
-            # Sometimes the tag "footnote1-r" appears twice, so I join all in one
-            footnote1_r_tags = product_html.find_all("span", class_="footnote1-r")
-            texts = []
-            for tag in footnote1_r_tags:
-                text = tag.get_text(
-                    strip=True
-                )  # Tag text without spaces at the beginning and end
-                texts.append(text)
+            possibles_measures = ["Kg", "KILO", "gr", "L", "l", "LITRO" "ml", "DOCENA"]
 
-            footnote1_r_in_one_text_by_spaces = " ".join(texts)
-            footnote1_r_splited_by_spaces = footnote1_r_in_one_text_by_spaces.split(" ")
-            possible_measures = [
-                "kg",
-                "g",
-                "L",
-                "ml",
-                "ud.",
-                "kg)",
-                "g)",
-                "L)",
-                "ml)",
-                "ud.)",
-            ]
-            measure = "failed_recollecting_measure"
+            if possible_measure in possibles_measures:
+                measure = possible_measure
+
             quantity_measure = 0.0
-
-            for possible_measure in possible_measures:
-                if possible_measure in footnote1_r_splited_by_spaces:
-                    measure = possible_measure
-                    if ")" in measure:
-                        measure = measure.replace(")", "")
-                    break
-
-            # Searching quantity in the left value of the measure
-            for i in range(len(footnote1_r_splited_by_spaces)):
-                if footnote1_r_splited_by_spaces[i] in possible_measures:
-                    quantity_measure = footnote1_r_splited_by_spaces[i - 1]
-                    if "(" in quantity_measure:
-                        quantity_measure = quantity_measure.replace("(", "")
-                    break
-
-            quantity_measure = float(quantity_measure.replace(",", "."))
+            # TODO: descomentar
+            # quantity_measure = self.scrap_quantity_product_link(product_html)
 
             price_per_measure = 0.0
             if quantity_measure != 0.0:
@@ -189,9 +187,7 @@ class ScrappingService:
                     quantity_measure, measure, price, name
                 )
 
-            image_wrapper = product_html.find(
-                "div", class_="product-cell__image-wrapper"
-            )
+            image_wrapper = product_html.find("div", class_="image-container")
             image_url = (
                 image_wrapper.find("img")["src"] if image_wrapper else "[no-image]"
             )
@@ -200,8 +196,19 @@ class ScrappingService:
             only_numbers_price = only_numbers_price.replace(",", ".")
             price_float = float(only_numbers_price)
 
-            store_name = "Mercadona"
-            store_image_url = "https://mirasol-centre.com/nousite/wp-content/uploads/2017/05/logo-Mercadona.png"
+            store_name = "Ahorramas"
+            store_image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlu7l3PhGxyJUajK_-O_CQoAaPiOy_kDxdpYm7Gy-n2A&s"
+
+            measure = measure.lower()
+            if measure == "gr":
+                measure = "g"
+            if measure == "kilo":
+                measure = "kg"
+            if measure == "litro":
+                measure = "l"
+            if measure == "docena":
+                measure = "ud."
+
             product = Product(
                 str(uuid.uuid4()),
                 id_category,
@@ -214,6 +221,8 @@ class ScrappingService:
                 store_name,
                 store_image_url,
             )
+
+            print(product)
         except AttributeError as e:
             print(f"Error al obtener datos del producto: {e}")
             output_file = f"{self.output_folder}/output_{id_category}.txt"
@@ -242,23 +251,23 @@ class ScrappingService:
         splited_euro = price_per_measure.split(" ")
         price_per_measure = float(splited_euro[0].replace(",", "."))
 
-        if measure == "g":
+        measure = measure.lower()
+
+        if measure == "gr":
             quantity_in_kg = quantity / 1000
             price_per_kg = price_per_measure / quantity_in_kg
             return price_per_kg
-        elif measure == "kg":
+        elif measure == "kg" or measure == "kilo":
             price_per_kg = price_per_measure / quantity
             return price_per_kg
         elif measure == "ml":
             quantity_in_liter = quantity / 1000
             price_per_liter = price_per_measure / quantity_in_liter
             return price_per_liter
-        elif measure == "l":
+        elif measure == "l" or measure == "litro":
             price_per_liter = price_per_measure / quantity
             return price_per_liter
-        elif (
-            measure == "ud." and "huevo" in name_product.lower()
-        ):  # In Mercadona ud. is same as dozens eggs.
+        elif measure == "docena" and "huevo" in name_product.lower():
             quantity_in_dozen = quantity / 12
             return price_per_measure / quantity_in_dozen
         elif measure == "ud.":
