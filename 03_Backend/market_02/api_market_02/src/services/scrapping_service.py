@@ -125,45 +125,32 @@ class ScrappingService:
             price = 0.0
             price = product_html.find("span", class_="value").text
 
-            # TODO: puedo sacar del NAME con excepciones, a veces ponen:
+            """
+            Return ej: 500 g
+            """
             quantity_measure = 0.0
-            quantity_measure = self.filter_quantity_measure_by_name(name)
-            """
-            quantity_measure = 
-                - 1,5l pack 2
-                - 100g pack 2
-                - 1l
-                - 750ml
-                - 0,25l
-                - 0.25l
-                - 310g
-                - 100 gr
-                - 500G
-                - 1,5kg + 1kg
-                - 1.5kg
-                - Si no pone nada directamente es al kilo...
-                - 12 unidades (huevos)
-                - 24u (huevos)
-                - Ponene nada y.. pack 3 (en este caso es mejor poner al kilo) -> KG.PESO ESC = KG
-                - 3uds (omitir tambien)
-            """
+            quantity_measure_and_measure_first_chance_from_name = (
+                self.filter_quantity_measure_and_measure_first_chance_from_name(name)
+            )
 
-            price_per_measure_and_measure = 0.0
-            # if quantity_measure != 0.0:
-            # First check if has offer
+            "Format price with second chance measure: (3,19€/DOCENA)"
+            price_per_measure_standard_with_measure_second_chance = 0.0
+
+            # Checking if has offer
             is_product_offer = product_html.find(
                 "span", class_="unit-price-per-unit red"
             )
             if is_product_offer:
-                price_per_measure_and_measure = is_product_offer.text
+                price_per_measure_standard_with_measure_second_chance = (
+                    is_product_offer.text
+                )
             else:
-                price_per_measure_and_measure = product_html.find(
-                    "span", class_="unit-price-per-unit grey"
-                ).text
+                price_per_measure_standard_with_measure_second_chance = (
+                    product_html.find("span", class_="unit-price-per-unit grey").text
+                )
 
-            "Format coming from scrapping: (3,19€/DOCENA)"
-            price_per_measure_and_measure = (
-                price_per_measure_and_measure.replace(" ", "")
+            price_per_measure_standard_with_measure_second_chance = (
+                price_per_measure_standard_with_measure_second_chance.replace(" ", "")
                 .replace("€", "")
                 .replace("/", " ")
                 .replace("(", "")
@@ -173,29 +160,42 @@ class ScrappingService:
                 .strip()
                 .split(" ")
             )
-            price_per_measure = float(price_per_measure_and_measure[0])
-            possible_measure = price_per_measure_and_measure[1]
+
+            price_per_standard_measure = float(
+                price_per_measure_standard_with_measure_second_chance[0]
+            )
+            possible_measure_second_chance = (
+                price_per_measure_standard_with_measure_second_chance[1]
+            )
 
             measure = "Failed to find measurement"
-
-            # TODO: repasar los posibles measure, cambiar sacando del nombre el valor real, y si no dan valor cogemos el generañ de aquí
-            possibles_measures = ["KILO", "LITRO", "KG.PESO ESC", "DOCENA", "UNIDAD"]
-
-            if possible_measure in possibles_measures:
-                measure = possible_measure
-
-            # TODO: repasar los posibles measure, cambiar sacando del nombre el valor real, y si no dan valor cogemos el generañ de aquí
-            measure = measure.lower()
-            if measure == "KILO":
-                measure = "kg"
-            if measure == "LITRO":
-                measure = "l"
-            if measure == "KG.PESO ESC":
-                measure = "kg"
-            if measure == "DOCENA":
-                measure = "ud."
-            if measure == "UNIDAD":
-                measure = "ud."
+            if quantity_measure_and_measure_first_chance_from_name != 0.0:
+                quantity_measure = quantity_measure_and_measure_first_chance_from_name[
+                    0
+                ]
+                measure = quantity_measure_and_measure_first_chance_from_name[1]
+            else:
+                # In case from name we could not find the quantity and measurement, we use the (possible_measure_second_chance)
+                quantity_measure = 0.0
+                possibles_measures_second_chance = [
+                    "KILO",
+                    "LITRO",
+                    "KG.PESO ESC",
+                    "DOCENA",
+                    "UNIDAD",
+                ]
+                if possible_measure_second_chance in possibles_measures_second_chance:
+                    measure = possible_measure_second_chance
+                if measure == "KILO":
+                    measure = "kg"
+                if measure == "LITRO":
+                    measure = "l"
+                if measure == "KG.PESO ESC":
+                    measure = "kg"
+                if measure == "DOCENA":
+                    measure = "ud."
+                if measure == "UNIDAD":
+                    measure = "ud."
 
             image_wrapper = product_html.find("div", class_="image-container")
             image_url = (
@@ -216,7 +216,7 @@ class ScrappingService:
                 price_float,
                 float(quantity_measure),
                 measure,
-                price_per_measure,
+                price_per_standard_measure,
                 image_url,
                 store_name,
                 store_image_url,
@@ -244,6 +244,56 @@ class ScrappingService:
             )
 
         return product
+
+    def filter_quantity_measure_and_measure_first_chance_from_name(self, name):
+        # Debo devolver el valor así, ej:  500 g
+        # TODO: puedo sacar del NAME el quantity y measure, pero con muchas excepciones...
+        possibles_measures_first_chance = [
+            "KILO",
+            "LITRO",
+            "KG.PESO ESC",
+            "DOCENA",
+            "UNIDAD",
+        ]
+
+        """
+        if possible_measure_second_chance in possibles_measures_second_chance:
+            measure = possible_measure_second_chance
+        """
+
+        """
+        quantity_measure =
+            - 1,5l pack 2
+            - 100g pack 2
+            - 1l
+            - 750ml
+            - 0,25l
+            - 0.25l
+            - 310g
+            - 100 gr
+            - 500G
+            - 1,5kg + 1kg
+            - 1.5kg
+            - Si no pone nada directamente es al kilo...
+            - 12 unidades (huevos)
+            - 24u (huevos)
+            - Ponene nada y.. pack 3 (en este caso es mejor poner al kilo) -> KG.PESO ESC = KG
+            - 3uds (omitir tambien)
+        """
+
+        """
+        if measure == "KILO":
+            measure = "kg"
+        if measure == "LITRO":
+            measure = "l"
+        if measure == "KG.PESO ESC":
+            measure = "kg"
+        if measure == "DOCENA":
+            measure = "ud."
+        if measure == "UNIDAD":
+            measure = "ud."
+        """
+        return 0.0
 
     def write_error_to_file(self, error, output_file):
         with open(output_file, "a", encoding="utf-8") as file:
