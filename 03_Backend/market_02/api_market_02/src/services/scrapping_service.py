@@ -120,6 +120,9 @@ class ScrappingService:
 
     def map_product_html_to_model(self, product_html, id_category):
         try:
+            # TODO: find url
+            url = "find"
+
             name = product_html.find("h2", class_="link product-name-gtm").text
 
             price = 0.0
@@ -218,6 +221,7 @@ class ScrappingService:
                 measure,
                 price_per_standard_measure,
                 image_url,
+                url,
                 store_name,
                 store_image_url,
             )
@@ -238,6 +242,7 @@ class ScrappingService:
                 0,
                 no_data,
                 0.0,
+                no_data,
                 no_data,
                 no_data,
                 no_data,

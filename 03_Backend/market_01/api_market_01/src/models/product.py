@@ -9,6 +9,7 @@ class Product:
         measure: str,
         price_by_standard_measure: float,
         image_url: str,
+        url: str,
         store_name: str,
         store_image_url: str,
     ):
@@ -20,6 +21,7 @@ class Product:
         self.measure = measure
         self.price_by_standard_measure = price_by_standard_measure
         self.image_url = image_url
+        self.url = url
         self.store_name = store_name
         self.store_image_url = store_image_url
 
@@ -33,6 +35,7 @@ class Product:
             "measure": self.measure,
             "price_by_standard_measure": self.price_by_standard_measure,
             "image_url": self.image_url,
+            "url": self.url,
             "store_name": self.store_name,
             "store_image_url": self.store_image_url,
         }

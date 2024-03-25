@@ -47,6 +47,10 @@ product_schema = {
                 "bsonType": "string",
                 "description": "must be a string and is required",
             },
+            "url": {
+                "bsonType": "string",
+                "description": "must be a string and is required",
+            },
             "store_name": {
                 "bsonType": "string",
                 "description": "must be a string and is required",

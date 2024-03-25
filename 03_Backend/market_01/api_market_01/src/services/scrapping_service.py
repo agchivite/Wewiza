@@ -123,6 +123,9 @@ class ScrappingService:
     # TODO: make a mapper DTO
     def map_product_html_to_model(self, product_html, id_category):
         try:
+            # TODO: find url
+            url = "find"
+
             name = product_html.find(
                 "h4", class_="subhead1-r product-cell__description-name"
             ).text
@@ -212,6 +215,7 @@ class ScrappingService:
                 measure.lower(),
                 price_per_measure,
                 image_url,
+                url,
                 store_name,
                 store_image_url,
             )
@@ -230,6 +234,7 @@ class ScrappingService:
                 0,
                 no_data,
                 0.0,
+                no_data,
                 no_data,
                 no_data,
                 no_data,
