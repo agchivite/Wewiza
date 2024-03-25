@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             WewizaFrontTheme {
-                Surface(color = Green) {
+                Surface {
                     AppNavigation()
                 }
             }

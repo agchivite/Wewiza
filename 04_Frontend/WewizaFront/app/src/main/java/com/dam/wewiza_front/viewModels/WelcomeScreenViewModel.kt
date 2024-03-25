@@ -89,15 +89,15 @@ class WelcomeScreenViewModel : ViewModel() {
             products = listOf(
                 Product(
                     UUID.randomUUID().toString(),
-                    UUID.randomUUID().toString(),
+                    "verduras",
+                    "",
+                    "kg",
                     "ProductoPrueba",
-                    2.99f,
-                    14.90f,
-                    "Kg",
-                    "1",
-                    "",
-                    "",
-                    Store("MarketPrueba", "")
+                    2.50f,
+                    14.50f,
+                    2,
+                    "storeUrl",
+                    "MarketPrueba"
                 )
             )
         )

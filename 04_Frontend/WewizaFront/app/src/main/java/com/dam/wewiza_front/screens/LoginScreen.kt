@@ -1,5 +1,6 @@
 package com.dam.wewiza_front.screens
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,23 +18,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -51,8 +49,11 @@ fun LoginScreen(
     }
 }
 
+
+
 @Composable
 fun LoginScreenBodyContent(viewModel: LoginScreenViewModel, navController: NavController) {
+    val context = LocalContext.current
     Box(modifier = Modifier.run {
         background(Color(0xFFD0C2DC))
     }) {
@@ -75,24 +76,30 @@ fun LoginScreenBodyContent(viewModel: LoginScreenViewModel, navController: NavCo
                     color = Color(0xFF2E2C31)
                 )
             )
-            TextInputs()
+            LoginTextInputs(viewModel)
 
             Spacer(modifier = Modifier.size(20.dp))
 
-            LoginScreenButtons(viewModel, navController)
+            LoginScreenButtons(viewModel, navController, context)
         }
     }
 }
 
 @Composable
-fun LoginScreenButtons(viewModel: LoginScreenViewModel, navController: NavController) {
+fun LoginScreenButtons(
+    viewModel: LoginScreenViewModel,
+    navController: NavController,
+    context: Context
+) {
+
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(
-            onClick = {},
+            onClick = {viewModel.loginWithEmailPassword(context, navController)},
             modifier = Modifier
                 .padding(top = 20.dp)
                 .padding(start = 20.dp)
@@ -141,14 +148,15 @@ fun LoginScreenButtons(viewModel: LoginScreenViewModel, navController: NavContro
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TextInputs(){
-    var email by remember { mutableStateOf(TextFieldValue("")) }
-    var password by remember { mutableStateOf(TextFieldValue("")) }
+fun LoginTextInputs(viewModel: LoginScreenViewModel) {
+
+    val email by viewModel.email.collectAsState()
+    val password by viewModel.password.collectAsState()
 
     Column {
         TextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { viewModel.setEmail(it)  },
             label = { Text("Correo") },
             modifier = Modifier
                 .padding(top = 30.dp)
@@ -156,7 +164,7 @@ fun TextInputs(){
         )
         TextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { viewModel.setPassword(it)  },
             label = { Text("Contraseña") },
             modifier = Modifier
                 .padding(top = 20.dp)
