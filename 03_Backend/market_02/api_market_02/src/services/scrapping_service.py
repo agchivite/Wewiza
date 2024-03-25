@@ -118,66 +118,6 @@ class ScrappingService:
                 output_file,
             )
 
-    def scrap_quantity_product_link(self, product_html, id_category):
-        try:
-            product_link = product_html.find("a", class_="product-pdp-link")
-
-            if product_link:
-                href = product_link.get("href")
-                single_product_full_url = "https://www.ahorramas.com" + href
-
-                response = requests.get(single_product_full_url)
-                if response.status_code == 200:
-                    return self.scrap_quantity_from_new_page(
-                        single_product_full_url, id_category
-                    )
-                else:
-                    print("Single product link not recieved 200 response")
-                    output_file = f"{self.output_folder}/output_{id_category}.txt"
-                    self.write_error_to_file(
-                        f"Single product link not recieved 200 response", output_file
-                    )
-                    return 0.0
-            else:
-                print("Single product link not found")
-                output_file = f"{self.output_folder}/output_{id_category}.txt"
-                self.write_error_to_file(f"Single product link not found", output_file)
-        except Exception as e:
-            print(f"Error to open single product link: {e}")
-            output_file = f"{self.output_folder}/output_{id_category}.txt"
-            self.write_error_to_file(
-                f"Error to open single product link: {e}", output_file
-            )
-
-    def scrap_quantity_from_new_page(self, single_product_full_url, id_category):
-        try:
-            self.driver.get(single_product_full_url)
-            page_source = self.driver.page_source
-            soup = BeautifulSoup(page_source, "html.parser")
-
-            div_containing_three_paragraphs = soup.find("div", class_="collapse show")
-            paragraphs = div_containing_three_paragraphs.find_all("p")
-            text_of_second_span = paragraphs[1].text
-
-            quantity_text = (
-                text_of_second_span.strip()
-                .replace("\n", "")
-                .replace("Peso Neto", "")
-                .replace(":", "")
-                .replace("KG", "")
-                .strip()
-                .replace(",", ".")
-            )
-
-            return float(quantity_text)
-        except Exception as e:
-            print(f"Error to obtain paragraphs from single product link: {e}")
-            output_file = f"{self.output_folder}/output_{id_category}.txt"
-            self.write_error_to_file(
-                f"Error to obtain paragraphs from single product link: {e}", output_file
-            )
-            return 0.0
-
     def map_product_html_to_model(self, product_html, id_category):
         try:
             name = product_html.find("h2", class_="link product-name-gtm").text
