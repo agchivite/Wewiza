@@ -23,6 +23,6 @@ product_service = ProductService(product_repository)
 scrapping_service = ScrappingService(driver_chrome, product_service)
 
 # Num id_categories are includes when scrapping
-start_category = 0
-end_category = 300
+start_category = 27
+end_category = 244
 scrapping_service.run_simulation(start_category, end_category)

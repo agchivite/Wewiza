@@ -32,8 +32,8 @@ product_schema = {
                 "description": "must be a double and is required",
             },
             "quantity_measure": {
-                "bsonType": "int",
-                "description": "must be a int and is required",
+                "bsonType": "double",
+                "description": "must be a double and is required",
             },
             "measure": {
                 "bsonType": "string",
