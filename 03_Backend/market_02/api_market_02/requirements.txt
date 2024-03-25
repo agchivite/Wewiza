@@ -2,10 +2,7 @@
 fastapi==0.68.0
 # HTTP Requests 
 requests==2.26.0
-# Selenium
-selenium==4.1.0
-# BeautifulSoup
-beautifulsoup4==4.10.0
+
 # Validación FASTAPI, pero explota si lo utilizo
 # pydantic==1.6.2 
 # Uvicorn Server
@@ -13,7 +10,8 @@ uvicorn==0.15.0 # Mantiene la API actuando como servidor
 # Archivos estáticos del servidor
 aiofiles==0.8.0
 # MongoDB
-pymongo==4.6.1
+# pymongo==4.6.1
+pymongo==3.11.4 # Para el servidor arm32v7
 # Environment variables
 python-dotenv==1.0.1 
 # Testing
@@ -21,3 +19,8 @@ pytest==6.2.5
 pytest-mock==3.6.1
 # Results (Railway Orientated Programming): https://pypi.org/project/python-on-rails/
 python_on_rails==1.0.1
+# No me haría faltan los siguiente porque el Scrapping lo realizo desde una máquina Windows
+# Selenium
+#selenium==4.1.0
+# BeautifulSoup
+#beautifulsoup4==4.10.0
