@@ -17,8 +17,13 @@ class ScrappingService:
 
     def run_simulation(self):
         categories_dict = {
-            "aperitivos": ["patatas_fritas", "gourmet", "lisas"],
-            "zumos": ["zumos", "naranja", "pina"],
+            "carne": [
+                "pollo",
+                "ternera_y_vacuno",
+                "cerdo_y_cochinillo",
+                "carne_picada_y_hamburguesas",
+                "conejo_pavo_y_otras_aves",
+            ],
         }
 
         """
@@ -136,7 +141,7 @@ class ScrappingService:
             quantity_measure = 0.0
             quantity_measure_and_measure_first_chance_from_name = (
                 self.filter_quantity_measure_and_measure_first_chance_from_name(name)
-            )
+            ).split(" ")
 
             "Format price with second chance measure: (3,19€/DOCENA)"
             price_per_measure_standard_with_measure_second_chance = 0.0
@@ -173,12 +178,22 @@ class ScrappingService:
                 price_per_measure_standard_with_measure_second_chance[1]
             )
 
-            measure = "Failed to find measurement"
-            if quantity_measure_and_measure_first_chance_from_name != 0.0:
+            measure = "kg"
+            if quantity_measure_and_measure_first_chance_from_name[0] != "0.0":
                 quantity_measure = quantity_measure_and_measure_first_chance_from_name[
                     0
-                ]
+                ].replace(",", ".")
+
+                if "num_pack_" in quantity_measure:
+                    # In case we have num_pack, we need to calculate his quantity for standard kg
+                    parts = quantity_measure.split("_")
+                    quantity_measure = price / int(parts[2])
+                elif quantity_measure == "none":
+                    # In case we don't have quantity, we detect the price is for standard kg
+                    quantity_measure = "1"
+
                 measure = quantity_measure_and_measure_first_chance_from_name[1]
+
             else:
                 # In case from name we could not find the quantity and measurement, we use the (possible_measure_second_chance)
                 quantity_measure = 0.0
@@ -228,7 +243,6 @@ class ScrappingService:
                 store_image_url,
             )
 
-            print(product)
         except AttributeError as e:
             print(f"Error to obtain data from product: {e}")
             output_file = f"{self.output_folder}/output_{id_category}.txt"
@@ -253,54 +267,103 @@ class ScrappingService:
         return product
 
     def filter_quantity_measure_and_measure_first_chance_from_name(self, name):
-        # Debo devolver el valor así, ej:  500 g
-        # TODO: puedo sacar del NAME el quantity y measure, pero con muchas excepciones...
-        possibles_measures_first_chance = [
-            "KILO",
-            "LITRO",
-            "KG.PESO ESC",
-            "DOCENA",
-            "UNIDAD",
-        ]
+        try:
+            """
+            Posibles returns:
+            - 500 g -> In normal case
+            - num_pack_X kg -> In case we dont have the measure
+            - none kg -> In case we don't anything
+            """
+            possibles_names_to_study_web = [
+                """
+                - 1.5l pack 2
+                - 1l
+                - 750ml
+                - 0.25l
 
-        """
-        if possible_measure_second_chance in possibles_measures_second_chance:
-            measure = possible_measure_second_chance
-        """
+                - 100g pack 2
+                - 310g
+                - 100 gr
+                - 500G
+                - 1.5kg + 1kg
+                - 1.5kg
 
-        """
-        quantity_measure =
-            - 1,5l pack 2
-            - 100g pack 2
-            - 1l
-            - 750ml
-            - 0,25l
-            - 0.25l
-            - 310g
-            - 100 gr
-            - 500G
-            - 1,5kg + 1kg
-            - 1.5kg
-            - Si no pone nada directamente es al kilo...
-            - 12 unidades (huevos)
-            - 24u (huevos)
-            - Ponene nada y.. pack 3 (en este caso es mejor poner al kilo) -> KG.PESO ESC = KG
-            - 3uds (omitir tambien)
-        """
+                # En estos casos será:
+                - Si no pone nada directamente es al kilo estandar... -> return none kg
+                - Si no pone nada pero si pack Xnum (en este caso es mejor poner al kilo estandar) -> return num_pack_X kg
+                - 3uds Poner al kilo estandar -> return num_pack_X kg
+                """
+            ]
 
-        """
-        if measure == "KILO":
-            measure = "kg"
-        if measure == "LITRO":
-            measure = "l"
-        if measure == "KG.PESO ESC":
-            measure = "kg"
-        if measure == "DOCENA":
-            measure = "ud."
-        if measure == "UNIDAD":
-            measure = "ud."
-        """
-        return 0.0
+            # CASE KILOS
+            kilos_patterns = [
+                r"(\d*\.?\d+)\s*(g|gr|kg)\s*pack\s*(\d+)",
+                r"(\d*\.?\d+)\s*(g|gr|kg)\s*pack",
+                r"(\d*\.?\d+)\s*(g|gr|kg)",
+            ]
+
+            quantities = []
+            units = set()
+
+            for pattern in kilos_patterns:
+                for match in re.finditer(pattern, name, re.IGNORECASE):
+                    quantity = float(match.group(1))
+                    unidad = match.group(2).lower()
+                    if unidad in ("gr"):
+                        unidad = "g"
+                        # TODO: los packs no me los pilla...
+                    if "pack" in match.group():
+                        packs = int(match.group(3)) if match.group(3) else 1
+                        quantity *= packs
+                        print(packs)
+                        print("ENTRO EN PACK")
+                    quantities.append(quantity)
+                    units.add(unidad)
+
+            total_quantity = sum(quantities)
+            if len(units) >= 1:
+                final_unit = units.pop()
+                return f"{total_quantity} {final_unit}"
+
+            # CASE LITERS
+            liters_patterns = [
+                r"(\d*\.?\d+)\s*(l|ml)",
+                r"(\d*\.?\d+)\s*(l|ml)\s*pack\s*(\d+)",
+                r"(\d*\.?\d+)\s*(l|ml)\s*pack",
+                r"(\d*\.?\d+)\s*(l|ml)",
+            ]
+
+            for pattern in liters_patterns:
+                match = re.search(pattern, name, re.IGNORECASE)
+                if match:
+                    quantity = float(match.group(1))
+                    unit = match.group(2).lower()
+                    if "pack" in pattern:
+                        packs = int(match.group(3)) if match.group(3) else 1
+                        quantity *= packs
+                    return f"{quantity} {unit}"
+
+            # CASE EGGS
+            egg_patterns = [r"(\d+)\s*unidades?", r"(\d+)\s*unid\b", r"(\d+)\s*u\b"]
+
+            for pattern in egg_patterns:
+                match = re.search(pattern, name)
+                if match:
+                    return match.group(1) + " ud."
+
+            # CASE GENERAL EGGS
+            # In case then name has not the quantity eggs
+            possible_eggs_standard_dozens_values = ["Huevos", "huevos"]
+
+            for (
+                possible_eggs_standard_dozens_value
+            ) in possible_eggs_standard_dozens_values:
+                if possible_eggs_standard_dozens_value in name:
+                    return str(12) + " ud."
+
+            return str(0.0) + " none"
+        except AttributeError as e:
+            print(f"Error filtering quantity and measure: {e}")
 
     def write_error_to_file(self, error, output_file):
         with open(output_file, "a", encoding="utf-8") as file:
