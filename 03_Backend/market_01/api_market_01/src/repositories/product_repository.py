@@ -24,6 +24,20 @@ class ProductRepository:
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
+
+            existing_product_name = collection.find_one({"name": product_data["name"]})
+            existing_product_price = collection.find_one(
+                {"price": product_data["price"]}
+            )
+
+            if existing_product_name and existing_product_price:
+                return Result.failure(
+                    "Product already exists with name: "
+                    + product_data["name"]
+                    + " and price: "
+                    + str(product_data["price"])
+                )
+
             result = collection.insert_one(product_data)
             # Because ObjectID needs to be converted to string
             inserted_id = str(result.inserted_id)

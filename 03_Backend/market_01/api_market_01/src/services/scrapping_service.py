@@ -55,7 +55,7 @@ class ScrappingService:
 
                         for product_html in products_html:
                             product_model = self.map_product_html_to_model(
-                                product_html, id_category
+                                product_html, id_category, url
                             )
 
                             if product_model.name != "[no-data]":
@@ -121,11 +121,8 @@ class ScrappingService:
             )
 
     # TODO: make a mapper DTO
-    def map_product_html_to_model(self, product_html, id_category):
+    def map_product_html_to_model(self, product_html, id_category, url):
         try:
-            # TODO: find url
-            url = "find"
-
             name = product_html.find(
                 "h4", class_="subhead1-r product-cell__description-name"
             ).text

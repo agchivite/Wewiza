@@ -120,8 +120,10 @@ class ScrappingService:
 
     def map_product_html_to_model(self, product_html, id_category):
         try:
-            # TODO: find url
-            url = "find"
+            url = (
+                "https://www.ahorramas.com/"
+                + product_html.find("a", class_="product-pdp-link")["href"]
+            )
 
             name = product_html.find("h2", class_="link product-name-gtm").text
 
