@@ -4,14 +4,14 @@ services:
     build: ./
     restart: always
     ports:
-      - "8080:8080"
+      - "443:443"
       - "587:587" # SMTP for email
     environment:
-      - PORT=8080
+      - PORT=443
     networks:
       - public-wewiza-network
       - private-wewiza-network
-    command: uvicorn api_wewiza.main:app --host 0.0.0.0 --port 8080 --reload
+    command: uvicorn api_wewiza.main:app --host 0.0.0.0 --port 443 --ssl-keyfile=certs.ssl.server.key --ssl-certfile=certs.ssl.server.cer --reload
 
   mongo_wewiza:
     # apcheamitru/arm32v7-mongo:3.2.20

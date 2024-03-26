@@ -5,7 +5,7 @@ WORKDIR /wewiza
 COPY ./api_wewiza/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8080
+EXPOSE 443
 
 # Ruta actual copiar a la ruta de destino
 COPY . .
