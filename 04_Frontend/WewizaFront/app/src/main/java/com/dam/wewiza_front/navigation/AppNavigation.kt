@@ -5,9 +5,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dam.wewiza_front.screens.AboutUsScreen
+import com.dam.wewiza_front.screens.CategoriesScreen
 import com.dam.wewiza_front.screens.HomeScreen
 import com.dam.wewiza_front.screens.LoginScreen
+import com.dam.wewiza_front.screens.ProfileScreen
 import com.dam.wewiza_front.screens.RegisterScreen
+import com.dam.wewiza_front.screens.SuggestionScreen
 import com.dam.wewiza_front.screens.WelcomeScreen
 import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
@@ -17,23 +20,32 @@ import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 
 
 @Composable
-fun AppNavigation(){
+fun AppNavigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = AppScreens.WelcomeScreen.route){
-        composable(route = AppScreens.WelcomeScreen.route){
+    NavHost(navController = navController, startDestination = AppScreens.HomeScreen.route) {
+        composable(route = AppScreens.WelcomeScreen.route) {
             WelcomeScreen(WelcomeScreenViewModel(), navController)
         }
-        composable(route = AppScreens.HomeScreen.route){
-            HomeScreen(HomeScreenViewModel() ,navController)
+        composable(route = AppScreens.HomeScreen.route) {
+            HomeScreen(HomeScreenViewModel(), navController)
         }
-        composable(route = AppScreens.LoginScreen.route){
+        composable(route = AppScreens.LoginScreen.route) {
             LoginScreen(LoginScreenViewModel(), navController = navController)
         }
-        composable(route = AppScreens.RegisterScreen.route){
+        composable(route = AppScreens.RegisterScreen.route) {
             RegisterScreen(RegisterScreenViewModel(), navController = navController)
         }
-        composable(route = AppScreens.AboutUsScreen.route){
+        composable(route = AppScreens.AboutUsScreen.route) {
             AboutUsScreen(AboutUsScreenViewModel(), navController)
+        }
+        composable(route = AppScreens.SuggestionScreen.route) {
+            SuggestionScreen()
+        }
+        composable(route = AppScreens.CategoriesScreen.route) {
+            CategoriesScreen()
+        }
+        composable(route = AppScreens.ProfileScreen.route) {
+            ProfileScreen()
         }
     }
 }

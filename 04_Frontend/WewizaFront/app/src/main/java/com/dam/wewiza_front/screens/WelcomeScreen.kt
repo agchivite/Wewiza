@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.dam.wewiza_front.R
+import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
@@ -68,8 +69,10 @@ fun WelcomeScreen(
     viewModel: WelcomeScreenViewModel,
     navController: NavController
 ) {
-    Scaffold() {
-        BodyContent(viewModel, navController)
+    MyLightTheme {
+        Scaffold() {
+            BodyContent(viewModel, navController)
+        }
     }
 
 }
@@ -93,7 +96,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
 
 
     Box(modifier = Modifier.run {
-        background(Color(0xFFD0C2DC))
+        background(MaterialTheme.colorScheme.surface)
     }) {
         Column(
             modifier = Modifier
@@ -108,7 +111,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
             )
             Text(
                 "¡Bienvenido a Wewiza!", style = TextStyle(
-                    fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, fontFamily = Butler, color = Color(0xFF2E2C31)
+                    fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, fontFamily = Butler, color = MaterialTheme.colorScheme.onSurface
                 )
             )
 
@@ -168,12 +171,16 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
 
 
             Column(
-                modifier = Modifier.fillMaxSize().padding(bottom = 30.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 30.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Spacer(modifier = Modifier.width(16.dp))
