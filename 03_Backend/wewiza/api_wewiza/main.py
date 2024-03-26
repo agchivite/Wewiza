@@ -26,7 +26,7 @@ def get_categories():
     {"id": "maquillaje", "name": "Maquillaje"},
     """
     return {
-        "categories": [
+        "fix": [
             {"id": "aceite_especias_y_salsas", "name": "Aceite, especias y salsas"},
             {"id": "agua_y_refrescos", "name": "Agua y refrescos"},
             {"id": "aperitivos", "name": "Aperitivos"},
