@@ -16,7 +16,7 @@ services:
     command: uvicorn api_wewiza.main:app --host 0.0.0.0 --port 443 --ssl-keyfile=/certs/ssl/server.key --ssl-certfile=/certs/ssl/server.cer --reload
 
   mongo_wewiza:
-    # apcheamitru/arm32v7-mongo:3.2.20
+    # apcheamitru/arm32v7-mongo:3.2.20 # mongo:6.0.13
     image: apcheamitru/arm32v7-mongo:3.2.20
     restart: always
     ports:
