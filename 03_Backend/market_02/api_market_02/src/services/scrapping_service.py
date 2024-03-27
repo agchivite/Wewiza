@@ -14,34 +14,30 @@ class ScrappingService:
     def __init__(self, driver, product_service: ProductService):
         self.driver = driver
         self.product_service = product_service
-        self.output_folder = "log_error_ahorramas"
+        self.output_folder = ""
 
-    def run_simulation(self):
-        categories_dict = {
-            "agua_y_refrescos": [
-                "refrescos",
-                "refrescos_con_gas",
-                "refrescos_sin_gas",
-                "de_cola",
-                "de_naranja",
-                "de_limon_y_limalimon",
-                "bebidas_energeticas",
-                "bebidas_isotonicas",
-                "bebidas_de_te",
-                "tonicas_y_bitter",
-                "gaseosa",
-                "kombucha",
-                "agua",
-                "agua_sin_gas",
-                "agua_con_gas",
-                "agua_con_sabores",
-            ],
-        }
+    def run_scrapping_ahorramas(self):
+        current_directory = os.path.dirname(os.path.realpath(__file__))
 
-        """
-        # TODO: Change to get static from relative path
-        categories_folder = "C:\\Users\\chivi\\Desktop\\git-ephemeral\\wewiza\\03_Backend\\market_02\\api_market_02\\static\\ahorramas_categories_ids_to_scrap"
+        api_market_02_folder = os.path.abspath(
+            os.path.join(current_directory, "..", "..")
+        )
+        log_error_folder = os.path.join(api_market_02_folder, "log_error_ahorramas")
+        self.output_folder = log_error_folder
 
+        # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
+        if not os.path.exists(log_error_folder):
+            os.makedirs(log_error_folder)
+
+        current_directory = os.path.dirname(os.path.realpath(__file__))
+        static_folder = os.path.abspath(
+            os.path.join(current_directory, "..", "..", "static")
+        )
+        categories_folder = os.path.join(
+            static_folder, "ahorramas_categories_ids_to_scrap"
+        )
+
+        categories_dict = {}
 
         for category_id_wewiza in os.listdir(categories_folder):
             file_path = os.path.join(categories_folder, category_id_wewiza)
@@ -51,16 +47,12 @@ class ScrappingService:
                     contenido = f.read()
 
                 categories = contenido.split(";")
+                category_id_wewiza = category_id_wewiza.replace(".csv", "")
                 categories_dict[category_id_wewiza] = categories
-        """
 
         self.scrap_categories(categories_dict)
 
     def scrap_categories(self, categories_dict):
-        # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
-        if not os.path.exists(self.output_folder):
-            os.makedirs(self.output_folder)
-
         for category_id_wewiza, categories_list in categories_dict.items():
             for categorie_ahorramas in categories_list:
                 url = f"https://www.ahorramas.com/on/demandware.store/Sites-Ahorramas-Site/es/Search-UpdateGrid?cgid={categorie_ahorramas}&pmin=0.01&start=0&sz=1500"
@@ -351,7 +343,6 @@ class ScrappingService:
         for pattern in egg_patterns:
             match = re.search(pattern, name)
             if match:
-                print(f"{match.group(1)} ud.")
                 return Result.success(f"{match.group(1)} ud.")
 
         # CASE GENERAL EGGS
@@ -360,7 +351,6 @@ class ScrappingService:
 
         for possible_eggs_standard_dozens_value in possible_eggs_standard_dozens_values:
             if possible_eggs_standard_dozens_value in name:
-                print(f"{str(12)} ud.")
                 return Result.success(f"{str(12)} ud.")
 
         return Result.failure("failure")

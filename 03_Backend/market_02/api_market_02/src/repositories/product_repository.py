@@ -56,17 +56,6 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
-    def get_todos_by_user_email(self, user_email):
-        database = self.db_manager.connect_database()
-        collection = database[self.collection_name]
-        filter = {"user_email": user_email}
-        todos = list(collection.find(filter))
-        # Convertimos ObjectId a string, si no Python no puede convertirlo
-        for todo in todos:
-            todo["_id"] = str(todo["_id"])
-        self.db_manager.close_database()
-        return todos
-
     def delete_product(self, query):
         try:
             database = self.db_manager.connect_database()

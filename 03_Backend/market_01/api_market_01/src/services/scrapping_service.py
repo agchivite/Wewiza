@@ -13,13 +13,20 @@ class ScrappingService:
     def __init__(self, driver, product_service: ProductService):
         self.driver = driver
         self.product_service = product_service
-        self.output_folder = "log_error_mercadona"
+        self.output_folder = ""
 
-    def run_simulation(self, start_category, end_category):
+    def run_scrapping_mercadona(self, start_category, end_category):
+        current_directory = os.path.dirname(os.path.realpath(__file__))
+
+        api_market_02_folder = os.path.abspath(
+            os.path.join(current_directory, "..", "..")
+        )
+        log_error_folder = os.path.join(api_market_02_folder, "log_error_mercadona")
+        self.output_folder = log_error_folder
 
         # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
-        if not os.path.exists(self.output_folder):
-            os.makedirs(self.output_folder)
+        if not os.path.exists(log_error_folder):
+            os.makedirs(log_error_folder)
 
         for i in range(start_category, end_category + 1):
             url = f"https://tienda.mercadona.es/categories/{i}"
