@@ -3,6 +3,7 @@ package com.dam.wewiza_front.services
 import com.dam.wewiza_front.models.Categories
 import com.dam.wewiza_front.models.Category
 import com.dam.wewiza_front.models.Personaje
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -18,10 +19,16 @@ interface ApiService {
 
 
 object RetrofitServiceFactory {
+
+    private val okHttpClient = OkHttpClient.Builder()
+        .hostnameVerifier{hostname, _ -> hostname == "wewiza.ddns.net"}
+        .build()
+
     fun makeRetrofitService(): ApiService{
         return Retrofit.Builder()
-            .baseUrl("http://wewiza.ddns.net:80/")
+            .baseUrl("https://wewiza.ddns.net/")
             .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
             .build().create(ApiService::class.java)
     }
 }

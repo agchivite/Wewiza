@@ -1,6 +1,7 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +21,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dam.wewiza_front.R
+import com.dam.wewiza_front.models.Categories
 import com.dam.wewiza_front.navigation.AppScreens
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
@@ -62,13 +69,28 @@ fun HomeBodyContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        HomeBottomMenu(navController)
+        HomeBottomMenu(navController, viewModel)
     }
 }
 
 
 @Composable
-fun HomeBottomMenu(navController: NavController) {
+fun HomeBottomMenu(navController: NavController, viewModel: HomeScreenViewModel) {
+
+    var categoriesState by remember { mutableStateOf<Categories?>(null) }
+
+    LaunchedEffect(Unit) {
+        try {
+            val categories = viewModel.getAllCategories()
+            Log.d("asdasdasd", categories.toString())
+            categoriesState = categories
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Manejar el error de la llamada a la API según sea necesario
+        }
+    }
+
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -83,7 +105,7 @@ fun HomeBottomMenu(navController: NavController) {
             BottomMenuItem(
                 icon = R.drawable.google,
                 text = "Inicio",
-                onClick = { navController.navigate(AppScreens.HomeScreen.route) }
+                onClick = { Log.d("asdasd", categoriesState?.Categories.toString()) }
             )
             BottomMenuItem(
                 icon = R.drawable.google,
