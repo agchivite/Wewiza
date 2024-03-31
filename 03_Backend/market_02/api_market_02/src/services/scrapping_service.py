@@ -1,6 +1,7 @@
 import json
 import uuid
 from selenium.webdriver.chrome.service import Service
+from python_on_rails.result import Result
 from bs4 import BeautifulSoup
 from api_market_02.src.models.product import Product
 from api_market_02.src.services.product_service import ProductService
@@ -13,23 +14,30 @@ class ScrappingService:
     def __init__(self, driver, product_service: ProductService):
         self.driver = driver
         self.product_service = product_service
-        self.output_folder = "log_error_ahorramas"
+        self.output_folder = ""
 
-    def run_simulation(self):
-        categories_dict = {
-            "carne": [
-                "pollo",
-                "ternera_y_vacuno",
-                "cerdo_y_cochinillo",
-                "carne_picada_y_hamburguesas",
-                "conejo_pavo_y_otras_aves",
-            ],
-        }
+    def run_scrapping_ahorramas(self):
+        current_directory = os.path.dirname(os.path.realpath(__file__))
 
-        """
-        # TODO: Change to get static from relative path
-        categories_folder = "C:\\Users\\chivi\\Desktop\\git-ephemeral\\wewiza\\03_Backend\\market_02\\api_market_02\\static\\ahorramas_categories_ids_to_scrap"
+        api_market_02_folder = os.path.abspath(
+            os.path.join(current_directory, "..", "..")
+        )
+        log_error_folder = os.path.join(api_market_02_folder, "log_error_ahorramas")
+        self.output_folder = log_error_folder
 
+        # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
+        if not os.path.exists(log_error_folder):
+            os.makedirs(log_error_folder)
+
+        current_directory = os.path.dirname(os.path.realpath(__file__))
+        static_folder = os.path.abspath(
+            os.path.join(current_directory, "..", "..", "static")
+        )
+        categories_folder = os.path.join(
+            static_folder, "ahorramas_categories_ids_to_scrap"
+        )
+
+        categories_dict = {}
 
         for category_id_wewiza in os.listdir(categories_folder):
             file_path = os.path.join(categories_folder, category_id_wewiza)
@@ -39,16 +47,12 @@ class ScrappingService:
                     contenido = f.read()
 
                 categories = contenido.split(";")
+                category_id_wewiza = category_id_wewiza.replace(".csv", "")
                 categories_dict[category_id_wewiza] = categories
-        """
 
         self.scrap_categories(categories_dict)
 
     def scrap_categories(self, categories_dict):
-        # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
-        if not os.path.exists(self.output_folder):
-            os.makedirs(self.output_folder)
-
         for category_id_wewiza, categories_list in categories_dict.items():
             for categorie_ahorramas in categories_list:
                 url = f"https://www.ahorramas.com/on/demandware.store/Sites-Ahorramas-Site/es/Search-UpdateGrid?cgid={categorie_ahorramas}&pmin=0.01&start=0&sz=1500"
@@ -140,7 +144,9 @@ class ScrappingService:
             """
             quantity_measure = 0.0
             quantity_measure_and_measure_first_chance_from_name = (
-                self.filter_quantity_measure_and_measure_first_chance_from_name(name)
+                self.filter_quantity_measure_and_measure_first_chance_from_name(
+                    name, id_category
+                )
             ).split(" ")
 
             "Format price with second chance measure: (3,19€/DOCENA)"
@@ -196,7 +202,7 @@ class ScrappingService:
 
             else:
                 # In case from name we could not find the quantity and measurement, we use the (possible_measure_second_chance)
-                quantity_measure = 0.0
+                quantity_measure = "0.0"
                 possibles_measures_second_chance = [
                     "KILO",
                     "LITRO",
@@ -228,6 +234,9 @@ class ScrappingService:
 
             store_name = "Ahorramas"
             store_image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlu7l3PhGxyJUajK_-O_CQoAaPiOy_kDxdpYm7Gy-n2A&s"
+
+            if quantity_measure == "0.0":
+                quantity_measure = 1
 
             product = Product(
                 str(uuid.uuid4()),
@@ -266,7 +275,9 @@ class ScrappingService:
 
         return product
 
-    def filter_quantity_measure_and_measure_first_chance_from_name(self, name):
+    def filter_quantity_measure_and_measure_first_chance_from_name(
+        self, name, id_category
+    ):
         try:
             """
             Posibles returns:
@@ -294,76 +305,142 @@ class ScrappingService:
                 - 3uds Poner al kilo estandar -> return num_pack_X kg
                 """
             ]
+            result_kg = self.kilogrames_filter_quantity_measure_and_measure_first_chance_from_name(
+                name
+            )
+            if result_kg.value != None:
+                return result_kg.value
 
-            # CASE KILOS
-            kilos_patterns = [
-                r"(\d*\.?\d+)\s*(g|gr|kg)\s*pack\s*(\d+)",
-                r"(\d*\.?\d+)\s*(g|gr|kg)\s*pack",
-                r"(\d*\.?\d+)\s*(g|gr|kg)",
-            ]
+            result_l = (
+                self.litres_filter_quantity_measure_and_measure_first_chance_from_name(
+                    name
+                )
+            )
+            if result_l.value != None:
+                return result_l.value
 
-            quantities = []
-            units = set()
-
-            for pattern in kilos_patterns:
-                for match in re.finditer(pattern, name, re.IGNORECASE):
-                    quantity = float(match.group(1))
-                    unidad = match.group(2).lower()
-                    if unidad in ("gr"):
-                        unidad = "g"
-                        # TODO: los packs no me los pilla...
-                    if "pack" in match.group():
-                        packs = int(match.group(3)) if match.group(3) else 1
-                        quantity *= packs
-                        print(packs)
-                        print("ENTRO EN PACK")
-                    quantities.append(quantity)
-                    units.add(unidad)
-
-            total_quantity = sum(quantities)
-            if len(units) >= 1:
-                final_unit = units.pop()
-                return f"{total_quantity} {final_unit}"
-
-            # CASE LITERS
-            liters_patterns = [
-                r"(\d*\.?\d+)\s*(l|ml)",
-                r"(\d*\.?\d+)\s*(l|ml)\s*pack\s*(\d+)",
-                r"(\d*\.?\d+)\s*(l|ml)\s*pack",
-                r"(\d*\.?\d+)\s*(l|ml)",
-            ]
-
-            for pattern in liters_patterns:
-                match = re.search(pattern, name, re.IGNORECASE)
-                if match:
-                    quantity = float(match.group(1))
-                    unit = match.group(2).lower()
-                    if "pack" in pattern:
-                        packs = int(match.group(3)) if match.group(3) else 1
-                        quantity *= packs
-                    return f"{quantity} {unit}"
-
-            # CASE EGGS
-            egg_patterns = [r"(\d+)\s*unidades?", r"(\d+)\s*unid\b", r"(\d+)\s*u\b"]
-
-            for pattern in egg_patterns:
-                match = re.search(pattern, name)
-                if match:
-                    return match.group(1) + " ud."
-
-            # CASE GENERAL EGGS
-            # In case then name has not the quantity eggs
-            possible_eggs_standard_dozens_values = ["Huevos", "huevos"]
-
-            for (
-                possible_eggs_standard_dozens_value
-            ) in possible_eggs_standard_dozens_values:
-                if possible_eggs_standard_dozens_value in name:
-                    return str(12) + " ud."
+            result_egg = (
+                self.eggs_filter_quantity_measure_and_measure_first_chance_from_name(
+                    name
+                )
+            )
+            if result_egg.value != None:
+                return result_egg.value
 
             return str(0.0) + " none"
         except AttributeError as e:
             print(f"Error filtering quantity and measure: {e}")
+            output_file = f"{self.output_folder}/output_{id_category}.txt"
+            self.write_error_to_file(
+                f"Error filtering quantity and measure: {e}",
+                output_file,
+            )
+
+    def eggs_filter_quantity_measure_and_measure_first_chance_from_name(self, name):
+        # CASE EGGS
+        egg_patterns = [r"(\d+)\s*unidades?", r"(\d+)\s*unid\b", r"(\d+)\s*u\b"]
+
+        for pattern in egg_patterns:
+            match = re.search(pattern, name)
+            if match:
+                return Result.success(f"{match.group(1)} ud.")
+
+        # CASE GENERAL EGGS
+        # In case then name has not the quantity eggs
+        possible_eggs_standard_dozens_values = ["Huevos", "huevos"]
+
+        for possible_eggs_standard_dozens_value in possible_eggs_standard_dozens_values:
+            if possible_eggs_standard_dozens_value in name:
+                return Result.success(f"{str(12)} ud.")
+
+        return Result.failure("failure")
+
+    def litres_filter_quantity_measure_and_measure_first_chance_from_name(self, name):
+        liters_patterns = [
+            r"(\d*[,\.]?\d+)\s*(l|ml|cl)\s*pack\s*(\d+)",
+            r"(\d*[,\.]?\d+)\s*(l|ml|cl)",
+        ]
+
+        quantities = []
+        units = set()
+
+        quantity = 0
+        found_pattern = False
+
+        for pattern in liters_patterns:
+            for match in re.finditer(pattern, name, re.IGNORECASE):
+                quantity_str = match.group(1)
+                quantity = float(quantity_str.replace(",", "."))
+                unidad = match.group(2).lower()
+                name_splited = name.split(" ")
+                for i in range(len(name_splited)):
+                    if "pack" in name_splited[i]:
+                        if name_splited[i + 1].isdigit():
+                            packs = int(name_splited[i + 1])
+                            quantity *= packs
+
+                units.add(unidad)
+                quantities.append(quantity)
+
+                if quantity != 0:
+                    found_pattern = True
+                    quantity = 0
+            if found_pattern:
+                break
+
+        total_quantity = float(sum(quantities))
+
+        if found_pattern:
+            final_unit = units.pop()
+            return Result.success(f"{total_quantity} {final_unit}")
+        else:
+            return Result.failure("failure")
+
+    def kilogrames_filter_quantity_measure_and_measure_first_chance_from_name(
+        self, name
+    ):
+        kilos_patterns = [
+            r"(\d*[,\.]?\d+)\s*(g|gr|kg)\s*pack\s*(\d+)",
+            r"(\d*[,\.]?\d+)\s*(g|gr|kg)",
+        ]
+
+        # We need beacuse there are cases with: 1kg +1,5kg
+        quantities = []
+        units = set()
+
+        quantity = 0
+        found_pattern = False
+
+        for pattern in kilos_patterns:
+            for match in re.finditer(pattern, name, re.IGNORECASE):
+                quantity_str = match.group(1)
+                quantity = float(quantity_str.replace(",", "."))
+                unidad = match.group(2).lower()
+                if unidad in ("gr"):
+                    unidad = "g"
+                name_splited = name.split(" ")
+                for i in range(len(name_splited)):
+                    if "pack" in name_splited[i] and name_splited[i + 2] == "de":
+                        if name_splited[i + 1].isdigit():
+                            packs = int(name_splited[i + 1])
+                            quantity *= packs
+
+                units.add(unidad)
+                quantities.append(quantity)
+
+                if quantity != 0:
+                    found_pattern = True
+                    quantity = 0
+            if found_pattern:
+                break
+
+        total_quantity = float(sum(quantities))
+
+        if found_pattern:
+            final_unit = units.pop()
+            return Result.success(f"{total_quantity} {final_unit}")
+        else:
+            return Result.failure("failure")
 
     def write_error_to_file(self, error, output_file):
         with open(output_file, "a", encoding="utf-8") as file:

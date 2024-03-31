@@ -27,7 +27,6 @@ class ProductService:
 
         result = self.product_repository.insert_product(product_dict)
         if result.is_failure():
-            print("Failed to insert product:", result.error)
             return result.error
         else:
             return result.value

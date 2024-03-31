@@ -15,7 +15,7 @@ services:
       - private-market-01-network
 
   mongo_market_01:
-    # apcheamitru/arm32v7-mongo:3.2.20
+    # apcheamitru/arm32v7-mongo:3.2.20 # mongo:6.0.13
     image: apcheamitru/arm32v7-mongo:3.2.20
     restart: always
     ports:
