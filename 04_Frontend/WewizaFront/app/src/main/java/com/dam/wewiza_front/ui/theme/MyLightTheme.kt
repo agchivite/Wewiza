@@ -17,7 +17,8 @@ fun MyLightTheme(
         return lightColorScheme(
             surface = Color(0xFFD0C2DC),
             onSurface = Color(0xFF2E2C31),
-            primary = Color(0xFFBB84E8)
+            primary = Color(0xFFBB84E8),
+            background = Color(0xFF7386C0)
         )
     }
 

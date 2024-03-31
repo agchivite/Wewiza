@@ -10,19 +10,24 @@ import com.dam.wewiza_front.screens.HomeScreen
 import com.dam.wewiza_front.screens.LoginScreen
 import com.dam.wewiza_front.screens.ProfileScreen
 import com.dam.wewiza_front.screens.RegisterScreen
+import com.dam.wewiza_front.screens.SettingsScreen
 import com.dam.wewiza_front.screens.SuggestionScreen
 import com.dam.wewiza_front.screens.WelcomeScreen
 import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
+import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
+import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
 import com.dam.wewiza_front.viewModels.RegisterScreenViewModel
+import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
+import com.dam.wewiza_front.viewModels.SuggestionScreenViewModel
 import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = AppScreens.HomeScreen.route) {
+    NavHost(navController = navController, startDestination = AppScreens.SettingsScreen.route) {
         composable(route = AppScreens.WelcomeScreen.route) {
             WelcomeScreen(WelcomeScreenViewModel(), navController)
         }
@@ -39,13 +44,16 @@ fun AppNavigation() {
             AboutUsScreen(AboutUsScreenViewModel(), navController)
         }
         composable(route = AppScreens.SuggestionScreen.route) {
-            SuggestionScreen()
+            SuggestionScreen(SuggestionScreenViewModel(), navController)
         }
         composable(route = AppScreens.CategoriesScreen.route) {
-            CategoriesScreen()
+            CategoriesScreen(CategoriesScreenViewModel(), navController)
         }
         composable(route = AppScreens.ProfileScreen.route) {
-            ProfileScreen()
+            ProfileScreen(ProfileScreenViewModel(), navController)
+        }
+        composable(route = AppScreens.SettingsScreen.route){
+            SettingsScreen(SettingsScrennViewModel(), navController)
         }
     }
 }
