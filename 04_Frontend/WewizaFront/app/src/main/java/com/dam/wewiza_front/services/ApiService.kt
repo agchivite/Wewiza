@@ -1,13 +1,10 @@
 package com.dam.wewiza_front.services
 
 import com.dam.wewiza_front.models.Categories
-import com.dam.wewiza_front.models.Category
-import com.dam.wewiza_front.models.Personaje
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import retrofit2.http.Path
 
 interface ApiService {
 

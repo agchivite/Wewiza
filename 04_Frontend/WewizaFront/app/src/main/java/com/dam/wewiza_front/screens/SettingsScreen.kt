@@ -3,6 +3,7 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 
@@ -29,6 +30,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dam.wewiza_front.constants.Constants
@@ -42,7 +44,7 @@ import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
 fun SettingsScreen(
     viewModel: SettingsScrennViewModel,
     navController: NavController
-){
+) {
 
     Scaffold(topBar = {
         Constants.TopBarWithLogo(navController)
@@ -61,6 +63,8 @@ fun SettingsScreenBodyContent(viewModel: SettingsScrennViewModel, navController:
             .fillMaxSize()
             .padding(vertical = 70.dp)
     ) {
+        val context = LocalContext.current
+
 
         Spacer(modifier = Modifier.height(20.dp))
         ThemeSelector()
@@ -79,7 +83,7 @@ fun SettingsScreenBodyContent(viewModel: SettingsScrennViewModel, navController:
 
 
         Spacer(modifier = Modifier.height(20.dp))
-        DeleteAccountSection(viewModel)
+        DeleteAccountSection(viewModel, navController, context)
         Spacer(modifier = Modifier.height(20.dp))
     }
 }
@@ -136,7 +140,7 @@ fun ThemeSelector() {
 @Composable
 fun AboutUsSection(navController: NavController) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Button(onClick = { navController.navigate(AppScreens.AboutUsScreen.route)}) {
+        Button(onClick = { navController.navigate(AppScreens.AboutUsScreen.route) }) {
             Text("Sobre nosotros")
         }
     }
@@ -144,11 +148,18 @@ fun AboutUsSection(navController: NavController) {
 }
 
 @Composable
-fun DeleteAccountSection(viewModel: SettingsScrennViewModel) {
+fun DeleteAccountSection(
+    viewModel: SettingsScrennViewModel,
+    navController: NavController,
+    context: Context
+) {
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
-            onClick = { /* Acción para eliminar la cuenta */ },
+            onClick = {
+                viewModel.deleteAccount(navController, context)
+
+            },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
         ) {
             Text("Eliminar cuenta")

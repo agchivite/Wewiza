@@ -22,12 +22,20 @@ import com.dam.wewiza_front.viewModels.RegisterScreenViewModel
 import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
 import com.dam.wewiza_front.viewModels.SuggestionScreenViewModel
 import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = AppScreens.SettingsScreen.route) {
+    val auth = FirebaseAuth.getInstance()
+    var startDestination = AppScreens.HomeScreen.route
+
+    if (auth.currentUser ==null){
+        startDestination = AppScreens.WelcomeScreen.route
+    }
+
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(route = AppScreens.WelcomeScreen.route) {
             WelcomeScreen(WelcomeScreenViewModel(), navController)
         }

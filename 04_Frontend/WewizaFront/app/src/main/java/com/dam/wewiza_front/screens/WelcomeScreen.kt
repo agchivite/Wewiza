@@ -43,6 +43,7 @@ import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 
 
@@ -80,6 +81,8 @@ fun WelcomeScreen(
 @Composable
 fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController) {
     val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()
     ) {
