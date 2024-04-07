@@ -33,7 +33,11 @@ fun SuggestionScreen(
     viewModel: SuggestionScreenViewModel,
     navController: NavController
 ){
-    Scaffold() {
+    Scaffold(
+        bottomBar = {
+            Constants.BottomMenu(navController)
+        }
+    ) {
         MyLightTheme {
             SuggestionScreenBodyContent(viewModel, navController)
         }
@@ -46,14 +50,5 @@ fun SuggestionScreenBodyContent(
     navController: NavController
 ) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-        Constants.BottomMenu(navController)
-    }
 }
 

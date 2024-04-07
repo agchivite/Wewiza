@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.constants.Constants.BottomMenu
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
@@ -24,7 +25,11 @@ fun HomeScreen(
     viewModel: HomeScreenViewModel,
     navController: NavController
 ) {
-    Scaffold() {
+    Scaffold(
+        bottomBar = {
+            Constants.BottomMenu(navController)
+        }
+    ) {
 
         MyLightTheme {
             HomeBodyContent(navController, viewModel)
@@ -39,14 +44,5 @@ fun HomeBodyContent(
 ) {
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-        BottomMenu(navController)
-    }
 }
 

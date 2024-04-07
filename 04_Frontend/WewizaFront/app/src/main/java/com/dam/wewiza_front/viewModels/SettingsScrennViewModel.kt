@@ -42,4 +42,11 @@ class SettingsScrennViewModel {
         Log.i("Delete account", "aun no se ha implementado")
 
     }
+
+    fun signOut(navController: NavController, context: Context) {
+        auth.signOut()
+        navController.navigate(AppScreens.WelcomeScreen.route)
+        Toast.makeText(context, "Sesión cerrada correctamente", Toast.LENGTH_LONG).show()
+    }
+
 }

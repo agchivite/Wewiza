@@ -3,40 +3,50 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.navigation.AppScreens
 import com.dam.wewiza_front.ui.theme.MyLightTheme
-import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
 import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,10 +55,16 @@ import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
 fun ProfileScreen(
     viewModel: ProfileScreenViewModel,
     navController: NavController
-){
+) {
     Scaffold(
         topBar = {
-            ProfileTopBar(navController)
+            Box(modifier = Modifier.fillMaxSize()) {
+                ProfileTopBar(navController)
+            }
+
+        },
+        bottomBar = {
+            Constants.BottomMenu(navController)
         }
     ) {
         MyLightTheme {
@@ -62,15 +78,86 @@ fun ProfileScreenBodyContent(
     viewModel: ProfileScreenViewModel,
     navController: NavController
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedImage by remember { mutableStateOf<Int?>(null) }
+    var username by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.weight(1f))
-        Constants.BottomMenu(navController)
+
+        Spacer(modifier = Modifier.height(70.dp))
+        // Foto de perfil redonda
+        ProfilePicture(selectedImage)
+
+        // Botones
+        ProfileButton(
+            text = "Editar Perfil",
+            icon = R.drawable.baseline_edit_24,
+        ) { showDialog = true }
+
+        ProfileButton(
+            text = "Mis Listas",
+            icon = R.drawable.baseline_format_list_bulleted_24,
+        ) { viewModel.navigateToMyListScreen(navController) }
+
+        ProfileButton(
+            text = "Soporte Técnico",
+            icon = R.drawable.baseline_contact_support_24,
+        ) { viewModel.navigateToCustomerSupportScreen(navController) }
+
+
+        if (showDialog) {
+            EditProfileDialog(
+                onDismissRequest = { showDialog = false },
+                onImageClick = { /* Implementar lógica para seleccionar imagen de la galería */ },
+                onConfirmClick = { /* Actualizar el estado con la imagen seleccionada y el nombre de usuario */ },
+                selectedImage = selectedImage,
+                username = username,
+                onUsernameChange = { newUsername -> username = newUsername }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditProfileDialog(
+    onDismissRequest: () -> Unit,
+    onImageClick: () -> Unit,
+    onConfirmClick: () -> Unit,
+    selectedImage: Int?,
+    username: String,
+    onUsernameChange: (String) -> Unit
+) {
+    Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties()) {
+        Column(
+            modifier = Modifier
+                .size(300.dp, 600.dp)
+                .padding(top = 70.dp)
+                .background(MaterialTheme.colorScheme.surface),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(modifier = Modifier.clickable(onClick = onImageClick)) {
+                ProfilePicture(selectedImage)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            TextField(value = username, onValueChange = onUsernameChange)
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onConfirmClick) {
+                Text("Confirmar")
+            }
+            Spacer(modifier = Modifier.height(16.dp)) // Agrega espacio entre los botones
+            Button(onClick = onDismissRequest) { // Botón de cancelar que cierra el diálogo
+                Text("Cancelar")
+            }
+        }
     }
 }
 
@@ -81,7 +168,7 @@ fun ProfileTopBar(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp)
-            .background(color = Color(0xFF7386C0)) // Color de fondo
+            .background(MaterialTheme.colorScheme.surface) // Color de fondo
     ) {
         Text(text = "Wewiza") //Insertar logo de letras
 
@@ -90,10 +177,51 @@ fun ProfileTopBar(navController: NavController) {
             painter = painterResource(id = R.drawable.settings),
             contentDescription = "Settings",
             modifier = Modifier
-                .clickable{ navController.navigate(AppScreens.SettingsScreen.route)}
+                .clickable { navController.navigate(AppScreens.SettingsScreen.route) }
                 .align(Alignment.TopEnd)
                 .padding(end = 16.dp, top = 16.dp) // Margen desde el borde superior y derecho
                 .size(40.dp) // Tamaño del icono
         )
     }
 }
+
+@Composable
+fun ProfilePicture(ImageResource: Int?) {
+
+    var image = ImageResource
+
+    if (image == null) {
+        image = R.drawable.defaultprofilepic
+    }
+
+
+    Image(
+        painter = painterResource(id = R.drawable.defaultprofilepic),
+        contentDescription = null,
+        modifier = Modifier
+            .size(120.dp)
+            .clip(CircleShape)
+            .clickable { },
+        contentScale = ContentScale.Crop
+    )
+}
+
+
+@Composable
+fun ProfileButton(text: String, icon: Int, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(painter = painterResource(id = icon), contentDescription = "profile pic")
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text, color = Color.White)
+        }
+    }
+}
+
+
+
+

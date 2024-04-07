@@ -78,6 +78,12 @@ fun SettingsScreenBodyContent(viewModel: SettingsScrennViewModel, navController:
         AboutUsSection(navController)
         Spacer(modifier = Modifier.height(20.dp))
 
+        Divider(color = Color.Black, thickness = 1.dp)
+
+        Spacer(modifier = Modifier.height(20.dp))
+        SignOutSection(viewModel, context, navController)
+        Spacer(modifier = Modifier.height(20.dp))
+
 
         Divider(color = Color.Black, thickness = 1.dp)
 
@@ -166,5 +172,24 @@ fun DeleteAccountSection(
         }
     }
 
+}
+
+@Composable
+fun SignOutSection(
+    viewModel: SettingsScrennViewModel,
+    context: Context,
+    navController: NavController
+){
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Button(
+            onClick = {
+                viewModel.signOut(navController, context)
+
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+        ) {
+            Text("Cerrar Sesión")
+        }
+    }
 }
 

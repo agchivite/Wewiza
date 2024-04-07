@@ -25,7 +25,12 @@ fun CategoriesScreen(
     viewModel: CategoriesScreenViewModel,
     navController: NavController
 ){
-    Scaffold() {
+    Scaffold(
+
+        bottomBar = {
+            Constants.BottomMenu(navController)
+        }
+    ) {
         MyLightTheme {
             CategoriesScreenBodyContent(viewModel, navController)
         }
@@ -38,13 +43,5 @@ fun CategoriesScreenBodyContent(
     navController: NavController
 ) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-        Constants.BottomMenu(navController)
-    }
+
 }

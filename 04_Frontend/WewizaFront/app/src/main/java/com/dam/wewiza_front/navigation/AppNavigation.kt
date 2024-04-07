@@ -6,8 +6,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dam.wewiza_front.screens.AboutUsScreen
 import com.dam.wewiza_front.screens.CategoriesScreen
+import com.dam.wewiza_front.screens.CustomerSupportScreen
 import com.dam.wewiza_front.screens.HomeScreen
 import com.dam.wewiza_front.screens.LoginScreen
+import com.dam.wewiza_front.screens.MyListsScreen
 import com.dam.wewiza_front.screens.ProfileScreen
 import com.dam.wewiza_front.screens.RegisterScreen
 import com.dam.wewiza_front.screens.SettingsScreen
@@ -15,8 +17,10 @@ import com.dam.wewiza_front.screens.SuggestionScreen
 import com.dam.wewiza_front.screens.WelcomeScreen
 import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
+import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
+import com.dam.wewiza_front.viewModels.MyListsScreenViewModel
 import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
 import com.dam.wewiza_front.viewModels.RegisterScreenViewModel
 import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
@@ -35,7 +39,7 @@ fun AppNavigation() {
         startDestination = AppScreens.WelcomeScreen.route
     }
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(navController = navController, startDestination = AppScreens.ProfileScreen.route) {
         composable(route = AppScreens.WelcomeScreen.route) {
             WelcomeScreen(WelcomeScreenViewModel(), navController)
         }
@@ -63,5 +67,12 @@ fun AppNavigation() {
         composable(route = AppScreens.SettingsScreen.route){
             SettingsScreen(SettingsScrennViewModel(), navController)
         }
+        composable(route = AppScreens.MyListScreen.route){
+            MyListsScreen(MyListsScreenViewModel(), navController)
+        }
+        composable(route = AppScreens.CustomerSupportScreen.route){
+            CustomerSupportScreen(CustomerSupportScreenViewModel(), navController)
+        }
+
     }
 }

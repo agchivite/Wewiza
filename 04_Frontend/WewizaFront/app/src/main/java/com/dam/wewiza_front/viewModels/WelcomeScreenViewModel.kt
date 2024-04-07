@@ -80,7 +80,7 @@ class WelcomeScreenViewModel : ViewModel() {
 
 
     /**
-     * NO deberia estar aqui esta funcion, la puse para una guarrada con el firebase, asi que XD
+     * NO deberia estar aqui esta funcion, la puse para una guarrada con el firebase
      */
     fun addToFirestore() {
         val db = FirebaseFirestore.getInstance()
