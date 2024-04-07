@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
+import com.dam.wewiza_front.models.Profile
+import com.dam.wewiza_front.models.ShoppingList
 import com.dam.wewiza_front.models.Store
 import com.dam.wewiza_front.models.UsersGroceryList
 import com.dam.wewiza_front.navigation.AppScreens
@@ -25,6 +27,8 @@ import java.util.UUID
 
 class WelcomeScreenViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
+    val db = FirebaseFirestore.getInstance()
+
 
     fun signInWithGoogleCredential(credential: AuthCredential , navController: NavController) {
         viewModelScope.launch {
@@ -32,6 +36,8 @@ class WelcomeScreenViewModel : ViewModel() {
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
+                            createUserInFirestore()
+
                             Log.i("Login", "Usuario logueado con google")
                             navController.navigate(route = AppScreens.HomeScreen.route)
                         }
@@ -45,11 +51,37 @@ class WelcomeScreenViewModel : ViewModel() {
         }
     }
 
+    private fun createUserInFirestore() {
+        val user = auth.currentUser
+        val uid = user!!.uid
+
+        // Comprobar si ya existe un perfil con el mismo uid
+        db.collection("profiles").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    Log.d("Firestore", "Profile already exists!")
+                } else {
+                    val profile = Profile(
+                        id = uid,
+                        name = user.displayName ?: "DefaultUserName",
+                        imageUrl = user.photoUrl?.toString() ?: "",
+                        reviews = 0,
+                        shoppingListsList = emptyList<ShoppingList>(),
+                        recentSearches = emptyList<String>()
+                    )
+                    db.collection("profiles").document(uid).set(profile)
+                        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully written!") }
+                        .addOnFailureListener { e -> Log.w("Firestore", "Error writing document", e) }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firestore", "Error checking document", e)
+            }
+    }
 
     fun loginWithGoogle(
         context: Context,
         launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-        navController: NavController,
         ) {
 
 

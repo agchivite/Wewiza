@@ -39,7 +39,7 @@ fun AppNavigation() {
         startDestination = AppScreens.WelcomeScreen.route
     }
 
-    NavHost(navController = navController, startDestination = AppScreens.ProfileScreen.route) {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(route = AppScreens.WelcomeScreen.route) {
             WelcomeScreen(WelcomeScreenViewModel(), navController)
         }

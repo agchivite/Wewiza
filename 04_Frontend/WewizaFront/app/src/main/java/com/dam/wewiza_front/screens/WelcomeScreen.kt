@@ -204,7 +204,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
 
                 Button(
                     onClick = {
-                        viewModel.loginWithGoogle(context, launcher,navController)
+                        viewModel.loginWithGoogle(context, launcher)
                     },
                     modifier = Modifier
                         .height(40.dp)

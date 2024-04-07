@@ -17,15 +17,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -37,17 +36,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.navigation.AppScreens
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -78,9 +80,13 @@ fun ProfileScreenBodyContent(
     viewModel: ProfileScreenViewModel,
     navController: NavController
 ) {
+
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser
+
     var showDialog by remember { mutableStateOf(false) }
-    var selectedImage by remember { mutableStateOf<Int?>(null) }
-    var username by remember { mutableStateOf("") }
+    var selectedImage by remember { mutableStateOf(user?.photoUrl?.toString()) }
+    var username by remember { mutableStateOf(user?.displayName ?: "") }
 
     Column(
         modifier = Modifier
@@ -92,8 +98,21 @@ fun ProfileScreenBodyContent(
     ) {
 
         Spacer(modifier = Modifier.height(70.dp))
-        // Foto de perfil redonda
-        ProfilePicture(selectedImage)
+
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ProfilePicture(selectedImage)
+            Spacer(modifier = Modifier.height(8.dp))
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shape = MaterialTheme.shapes.medium,
+            ) {
+                Text(text = username, modifier = Modifier.padding(16.dp))
+            }
+        }
 
         // Botones
         ProfileButton(
@@ -131,7 +150,7 @@ fun EditProfileDialog(
     onDismissRequest: () -> Unit,
     onImageClick: () -> Unit,
     onConfirmClick: () -> Unit,
-    selectedImage: Int?,
+    selectedImage: String?,
     username: String,
     onUsernameChange: (String) -> Unit
 ) {
@@ -186,17 +205,17 @@ fun ProfileTopBar(navController: NavController) {
 }
 
 @Composable
-fun ProfilePicture(ImageResource: Int?) {
-
-    var image = ImageResource
-
-    if (image == null) {
-        image = R.drawable.defaultprofilepic
-    }
-
+fun ProfilePicture(imageUrl: String?) {
+    val painter: Painter = rememberImagePainter(
+        data = imageUrl,
+        builder = {
+            crossfade(true)
+            placeholder(R.drawable.defaultprofilepic)
+        }
+    )
 
     Image(
-        painter = painterResource(id = R.drawable.defaultprofilepic),
+        painter = painter,
         contentDescription = null,
         modifier = Modifier
             .size(120.dp)
@@ -205,7 +224,6 @@ fun ProfilePicture(ImageResource: Int?) {
         contentScale = ContentScale.Crop
     )
 }
-
 
 @Composable
 fun ProfileButton(text: String, icon: Int, onClick: () -> Unit) {
