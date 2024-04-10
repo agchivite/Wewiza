@@ -6,9 +6,12 @@ import android.widget.Toast
 import androidx.navigation.NavController
 import com.dam.wewiza_front.navigation.AppScreens
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 
 class SettingsScrennViewModel {
     private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
     fun deleteAccount(navController: NavController, context: Context) {
         val currentUser = auth.currentUser
 
@@ -19,7 +22,7 @@ class SettingsScrennViewModel {
                         if (task.isSuccessful) {
                             navController.navigate(AppScreens.WelcomeScreen.route)
                             Toast.makeText(context, "La cuenta se ha eliminado correctamente", Toast.LENGTH_LONG).show()
-                            deleteDataFromFirebase()
+                            deleteDataFromFirebase(currentUser)
                         } else {
                             Toast.makeText(context, "No se ha podido eliminar la cuenta", Toast.LENGTH_LONG).show()
                         }
@@ -31,15 +34,19 @@ class SettingsScrennViewModel {
         }
     }
 
-    private fun deleteDataFromFirebase() {
-
+    private fun deleteDataFromFirebase(currentUser: FirebaseUser) {
         /*
         "Hay que hacer que se eliminen todos los elementos de la collecion de listas"
                 " y datos del perfil, segun el id de este usuario. CurrentUser.uid"
 
          */
 
-        Log.i("Delete account", "aun no se ha implementado")
+        val email = currentUser.email
+        db.collection("profiles").document(email!!).delete()
+            .addOnCompleteListener {
+                Log.d("Delete account", "Profile data deleted")
+            }
+
 
     }
 

@@ -53,23 +53,23 @@ class WelcomeScreenViewModel : ViewModel() {
 
     private fun createUserInFirestore() {
         val user = auth.currentUser
-        val uid = user!!.uid
+        val email = user!!.email
 
         // Comprobar si ya existe un perfil con el mismo uid
-        db.collection("profiles").document(uid).get()
+        db.collection("profiles").document(email!!).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     Log.d("Firestore", "Profile already exists!")
                 } else {
                     val profile = Profile(
-                        id = uid,
+                        email = email,
                         name = user.displayName ?: "DefaultUserName",
                         imageUrl = user.photoUrl?.toString() ?: "",
                         reviews = 0,
                         shoppingListsList = emptyList<ShoppingList>(),
                         recentSearches = emptyList<String>()
                     )
-                    db.collection("profiles").document(uid).set(profile)
+                    db.collection("profiles").document(email).set(profile)
                         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully written!") }
                         .addOnFailureListener { e -> Log.w("Firestore", "Error writing document", e) }
                 }

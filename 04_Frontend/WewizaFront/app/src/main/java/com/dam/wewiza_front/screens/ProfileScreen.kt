@@ -49,7 +49,6 @@ import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.navigation.AppScreens
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
-import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -81,12 +80,19 @@ fun ProfileScreenBodyContent(
     navController: NavController
 ) {
 
-    val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
+
+    var isLoading = viewModel.isLoading.value
+    val profile = viewModel.profile.value
+
+    while (isLoading) {
+        if (!viewModel.isLoading.value) {
+            isLoading= false
+        }
+    }
 
     var showDialog by remember { mutableStateOf(false) }
-    var selectedImage by remember { mutableStateOf(user?.photoUrl?.toString()) }
-    var username by remember { mutableStateOf(user?.displayName ?: "") }
+    var selectedImage by remember { mutableStateOf(profile?.imageUrl) }
+    var username by remember { mutableStateOf(profile?.name) }
 
     Column(
         modifier = Modifier
@@ -110,7 +116,7 @@ fun ProfileScreenBodyContent(
                 color = MaterialTheme.colorScheme.surface,
                 shape = MaterialTheme.shapes.medium,
             ) {
-                Text(text = username, modifier = Modifier.padding(16.dp))
+                Text(text = username ?: "DefaultUsername", modifier = Modifier.padding(16.dp))
             }
         }
 
@@ -137,10 +143,11 @@ fun ProfileScreenBodyContent(
                 onImageClick = { /* Implementar lógica para seleccionar imagen de la galería */ },
                 onConfirmClick = { /* Actualizar el estado con la imagen seleccionada y el nombre de usuario */ },
                 selectedImage = selectedImage,
-                username = username,
+                username = username ?: "DefaultUsername",
                 onUsernameChange = { newUsername -> username = newUsername }
             )
         }
+
     }
 }
 
@@ -206,13 +213,19 @@ fun ProfileTopBar(navController: NavController) {
 
 @Composable
 fun ProfilePicture(imageUrl: String?) {
-    val painter: Painter = rememberImagePainter(
-        data = imageUrl,
-        builder = {
-            crossfade(true)
-            placeholder(R.drawable.defaultprofilepic)
-        }
-    )
+
+    val defaultImage = painterResource(id = R.drawable.defaultprofilepic)
+    val painter: Painter = if (imageUrl.isNullOrEmpty()) {
+        defaultImage
+    } else {
+        rememberImagePainter(
+            data = imageUrl,
+            builder = {
+                crossfade(true)
+                placeholder(R.drawable.defaultprofilepic)
+            }
+        )
+    }
 
     Image(
         painter = painter,

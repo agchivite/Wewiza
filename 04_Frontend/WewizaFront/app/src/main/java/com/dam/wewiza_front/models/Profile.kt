@@ -1,10 +1,12 @@
 package com.dam.wewiza_front.models
 
+import androidx.compose.runtime.MutableState
+
 data class Profile(
-    val id: String,
-    val name: String,
-    val imageUrl: String,
-    val reviews: Int,
-    val shoppingListsList: List<ShoppingList>,
-    val recentSearches: List<String> //List of the uuid of the last 5 searches
-    )
+    var email: String? = null,
+    var name: String? = null,
+    var imageUrl: String? = null,
+    var reviews: Int? = null,
+    var shoppingListsList: List<ShoppingList>? = null,
+    var recentSearches: List<String>? = null //List of the uuid of the last 5 searches
+)
