@@ -1,4 +1,6 @@
 package com.dam.wewiza_front.viewModels
 
-class CategoriesScreenViewModel {
+import androidx.lifecycle.ViewModel
+
+class CategoriesScreenViewModel: ViewModel() {
 }

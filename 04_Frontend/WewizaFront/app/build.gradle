@@ -94,5 +94,9 @@ dependencies {
     // Coil
     implementation("io.coil-kt:coil-compose:1.4.0")
 
+    //Koin
+    implementation "io.insert-koin:koin-android:3.1.2"
+
+
 
 }

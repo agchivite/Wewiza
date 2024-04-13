@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.dam.wewiza_front.MainActivity
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.navigation.AppScreens
 import com.dam.wewiza_front.ui.theme.MyLightTheme
@@ -43,21 +44,26 @@ import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
 @Composable
 fun SettingsScreen(
     viewModel: SettingsScrennViewModel,
-    navController: NavController
+    navController: NavController,
+    mainActivity: MainActivity
 ) {
 
     Scaffold(topBar = {
         Constants.TopBarWithLogo(navController)
     }) {
         MyLightTheme {
-            SettingsScreenBodyContent(viewModel, navController)
+            SettingsScreenBodyContent(viewModel, navController, mainActivity)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreenBodyContent(viewModel: SettingsScrennViewModel, navController: NavController) {
+fun SettingsScreenBodyContent(
+    viewModel: SettingsScrennViewModel,
+    navController: NavController,
+    mainActivity: MainActivity
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,7 +87,7 @@ fun SettingsScreenBodyContent(viewModel: SettingsScrennViewModel, navController:
         Divider(color = Color.Black, thickness = 1.dp)
 
         Spacer(modifier = Modifier.height(20.dp))
-        SignOutSection(viewModel, context, navController)
+        SignOutSection(viewModel, context, navController, mainActivity)
         Spacer(modifier = Modifier.height(20.dp))
 
 
@@ -178,12 +184,13 @@ fun DeleteAccountSection(
 fun SignOutSection(
     viewModel: SettingsScrennViewModel,
     context: Context,
-    navController: NavController
+    navController: NavController,
+    mainActivity: MainActivity
 ){
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             onClick = {
-                viewModel.signOut(navController, context)
+                viewModel.signOut(navController, context, mainActivity)
 
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Red)

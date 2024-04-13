@@ -1,4 +1,6 @@
 package com.dam.wewiza_front.viewModels
 
-class SuggestionScreenViewModel {
+import androidx.lifecycle.ViewModel
+
+class SuggestionScreenViewModel: ViewModel() {
 }

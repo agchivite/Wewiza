@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.dam.wewiza_front.MainActivity
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.Profile
@@ -40,6 +41,7 @@ class WelcomeScreenViewModel : ViewModel() {
 
                             Log.i("Login", "Usuario logueado con google")
                             navController.navigate(route = AppScreens.HomeScreen.route)
+
                         }
                     }
                     .addOnFailureListener {

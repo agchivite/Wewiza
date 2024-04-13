@@ -1,4 +1,6 @@
 package com.dam.wewiza_front.viewModels
 
-class MyListsScreenViewModel {
+import androidx.lifecycle.ViewModel
+
+class MyListsScreenViewModel: ViewModel() {
 }

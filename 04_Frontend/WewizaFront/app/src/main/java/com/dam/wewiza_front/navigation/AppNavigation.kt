@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.dam.wewiza_front.MainActivity
 import com.dam.wewiza_front.screens.AboutUsScreen
 import com.dam.wewiza_front.screens.CategoriesScreen
 import com.dam.wewiza_front.screens.CustomerSupportScreen
@@ -30,7 +31,20 @@ import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    welcomeScreenViewModel: WelcomeScreenViewModel,
+    homeScreenViewModel: HomeScreenViewModel,
+    loginScreenViewModel: LoginScreenViewModel,
+    registerScreenViewModel: RegisterScreenViewModel,
+    aboutUsScreenViewModel: AboutUsScreenViewModel,
+    suggestionScreenViewModel: SuggestionScreenViewModel,
+    categoriesScreenViewModel: CategoriesScreenViewModel,
+    profileScreenViewModel: ProfileScreenViewModel?,
+    settingsScreenViewModel: SettingsScrennViewModel,
+    myListsScreenViewModel: MyListsScreenViewModel,
+    customerSupportScreenViewModel: CustomerSupportScreenViewModel,
+    mainActivity: MainActivity
+) {
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
     var startDestination = AppScreens.HomeScreen.route
@@ -41,38 +55,41 @@ fun AppNavigation() {
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(route = AppScreens.WelcomeScreen.route) {
-            WelcomeScreen(WelcomeScreenViewModel(), navController)
+            WelcomeScreen(welcomeScreenViewModel, navController)
         }
         composable(route = AppScreens.HomeScreen.route) {
-            HomeScreen(HomeScreenViewModel(), navController)
+            HomeScreen(homeScreenViewModel, navController)
         }
         composable(route = AppScreens.LoginScreen.route) {
-            LoginScreen(LoginScreenViewModel(), navController = navController)
+            LoginScreen(loginScreenViewModel, navController)
         }
         composable(route = AppScreens.RegisterScreen.route) {
-            RegisterScreen(RegisterScreenViewModel(), navController = navController)
+            RegisterScreen(registerScreenViewModel, navController)
         }
         composable(route = AppScreens.AboutUsScreen.route) {
-            AboutUsScreen(AboutUsScreenViewModel(), navController)
+            AboutUsScreen(aboutUsScreenViewModel, navController)
         }
         composable(route = AppScreens.SuggestionScreen.route) {
-            SuggestionScreen(SuggestionScreenViewModel(), navController)
+            SuggestionScreen(suggestionScreenViewModel, navController)
         }
         composable(route = AppScreens.CategoriesScreen.route) {
-            CategoriesScreen(CategoriesScreenViewModel(), navController)
+            CategoriesScreen(categoriesScreenViewModel, navController)
         }
         composable(route = AppScreens.ProfileScreen.route) {
-            ProfileScreen(ProfileScreenViewModel(), navController)
+            if (profileScreenViewModel != null) {
+                ProfileScreen(profileScreenViewModel, navController)
+            } else {
+                WelcomeScreen(welcomeScreenViewModel, navController)
+            }
         }
         composable(route = AppScreens.SettingsScreen.route){
-            SettingsScreen(SettingsScrennViewModel(), navController)
+            SettingsScreen(settingsScreenViewModel, navController, mainActivity)
         }
         composable(route = AppScreens.MyListScreen.route){
-            MyListsScreen(MyListsScreenViewModel(), navController)
+            MyListsScreen(myListsScreenViewModel, navController)
         }
         composable(route = AppScreens.CustomerSupportScreen.route){
-            CustomerSupportScreen(CustomerSupportScreenViewModel(), navController)
+            CustomerSupportScreen(customerSupportScreenViewModel, navController)
         }
-
     }
 }
