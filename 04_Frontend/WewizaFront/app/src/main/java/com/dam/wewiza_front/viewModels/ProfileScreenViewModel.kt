@@ -1,6 +1,8 @@
 package com.dam.wewiza_front.viewModels
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -71,6 +73,35 @@ class ProfileScreenViewModel() : ViewModel() {
         super.onCleared()
         auth.removeAuthStateListener(authStateListener) //With this part of the code we remove the listener when the ViewModel is destroyed
     }
+
+    fun pickImageFromGallery() {
+
+    }
+
+    fun updateProfileDataOnFiresbase(selectedImage: String?, username: String?, context: Context) {
+        val user = auth.currentUser
+        if (user != null) {
+            val profileRef = db.collection("profiles").document(user.email.toString())
+            val profileUpdates = hashMapOf<String, Any>()
+            if (selectedImage != null) {
+                profileUpdates["imageUrl"] = selectedImage
+            }
+            if (username != null) {
+                profileUpdates["name"] = username
+            }
+            profileRef.update(profileUpdates)
+                .addOnSuccessListener {
+                    Log.d("Profile", "Profile updated")
+                    Toast.makeText(context, "Perfil actualizado correctamente", Toast.LENGTH_LONG).show()
+                    loadProfileData()
+                }
+                .addOnFailureListener { e ->
+                    Log.w("Profile", "Error updating profile", e)
+                    // Aquí puedes manejar el error de la actualización del perfil
+                }
+        }
+    }
+
 
 }
 

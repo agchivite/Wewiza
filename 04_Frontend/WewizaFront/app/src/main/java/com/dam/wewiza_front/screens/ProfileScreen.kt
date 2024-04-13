@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -79,14 +80,14 @@ fun ProfileScreenBodyContent(
     viewModel: ProfileScreenViewModel,
     navController: NavController
 ) {
-
+    val context = LocalContext.current
 
     var isLoading = viewModel.isLoading.value
     val profile = viewModel.profile.value
 
     while (isLoading) {
         if (!viewModel.isLoading.value) {
-            isLoading= false
+            isLoading = false
         }
     }
 
@@ -140,8 +141,11 @@ fun ProfileScreenBodyContent(
         if (showDialog) {
             EditProfileDialog(
                 onDismissRequest = { showDialog = false },
-                onImageClick = { /* Implementar lógica para seleccionar imagen de la galería */ },
-                onConfirmClick = { /* Actualizar el estado con la imagen seleccionada y el nombre de usuario */ },
+                onImageClick = { TODO("Need to implement the imagen picker function") },
+                onConfirmClick = {
+                    viewModel.updateProfileDataOnFiresbase(selectedImage, username, context)
+                    showDialog = false
+                },
                 selectedImage = selectedImage,
                 username = username ?: "DefaultUsername",
                 onUsernameChange = { newUsername -> username = newUsername }
