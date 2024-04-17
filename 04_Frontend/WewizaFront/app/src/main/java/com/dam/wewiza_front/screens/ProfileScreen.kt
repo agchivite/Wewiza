@@ -3,6 +3,11 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.dam.wewiza_front.R
@@ -95,6 +102,12 @@ fun ProfileScreenBodyContent(
     var selectedImage by remember { mutableStateOf(profile?.imageUrl) }
     var username by remember { mutableStateOf(profile?.name) }
 
+
+
+    // Save original values to restore them if the user cancels the dialog
+    val originalSelectedImage by rememberSaveable { mutableStateOf(selectedImage) }
+    val originalUsername by rememberSaveable { mutableStateOf(username) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -111,7 +124,9 @@ fun ProfileScreenBodyContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ProfilePicture(selectedImage)
+            ProfilePicture(selectedImage, context, false) {
+                Toast.makeText(context, "Selecciona la opción de editar", Toast.LENGTH_LONG).show()
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Surface(
                 color = MaterialTheme.colorScheme.surface,
@@ -140,15 +155,21 @@ fun ProfileScreenBodyContent(
 
         if (showDialog) {
             EditProfileDialog(
-                onDismissRequest = { showDialog = false },
-                onImageClick = { TODO("Need to implement the imagen picker function") },
+                onDismissRequest = {
+                    //restoring original values of name and profile pic
+                    selectedImage = originalSelectedImage
+                    username = originalUsername
+                    showDialog = false
+                },
                 onConfirmClick = {
-                    viewModel.updateProfileDataOnFiresbase(selectedImage, username, context)
+                    viewModel.updateProfileDataOnFiresbase(selectedImage!!.toUri(), username, context)
                     showDialog = false
                 },
                 selectedImage = selectedImage,
+                onSelectedImageChange = { newSelectedImage -> selectedImage = newSelectedImage },
                 username = username ?: "DefaultUsername",
-                onUsernameChange = { newUsername -> username = newUsername }
+                onUsernameChange = { newUsername -> username = newUsername },
+                context = context
             )
         }
 
@@ -159,12 +180,15 @@ fun ProfileScreenBodyContent(
 @Composable
 fun EditProfileDialog(
     onDismissRequest: () -> Unit,
-    onImageClick: () -> Unit,
     onConfirmClick: () -> Unit,
     selectedImage: String?,
+    onSelectedImageChange: (String) -> Unit,
     username: String,
-    onUsernameChange: (String) -> Unit
+    onUsernameChange: (String) -> Unit,
+    context: Context
 ) {
+
+
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties()) {
         Column(
             modifier = Modifier
@@ -174,8 +198,10 @@ fun EditProfileDialog(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(modifier = Modifier.clickable(onClick = onImageClick)) {
-                ProfilePicture(selectedImage)
+            Box(modifier = Modifier.clickable(onClick = { })) {
+                ProfilePicture(selectedImage, context, true) { newSelectedImage ->
+                    onSelectedImageChange(newSelectedImage)
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
             TextField(value = username, onValueChange = onUsernameChange)
@@ -216,7 +242,21 @@ fun ProfileTopBar(navController: NavController) {
 }
 
 @Composable
-fun ProfilePicture(imageUrl: String?) {
+fun ProfilePicture(
+    imageUrl: String?,
+    context: Context,
+    isEditing: Boolean,
+    onImageSelected: (String) -> Unit
+) {
+
+    val pickImageContract =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
+            // Aquí puedes manejar el Uri de la imagen seleccionada
+            // Por ejemplo, puedes convertirlo a una cadena y asignarlo a selectedImage
+            uri?.let {
+                onImageSelected(it.toString())
+            }
+        }
 
     val defaultImage = painterResource(id = R.drawable.defaultprofilepic)
     val painter: Painter = if (imageUrl.isNullOrEmpty()) {
@@ -237,9 +277,19 @@ fun ProfilePicture(imageUrl: String?) {
         modifier = Modifier
             .size(120.dp)
             .clip(CircleShape)
-            .clickable { },
-        contentScale = ContentScale.Crop
-    )
+            .clickable {
+                Toast
+                    .makeText(context, "Imagen clickeada", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            .clickable {
+                if (isEditing) {
+                    pickImageContract.launch("image/*")
+                }
+            },
+        contentScale = ContentScale.Crop,
+
+        )
 }
 
 @Composable
