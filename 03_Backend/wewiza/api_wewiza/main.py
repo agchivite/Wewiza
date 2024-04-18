@@ -61,7 +61,7 @@ def get_categories():
 
 @app.get("/get_all_products")
 def get_all_products():
-    response = requests.get("http://api_market_02:8082/get_all_products")
+    response = requests.get("http://api_market_01:8081/get_all_products")
     message = "Desde Wewiza: "
     print(message)
     print(response.json())
