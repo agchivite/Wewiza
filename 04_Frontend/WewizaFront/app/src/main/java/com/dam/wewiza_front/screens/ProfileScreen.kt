@@ -162,7 +162,7 @@ fun ProfileScreenBodyContent(
                     showDialog = false
                 },
                 onConfirmClick = {
-                    viewModel.updateProfileDataOnFiresbase(selectedImage!!.toUri(), username, context)
+                    viewModel.updateProfileDataOnFiresbase(originalSelectedImage?.toUri(), selectedImage?.toUri(), username, context)
                     showDialog = false
                 },
                 selectedImage = selectedImage,

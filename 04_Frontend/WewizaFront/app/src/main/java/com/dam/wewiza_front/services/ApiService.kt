@@ -10,7 +10,7 @@ interface ApiService {
 
     //http://wewiza.ddns.net/get_categories/
     @GET("get_categories")
-    suspend fun getPJById(): Categories
+    suspend fun getAllCategories(): Categories
 
 }
 

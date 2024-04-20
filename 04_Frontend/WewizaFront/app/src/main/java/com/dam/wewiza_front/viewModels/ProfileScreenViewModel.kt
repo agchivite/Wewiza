@@ -78,23 +78,19 @@ class ProfileScreenViewModel() : ViewModel() {
         auth.removeAuthStateListener(authStateListener) //With this part of the code we remove the listener when the ViewModel is destroyed
     }
 
-    fun pickImageFromGallery() {
-
-    }
-
-    fun updateProfileDataOnFiresbase(selectedImageUri: Uri?, username: String?, context: Context) {
+    fun updateProfileDataOnFiresbase(originalImageUri: Uri?, selectedImageUri: Uri?, username: String?, context: Context) {
         val user = auth.currentUser
         if (user != null) {
             val profileRef = db.collection("profiles").document(user.email.toString())
             val profileUpdates = hashMapOf<String, Any>()
             if (username != null) {
                 profileUpdates["name"] = username
-            } 
+            }
 
-            // Si se seleccionó una imagen, subirla a Firebase Storage
-            if (selectedImageUri != null) {
+            // Si se seleccionó una imagen y es diferente de la original, subirla a Firebase Storage
+            if (selectedImageUri != null && selectedImageUri != originalImageUri) {
                 val storageRef = Firebase.storage.reference
-                val imageRef = storageRef.child("images/${user.uid}")
+                val imageRef = storageRef.child("images/${user.email}")
                 val uploadTask = imageRef.putFile(selectedImageUri)
 
                 uploadTask.addOnSuccessListener {
@@ -102,16 +98,15 @@ class ProfileScreenViewModel() : ViewModel() {
                     imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                         // Guardar la URL de descarga en Firestore
                         profileUpdates["imageUrl"] = downloadUri.toString()
-                        updateProfileInFirestore(profileRef, profileUpdates, context)
                     }
                 }.addOnFailureListener { e ->
                     Log.w("Profile", "Error uploading image", e)
-                    // Aquí puedes manejar el error de la subida de la imagen
+                    Toast.makeText(context, "Error al subir la imagen", Toast.LENGTH_LONG).show()
                 }
-            } else {
-                // Si no se seleccionó una imagen, simplemente actualizar el perfil en Firestore
-                updateProfileInFirestore(profileRef, profileUpdates, context)
             }
+
+            // Actualizar el perfil en Firestore
+            updateProfileInFirestore(profileRef, profileUpdates, context)
         }
     }
 

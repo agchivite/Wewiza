@@ -6,5 +6,5 @@ data class Category(
 )
 
 data class Categories(
-    val Categories : List<Category>
+    val categories : List<Category>
 )
