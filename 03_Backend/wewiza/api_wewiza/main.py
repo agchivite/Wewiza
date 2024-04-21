@@ -15,8 +15,10 @@ database_manager = DatabaseManager(CONNECTION_MONGO, DATABASE_NAME)
 product_repository = ProductLikesRepository(database_manager, COLLECTION_NAME)
 product_service = ProductLikesService(product_repository)
 
+# https://127.0.0.1 -> To call API
 
-@app.get("/get_categories")
+
+@app.get("/categories")
 def get_categories():
     """
     {"id": "cuidado_del_cabello", "name": "Cuidado del cabello"},
@@ -59,32 +61,27 @@ def get_categories():
     }
 
 
-@app.get("/get_all_products")
+@app.get("/products")
 def get_all_products():
-    response = requests.get("http://api_market_01:8081/get_all_products")
-    message = "Desde Wewiza: "
-    print(message)
-    print(response.json())
+    response_products_market_01_json_list = requests.get(
+        "http://api_market_01:8081/products"
+    ).json()
 
-    return {message: response.json()}
+    response_products_market_02_json_list = requests.get(
+        "http://api_market_02:8082/products"
+    ).json()
 
+    # TODO: add market 03 = carrefour
+    response_products_market_03_json_list = "not implemented"
 
-@app.get("/saludo")
-def enviar_saludo():
-    return {"mensaje": "¡Hola! Bienvenido desde el Contenedor Wewiza"}
-
-
-@app.get("/test")
-def enviar_saludo():
-    response = requests.get("http://api_market_02:8082/saludo")
-    message = "Desde Wewiza: "
-    print(message)
-    print(response.json())
-
-    return {message: response.json()}
+    return {
+        "mercadona": response_products_market_01_json_list,
+        "ahorramas": response_products_market_02_json_list,
+        "carrefour": response_products_market_03_json_list,
+    }
 
 
-@app.get("/update_database_from_markets")
+@app.get("/update_likes_database")
 def update_database():
     response_products_market_01_json_list = requests.get(
         "http://api_market_01:8081/get_all_products"
@@ -92,6 +89,6 @@ def update_database():
 
     product_service.insert_products_json_list(response_products_market_01_json_list)
 
-    # TODO: market_02 duplicate the market_01
+    # TODO: market_02 and market_03
 
-    return {"message": "Database updated"}
+    return {"message": "Database likes updated"}

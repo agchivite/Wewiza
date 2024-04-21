@@ -19,7 +19,7 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 
 
-@app.get("/get_all_products")
+@app.get("/products")
 def get_all_products():
     return product_service.get_all_products()
 

@@ -12,6 +12,7 @@ class Product:
         url: str,
         store_name: str,
         store_image_url: str,
+        date_created: str,
     ):
         self.uuid = uuid
         self.category_id = category_id
@@ -24,6 +25,7 @@ class Product:
         self.url = url
         self.store_name = store_name
         self.store_image_url = store_image_url
+        self.date_created = date_created
 
     def dict(self):
         return {
@@ -38,6 +40,7 @@ class Product:
             "url": self.url,
             "store_name": self.store_name,
             "store_image_url": self.store_image_url,
+            "date_created": self.date_created,
         }
 
     def __str__(self):

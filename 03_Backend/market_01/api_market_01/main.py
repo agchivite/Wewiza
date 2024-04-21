@@ -19,7 +19,7 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 
 
-@app.get("/get_all_products")
+@app.get("/products")
 def get_all_products():
     return product_service.get_all_products()
 
@@ -29,18 +29,3 @@ async def insert_new_scrapped_product(request: Request):
     data = await request.json()
     result = product_service.create_product_to_mongo_recieving_json(data)
     return {"result": result}
-
-
-@app.get("/saludo")
-def enviar_saludo():
-    return {"mensaje": "¡Hola! Bienvenido desde el Contenedor Market-01"}
-
-
-@app.get("/test")
-def test():
-    response = requests.get("http://api_wewiza:8080/saludo")
-    message = "Desde Market 1: "
-    print(message)
-    print(response.json())
-
-    return {message: response.json()}

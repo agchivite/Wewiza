@@ -8,7 +8,6 @@ api_market_01/src/database/database_manager.py
 api_market_01/src/models/__init__.py
 api_market_01/src/models/category.py
 api_market_01/src/models/product.py
-api_market_01/src/models/product_first.py
 api_market_01/src/repositories/__init__.py
 api_market_01/src/repositories/product_repository.py
 api_market_01/src/schemas/__init__.py
