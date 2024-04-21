@@ -82,12 +82,12 @@ class ScrappingService:
 
                             if product_model.name != "[no-data]":
                                 # TODO: change when need it
-                                """
+
                                 self.send_to_wewiza_server(
                                     product_model, category_id_wewiza
                                 )
-                                """
-                                self.send_to_localhost_mongo(product_model)
+
+                                # self.send_to_localhost_mongo(product_model)
                             else:
                                 print("Can not retrieve product data.")
 
