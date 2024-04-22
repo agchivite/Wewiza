@@ -72,7 +72,7 @@ def get_all_products():
     ).json()
 
     # TODO: add market 03 = carrefour
-    response_products_market_03_json_list = "not implemented"
+    response_products_market_03_json_list = list()
 
     return {
         "mercadona": response_products_market_01_json_list,
