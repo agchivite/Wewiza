@@ -56,6 +56,16 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def get_all_products_by_category_id(self, category_id):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find({"category_id": category_id}))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def delete_product(self, query):
         try:
             database = self.db_manager.connect_database()

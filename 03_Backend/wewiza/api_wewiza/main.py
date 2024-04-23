@@ -163,6 +163,26 @@ def get_all_products():
     }
 
 
+@app.get("/products/{category_id}")
+def get_products_by_category(category_id: str):
+    response_products_market_01_json_list = requests.get(
+        "http://api_market_01:8081/products/" + category_id
+    ).json()
+
+    response_products_market_02_json_list = requests.get(
+        "http://api_market_02:8082/products/" + category_id
+    ).json()
+
+    # TODO: add market 03 = carrefour
+    response_products_market_03_json_list = list()
+
+    return {
+        "mercadona": response_products_market_01_json_list,
+        "ahorramas": response_products_market_02_json_list,
+        "carrefour": response_products_market_03_json_list,
+    }
+
+
 @app.get("/update_likes_database")
 def update_database():
     response_products_market_01_json_list = requests.get(
