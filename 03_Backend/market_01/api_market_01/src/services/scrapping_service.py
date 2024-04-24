@@ -7,6 +7,7 @@ from api_market_01.src.services.product_service import ProductService
 import re
 import os
 import requests
+from datetime import datetime
 
 
 class ScrappingService:
@@ -66,6 +67,7 @@ class ScrappingService:
                             )
 
                             if product_model.name != "[no-data]":
+                                # TODO: change when need it
                                 self.send_to_wewiza_server(product_model, id_category)
                                 # self.send_to_localhost_mongo(product_model)
 
@@ -210,6 +212,10 @@ class ScrappingService:
 
             store_name = "Mercadona"
             store_image_url = "https://mirasol-centre.com/nousite/wp-content/uploads/2017/05/logo-Mercadona.png"
+
+            current_date = datetime.now()
+            current_date_str = current_date.strftime("%Y-%m-%d %H:%M:%S")
+
             product = Product(
                 str(uuid.uuid4()),
                 id_category,
@@ -222,6 +228,7 @@ class ScrappingService:
                 url,
                 store_name,
                 store_image_url,
+                current_date_str,
             )
         except AttributeError as e:
             print(f"Error obtaining data from product: {e}")
@@ -238,6 +245,7 @@ class ScrappingService:
                 0,
                 no_data,
                 0.0,
+                no_data,
                 no_data,
                 no_data,
                 no_data,

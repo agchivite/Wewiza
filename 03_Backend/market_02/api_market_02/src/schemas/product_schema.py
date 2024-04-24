@@ -14,6 +14,7 @@ product_schema = {
             "url",
             "store_name",
             "store_image_url",
+            "date_created",
         ],
         "properties": {
             "uuid": {
@@ -57,6 +58,10 @@ product_schema = {
                 "description": "must be a string and is required",
             },
             "store_image_url": {
+                "bsonType": "string",
+                "description": "must be a string and is required",
+            },
+            "date_created": {
                 "bsonType": "string",
                 "description": "must be a string and is required",
             },
