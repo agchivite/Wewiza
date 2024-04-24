@@ -1,6 +1,7 @@
 package com.dam.wewiza_front
 
 import android.os.Bundle
+import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
@@ -77,6 +78,18 @@ class MainActivity : ComponentActivity(), KoinComponent {
                     )
                 }
             }
+        }
+    }
+
+
+    /**
+     * Removes the possibility of going back to the previous screen with the back button of the device
+     */
+    @Deprecated("deprecated")
+    override fun onBackPressed() {
+        val aux = false
+        if (aux){
+            super.onBackPressed()
         }
     }
 

@@ -8,13 +8,9 @@ import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.dam.wewiza_front.MainActivity
 import com.dam.wewiza_front.constants.Constants
-import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.Profile
 import com.dam.wewiza_front.models.ShoppingList
-import com.dam.wewiza_front.models.Store
-import com.dam.wewiza_front.models.UsersGroceryList
 import com.dam.wewiza_front.navigation.AppScreens
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -24,7 +20,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 class WelcomeScreenViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
@@ -116,35 +111,35 @@ class WelcomeScreenViewModel : ViewModel() {
     /**
      * NO deberia estar aqui esta funcion, la puse para una guarrada con el firebase
      */
-    fun addToFirestore() {
-        val db = FirebaseFirestore.getInstance()
-        val groceryList = UsersGroceryList(
-            name = "Mi lista de compras",
-            products = listOf(
-                Product(
-                    UUID.randomUUID().toString(),
-                    "verduras",
-                    "",
-                    "kg",
-                    "ProductoPrueba",
-                    2.50f,
-                    14.50f,
-                    2,
-                    "storeUrl",
-                    "MarketPrueba"
-                )
-            )
-        )
-
-        db.collection("lists")
-            .add(groceryList)
-            .addOnSuccessListener { documentReference ->
-                println("Lista de compras agregada con ID: ${documentReference.id}")
-            }
-            .addOnFailureListener { e ->
-                println("Error al agregar la lista de compras: $e")
-            }
-    }
-
+//    fun addToFirestore() {
+//        val db = FirebaseFirestore.getInstance()
+//        val groceryList = UsersGroceryList(
+//            name = "Mi lista de compras",
+//            products = listOf(
+//                Product(
+//                    UUID.randomUUID().toString(),
+//                    "verduras",
+//                    "",
+//                    "kg",
+//                    "ProductoPrueba",
+//                    2.50f,
+//                    14.50f,
+//                    2,
+//                    "storeUrl",
+//                    "MarketPrueba"
+//                )
+//            )
+//        )
+//
+//        db.collection("lists")
+//            .add(groceryList)
+//            .addOnSuccessListener { documentReference ->
+//                println("Lista de compras agregada con ID: ${documentReference.id}")
+//            }
+//            .addOnFailureListener { e ->
+//                println("Error al agregar la lista de compras: $e")
+//            }
+//    }
+//
 
 }

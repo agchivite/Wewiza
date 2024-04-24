@@ -1,6 +1,7 @@
 package com.dam.wewiza_front.services
 
 import com.dam.wewiza_front.models.Categories
+import com.dam.wewiza_front.models.Markets
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -9,8 +10,11 @@ import retrofit2.http.GET
 interface ApiService {
 
     //http://wewiza.ddns.net/get_categories/
-    @GET("get_categories")
+    @GET("categories")
     suspend fun getAllCategories(): Categories
+
+    @GET("products")
+    suspend fun getProductsPerMarket(): Markets
 
 }
 

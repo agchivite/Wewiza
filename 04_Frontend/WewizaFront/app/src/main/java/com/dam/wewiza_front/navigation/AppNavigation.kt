@@ -1,5 +1,6 @@
 package com.dam.wewiza_front.navigation
 
+import android.app.appsearch.AppSearchSchema
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -51,6 +52,12 @@ fun AppNavigation(
 
     if (auth.currentUser ==null){
         startDestination = AppScreens.WelcomeScreen.route
+
+        navController.popBackStack(AppScreens.LoginScreen.route, true)
+        navController.popBackStack(AppScreens.RegisterScreen.route, true)
+        navController.popBackStack(AppScreens.WelcomeScreen.route, true)
+    }else{
+        navController.popBackStack(AppScreens.SettingsScreen.route, true)
     }
 
     NavHost(navController = navController, startDestination = startDestination) {
