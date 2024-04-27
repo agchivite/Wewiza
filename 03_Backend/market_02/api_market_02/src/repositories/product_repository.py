@@ -30,12 +30,25 @@ class ProductRepository:
                 {"price": product_data["price"]}
             )
 
-            if existing_product_name and existing_product_price:
+            # Check if is scrapped in the same day
+            # We can find in mongo compass with: { date_created: { $regex: /^2024-04-21/}}
+            product_date_created = product_data["date_created"].split()[0]
+            existing_product_date = collection.find_one(
+                {"date_created": {"$regex": f"^{product_date_created}"}}
+            )
+
+            if (
+                existing_product_name
+                and existing_product_price
+                and existing_product_date
+            ):
                 return Result.failure(
-                    "Product already exists with name: "
+                    "Product already exists: "
                     + product_data["name"]
                     + " and price: "
                     + str(product_data["price"])
+                    + " and date: "
+                    + str(product_data["date_created"])
                 )
 
             result = collection.insert_one(product_data)
