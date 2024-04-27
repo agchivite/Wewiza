@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
-from api_market_02.src.services.product_service import ProductService
-from api_market_02.src.database.database_manager import DatabaseManager
-from api_market_02.src.repositories.product_repository import ProductRepository
+from api_market_03.src.services.product_service import ProductService
+from api_market_03.src.database.database_manager import DatabaseManager
+from api_market_03.src.repositories.product_repository import ProductRepository
 import requests
 import json
 

@@ -1,14 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from api_market_02.src.services.scrapping_service import ScrappingService
-from api_market_02.src.services.product_service import ProductService
-from api_market_02.src.database.database_manager import DatabaseManager
-from api_market_02.src.repositories.product_repository import ProductRepository
+from api_market_03.src.services.scrapping_service import ScrappingService
+from api_market_03.src.services.product_service import ProductService
+from api_market_03.src.database.database_manager import DatabaseManager
+from api_market_03.src.repositories.product_repository import ProductRepository
 
-# TODO: change to CARREFOUR
-
-CONNECTION_MONGO = "mongodb://root:root@localhost:27022"
-DATABASE_NAME = "ahorramas"
+CONNECTION_MONGO = "mongodb://root:root@localhost:27023"
+DATABASE_NAME = "carrefour"
 COLLECTION_NAME = "products"
 
 # Chrome Service
@@ -24,4 +22,4 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 scrapping_service = ScrappingService(driver_chrome, product_service)
 
-scrapping_service.run_scrapping_ahorramas()
+scrapping_service.run_scrapping_carrefour()

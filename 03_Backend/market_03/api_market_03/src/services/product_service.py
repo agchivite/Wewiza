@@ -1,5 +1,5 @@
-from api_market_02.src.models.product import Product
-from api_market_02.src.repositories.product_repository import ProductRepository
+from api_market_03.src.models.product import Product
+from api_market_03.src.repositories.product_repository import ProductRepository
 import json
 
 

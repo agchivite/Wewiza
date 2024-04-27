@@ -1,6 +1,6 @@
 from python_on_rails.result import Result
-from api_market_02.src.schemas.product_schema import product_schema
-from api_market_02.src.database.database_manager import DatabaseManager
+from api_market_03.src.schemas.product_schema import product_schema
+from api_market_03.src.database.database_manager import DatabaseManager
 
 
 class ProductRepository:

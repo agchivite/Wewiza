@@ -68,8 +68,8 @@ class ScrappingService:
 
                             if product_model.name != "[no-data]":
                                 # TODO: change when need it
-                                # self.send_to_wewiza_server(product_model, id_category)
-                                self.send_to_localhost_mongo(product_model)
+                                self.send_to_wewiza_server(product_model, id_category)
+                                # self.send_to_localhost_mongo(product_model)
 
                 except Exception as e:
                     print(f"Error processing page {i}: {e}")

@@ -1,5 +1,5 @@
 from ast import List
-from api_market_02.src.models.product import Product
+from api_market_03.src.models.product import Product
 
 
 class Category:

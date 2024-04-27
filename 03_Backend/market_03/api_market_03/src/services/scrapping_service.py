@@ -3,21 +3,22 @@ import uuid
 from selenium.webdriver.chrome.service import Service
 from python_on_rails.result import Result
 from bs4 import BeautifulSoup
-from api_market_02.src.models.product import Product
-from api_market_02.src.services.product_service import ProductService
+from api_market_03.src.models.product import Product
+from api_market_03.src.services.product_service import ProductService
 import re
 import os
 import requests
 from datetime import datetime
 
 
+# TODO: change to carrefour
 class ScrappingService:
     def __init__(self, driver, product_service: ProductService):
         self.driver = driver
         self.product_service = product_service
         self.output_folder = ""
 
-    def run_scrapping_ahorramas(self):
+    def run_scrapping_carrefour(self):
         current_directory = os.path.dirname(os.path.realpath(__file__))
 
         api_market_02_folder = os.path.abspath(
