@@ -22,7 +22,8 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 scrapping_service = ScrappingService(driver_chrome, product_service)
 
-# Num id_categories are includes when scrapping
-start_category = 27
-end_category = 244
+# Num id_categories are includes when scrapping // 897 & 884 & 789 (so far away)
+# 26 - 244
+start_category = 882
+end_category = 885
 scrapping_service.run_scrapping_mercadona(start_category, end_category)

@@ -59,6 +59,22 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def update_all(self):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+
+            # Realizar la actualización
+            result = collection.update_many(
+                {"date_created": {"$regex": "^2024-05-01"}},
+                {"$set": {"date_created": "2024-04-30 00:00:00"}},
+            )
+
+            self.db_manager.close_database()
+            return Result.success(result.modified_count)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def get_all_products(self):
         try:
             database = self.db_manager.connect_database()

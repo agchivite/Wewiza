@@ -7,6 +7,15 @@ class ProductService:
     def __init__(self, product_repository: ProductRepository):
         self.product_repository = product_repository
 
+    def update_all(self):
+        result = self.product_repository.update_all()
+
+        if result.is_failure():
+            print("Failed to update all products:", result.error)
+            return []
+
+        return result.value
+
     def get_all_products(self):
         result = self.product_repository.get_all_products()
 
