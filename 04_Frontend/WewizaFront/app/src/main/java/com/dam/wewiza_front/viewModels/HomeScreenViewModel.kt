@@ -40,8 +40,13 @@ class HomeScreenViewModel : ViewModel() {
         }
 
     }
+
     fun navigateToCategories(navController: NavController) {
         navController.navigate(AppScreens.CategoriesScreen.route)
+    }
+
+    fun navigateToProducts(navController: NavController) {
+        navController.navigate(AppScreens.ProductScreen.route)
     }
 
 }

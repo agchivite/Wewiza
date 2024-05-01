@@ -1,6 +1,5 @@
 package com.dam.wewiza_front.navigation
 
-import android.app.appsearch.AppSearchSchema
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +11,7 @@ import com.dam.wewiza_front.screens.CustomerSupportScreen
 import com.dam.wewiza_front.screens.HomeScreen
 import com.dam.wewiza_front.screens.LoginScreen
 import com.dam.wewiza_front.screens.MyListsScreen
+import com.dam.wewiza_front.screens.ProductScreen
 import com.dam.wewiza_front.screens.ProfileScreen
 import com.dam.wewiza_front.screens.RegisterScreen
 import com.dam.wewiza_front.screens.SettingsScreen
@@ -23,6 +23,7 @@ import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
 import com.dam.wewiza_front.viewModels.MyListsScreenViewModel
+import com.dam.wewiza_front.viewModels.ProductScreenViewModel
 import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
 import com.dam.wewiza_front.viewModels.RegisterScreenViewModel
 import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
@@ -44,6 +45,7 @@ fun AppNavigation(
     settingsScreenViewModel: SettingsScrennViewModel,
     myListsScreenViewModel: MyListsScreenViewModel,
     customerSupportScreenViewModel: CustomerSupportScreenViewModel,
+    productScreenViewModel: ProductScreenViewModel,
     mainActivity: MainActivity
 ) {
     val navController = rememberNavController()
@@ -97,6 +99,9 @@ fun AppNavigation(
         }
         composable(route = AppScreens.CustomerSupportScreen.route){
             CustomerSupportScreen(customerSupportScreenViewModel, navController)
+        }
+        composable(route = AppScreens.ProductScreen.route){
+            ProductScreen(productScreenViewModel, navController)
         }
     }
 }

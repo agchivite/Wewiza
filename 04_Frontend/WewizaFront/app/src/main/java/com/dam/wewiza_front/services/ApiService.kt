@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
 
 interface ApiService {
 
@@ -16,6 +17,8 @@ interface ApiService {
     @GET("products")
     suspend fun getProductsPerMarket(): Markets
 
+    @GET("products/{id}")
+    suspend fun getProductsPerCategory(@Path("id") id: String): Markets
 }
 
 

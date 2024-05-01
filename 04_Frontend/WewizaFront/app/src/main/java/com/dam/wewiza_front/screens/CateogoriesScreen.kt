@@ -3,9 +3,7 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
-import android.icu.number.Scale
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,16 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Category
 import com.dam.wewiza_front.ui.theme.MyLightTheme
@@ -64,7 +58,7 @@ fun CategoriesScreen(
                     .fillMaxSize()
                     .padding(top = 20.dp)
             ) {
-                SearchBar(searchText, onValueChange = { searchText = it })
+                SearchBar("Buscar Categoria",searchText, onValueChange = { searchText = it })
                 CategoriesScreenBodyContent(viewModel, navController, searchText)
             }
 
@@ -90,7 +84,7 @@ fun CategoriesScreenBodyContent(
         contentPadding = PaddingValues(8.dp),
         content = {
             items(filteredCategories.size) { index ->
-                CategoryItem(category = filteredCategories[index])
+                CategoryItem(category = filteredCategories[index], viewModel, navController)
             }
         }
     )
@@ -98,12 +92,12 @@ fun CategoriesScreenBodyContent(
 
 
 @Composable
-fun SearchBar(searchText: String, onValueChange: (String) -> Unit) {
+fun SearchBar(labelText:String, searchText: String, onValueChange: (String) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         TextField(
             value = searchText,
             onValueChange = onValueChange,
-            label = { Text("Buscar categoría") },
+            label = { Text(labelText) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
@@ -113,7 +107,11 @@ fun SearchBar(searchText: String, onValueChange: (String) -> Unit) {
 
 
 @Composable
-fun CategoryItem(category: Category) {
+fun CategoryItem(
+    category: Category,
+    viewModel: CategoriesScreenViewModel,
+    navController: NavController
+) {
     //can only retrieve svg from github repo with this method.
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(context = LocalContext.current)
@@ -125,7 +123,8 @@ fun CategoryItem(category: Category) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
+        onClick = {viewModel.navigateToProductsScreen(category.id, navController)}
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
