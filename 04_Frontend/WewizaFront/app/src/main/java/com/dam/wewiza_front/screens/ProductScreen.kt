@@ -3,12 +3,15 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
+import android.widget.CheckBox
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,11 +24,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +47,8 @@ import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.ProductScreenViewModel
 
+
+var showDialog: MutableState<Boolean> = mutableStateOf(false)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +57,10 @@ fun ProductScreen(
     navController: NavHostController
 ) {
     var searchText by remember { mutableStateOf("") }
+    var isMercadonaChecked by remember { mutableStateOf(true) }
+    var isAhorramasChecked by remember { mutableStateOf(true) }
+    var isCarrefourChecked by remember { mutableStateOf(true) }
+
     Scaffold(
         bottomBar = {
             Constants.BottomMenu(navController)
@@ -64,8 +75,22 @@ fun ProductScreen(
                 ProductsSearchBar(
                     "Buscar producto",
                     searchText = searchText,
-                    onValueChange = { searchText = it })
-                ProductScreenBodyContent(productScreenViewModel, navController, searchText)
+                    onValueChange = { searchText = it },
+                    isMercadonaChecked = isMercadonaChecked,
+                    onMercadonaCheckedChange = { isMercadonaChecked = it },
+                    isAhorramasChecked = isAhorramasChecked,
+                    onAhorramasCheckedChange = { isAhorramasChecked = it },
+                    isCarrefourChecked = isCarrefourChecked,
+                    onCarrefourCheckedChange = { isCarrefourChecked = it }
+                )
+                ProductScreenBodyContent(
+                    productScreenViewModel,
+                    navController,
+                    searchText,
+                    isMercadonaChecked,
+                    isAhorramasChecked,
+                    isCarrefourChecked
+                )
             }
         }
     }
@@ -75,22 +100,33 @@ fun ProductScreen(
 fun ProductScreenBodyContent(
     viewModel: ProductScreenViewModel,
     navController: NavHostController,
-    searchText: String
+    searchText: String,
+    isMercadonaChecked: Boolean,
+    isAhorramasChecked: Boolean,
+    isCarrefourChecked: Boolean
 ) {
     val products = viewModel.allProductsList
     val filteredProducts = products.filter { it.name.contains(searchText, ignoreCase = true) }
-    ProductGrid(products = filteredProducts)
-
+    ProductGrid(products = filteredProducts, isMercadonaChecked, isAhorramasChecked, isCarrefourChecked)
 }
 
-
 @Composable
-fun ProductGrid(products: List<Product>) {
+fun ProductGrid(
+    products: List<Product>,
+    isMercadonaChecked: Boolean,
+    isAhorramasChecked: Boolean,
+    isCarrefourChecked: Boolean
+) {
+    val filteredProducts = products.filter {
+        (it.store_name == "Mercadona" && isMercadonaChecked) ||
+                (it.store_name == "Ahorramas" && isAhorramasChecked) ||
+                (it.store_name == "Carrefour" && isCarrefourChecked)
+    }
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
         content = {
-            items(products.size) { index ->
-                ProductItem(products[index])
+            items(filteredProducts.size) { index ->
+                ProductItem(filteredProducts[index])
             }
         }
     )
@@ -124,42 +160,96 @@ fun ProductItem(product: Product) {
 }
 
 @Composable
-fun ProductsSearchBar(labelText: String, searchText: String, onValueChange: (String) -> Unit) {
+fun ProductsSearchBar(
+    labelText: String,
+    searchText: String,
+    onValueChange: (String) -> Unit,
+    isMercadonaChecked: Boolean,
+    onMercadonaCheckedChange: (Boolean) -> Unit,
+    isAhorramasChecked: Boolean,
+    onAhorramasCheckedChange: (Boolean) -> Unit,
+    isCarrefourChecked: Boolean,
+    onCarrefourCheckedChange: (Boolean) -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        TextField(
+            value = searchText,
+            onValueChange = onValueChange,
+            label = { Text(labelText) },
+            modifier = Modifier
+                .padding(8.dp)
+        )
 
-    var showDialog by remember { mutableStateOf(false) }
+        Image(
+            painter = painterResource(id = R.drawable.baseline_filter_list_24),
+            contentDescription = "Filter",
+            modifier = Modifier
+                .size(70.dp)
+                .clickable { showDialog.value = true },
+            alignment = Alignment.Center
+        )
+    }
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                TextField(
-                    value = searchText,
-                    onValueChange = onValueChange,
-                    label = { Text(labelText) },
-                    modifier = Modifier
-                        .padding(8.dp)
-                )
-
-                Image(
-                    painter = painterResource(id = R.drawable.baseline_filter_list_24),
-                    contentDescription = "Filter",
-                    modifier = Modifier
-                        .size(70.dp)
-                        .clickable { showDialog = true },
-                    alignment = Alignment.Center
-                )
-            }
-
-
-    if (showDialog) {
+    if (showDialog.value) {
         AlertDialog(
-            onDismissRequest = { showDialog = false },
+            onDismissRequest = { showDialog.value = false  },
             title = { Text(text = "Filtro de productos") },
-            text = { Text("Aquí puedes agregar los controles de filtro.") },
+            text = {
+                Text(text = "Mostrar productos de:")
+                Column(
+                    modifier = Modifier.padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 20.dp)
+                    ) {
+                        Box(modifier = Modifier.width(100.dp)) {
+                            Text("Mercadona")
+                        }
+                        Checkbox(
+                            checked = isMercadonaChecked,
+                            onCheckedChange = onMercadonaCheckedChange,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 20.dp)
+                    ) {
+                        Box(modifier = Modifier.width(100.dp)) {
+                            Text("Ahorramas")
+                        }
+
+                        Checkbox(
+                            checked = isAhorramasChecked,
+                            onCheckedChange = onAhorramasCheckedChange,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 20.dp)
+                    ) {
+                        Box(modifier = Modifier.width(100.dp)) {
+                            Text("Carrefour")
+                        }
+
+                        Checkbox(
+                            checked = isCarrefourChecked,
+                            onCheckedChange = onCarrefourCheckedChange,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }
+            },
             confirmButton = {
-                Button(onClick = { showDialog = false }) {
+                Button(
+                    onClick = { showDialog.value = false  }
+                ) {
                     Text("Cerrar")
                 }
             }
         )
     }
-
-
 }
