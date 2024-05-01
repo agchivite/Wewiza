@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 class CategoriesScreenViewModel : ViewModel() {
 
     private val service = RetrofitServiceFactory.makeRetrofitService()
+    private val sharedViewModel = SharedViewModel.instance
 
     var allCategoriesList = mutableListOf<Category>()
 
@@ -25,6 +26,7 @@ class CategoriesScreenViewModel : ViewModel() {
         viewModelScope.launch {
             val categories = service.getAllCategories()
             allCategoriesList.addAll(categories.categories)
+            sharedViewModel.loadedCategories.addAll(categories.categories)
             Log.d("CategoriesScreenViewModel", "getAllCategories: ${categories.categories}")
         }
 

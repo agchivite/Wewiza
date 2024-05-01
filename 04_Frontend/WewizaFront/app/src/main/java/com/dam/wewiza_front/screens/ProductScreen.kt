@@ -3,7 +3,6 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
-import android.widget.CheckBox
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -11,16 +10,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -46,9 +42,13 @@ import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.ProductScreenViewModel
+import com.dam.wewiza_front.viewModels.SharedViewModel
 
 
 var showDialog: MutableState<Boolean> = mutableStateOf(false)
+var sharedViewModel = SharedViewModel.instance
+var selectedCategories: MutableState<MutableMap<String, Boolean>> = mutableStateOf(sharedViewModel.loadedCategories.associate { it.id to true }.toMutableMap())
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,10 +117,14 @@ fun ProductGrid(
     isAhorramasChecked: Boolean,
     isCarrefourChecked: Boolean
 ) {
+    val keys = selectedCategories.value.keys
     val filteredProducts = products.filter {
-        (it.store_name == "Mercadona" && isMercadonaChecked) ||
+        ((it.store_name == "Mercadona" && isMercadonaChecked) ||
                 (it.store_name == "Ahorramas" && isAhorramasChecked) ||
-                (it.store_name == "Carrefour" && isCarrefourChecked)
+                (it.store_name == "Carrefour" && isCarrefourChecked)) && (
+                (selectedCategories.value[it.category_id] == true)
+                        )
+
     }
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
@@ -195,52 +199,93 @@ fun ProductsSearchBar(
             onDismissRequest = { showDialog.value = false  },
             title = { Text(text = "Filtro de productos") },
             text = {
-                Text(text = "Mostrar productos de:")
                 Column(
-                    modifier = Modifier.padding(10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(start = 20.dp)
+                    Text(text = "Mostrar productos de:")
+                    Column(
+                        modifier = Modifier.padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(modifier = Modifier.width(100.dp)) {
-                            Text("Mercadona")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(start = 20.dp)
+                        ) {
+                            Box(modifier = Modifier.width(100.dp)) {
+                                Text("Mercadona")
+                            }
+                            Checkbox(
+                                checked = isMercadonaChecked,
+                                onCheckedChange = onMercadonaCheckedChange,
+                                modifier = Modifier.padding(8.dp)
+                            )
                         }
-                        Checkbox(
-                            checked = isMercadonaChecked,
-                            onCheckedChange = onMercadonaCheckedChange,
-                            modifier = Modifier.padding(8.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(start = 20.dp)
+                        ) {
+                            Box(modifier = Modifier.width(100.dp)) {
+                                Text("Ahorramas")
+                            }
+
+                            Checkbox(
+                                checked = isAhorramasChecked,
+                                onCheckedChange = onAhorramasCheckedChange,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(start = 20.dp)
+                        ) {
+                            Box(modifier = Modifier.width(100.dp)) {
+                                Text("Carrefour")
+                            }
+
+                            Checkbox(
+                                checked = isCarrefourChecked,
+                                onCheckedChange = onCarrefourCheckedChange,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(start = 20.dp)
-                    ) {
-                        Box(modifier = Modifier.width(100.dp)) {
-                            Text("Ahorramas")
+                    Text(text = "Categorias: ")
+                    Column( modifier = Modifier.padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally ) {
+                        sharedViewModel.loadedCategories.forEach { category ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(start = 20.dp)
+                            ) {
+                                Box(modifier = Modifier.width(100.dp)) {
+                                    Text(category.name)
+                                }
+                                Checkbox(
+                                    checked = selectedCategories.value[category.id] ?: false,
+                                    onCheckedChange = { isChecked ->
+                                        selectedCategories.value = selectedCategories.value.toMutableMap().also { it[category.id] = isChecked }
+                                    },
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
+                        Button(onClick = {
+                            val newMap = selectedCategories.value.toMutableMap()
+                            newMap.keys.forEach { newMap[it] = true }
+                            selectedCategories.value = newMap
+                        }, modifier = Modifier.padding(8.dp)) {
+                            Text("Seleccionar todas las categorías")
                         }
 
-                        Checkbox(
-                            checked = isAhorramasChecked,
-                            onCheckedChange = onAhorramasCheckedChange,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(start = 20.dp)
-                    ) {
-                        Box(modifier = Modifier.width(100.dp)) {
-                            Text("Carrefour")
+                        Button(onClick = {
+                            val newMap = selectedCategories.value.toMutableMap()
+                            newMap.keys.forEach { newMap[it] = false }
+                            selectedCategories.value = newMap
+                        }) {
+                            Text("Deseleccionar todas las categorías")
                         }
-
-                        Checkbox(
-                            checked = isCarrefourChecked,
-                            onCheckedChange = onCarrefourCheckedChange,
-                            modifier = Modifier.padding(8.dp)
-                        )
                     }
+
                 }
             },
             confirmButton = {
