@@ -1,7 +1,6 @@
 package com.dam.wewiza_front
 
 import android.os.Bundle
-import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
@@ -14,6 +13,7 @@ import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
 import com.dam.wewiza_front.viewModels.MyListsScreenViewModel
+import com.dam.wewiza_front.viewModels.ProductScreenViewModel
 import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
 import com.dam.wewiza_front.viewModels.RegisterScreenViewModel
 import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
         profileViewModel = if (auth.currentUser != null) get() else null
         val myListsViewModel = get<MyListsScreenViewModel>()
         val customerSupportViewModel = get<CustomerSupportScreenViewModel>()
+        val productScreenViewModel = get<ProductScreenViewModel>()
 
         setContent {
             WewizaFrontTheme {
@@ -74,6 +75,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
                         settingsViewModel,
                         myListsViewModel,
                         customerSupportViewModel,
+                        productScreenViewModel,
                         this
                     )
                 }

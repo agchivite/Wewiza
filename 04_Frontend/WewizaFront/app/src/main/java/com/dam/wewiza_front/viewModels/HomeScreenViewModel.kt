@@ -22,26 +22,40 @@ class HomeScreenViewModel : ViewModel() {
     }
 
     private fun getAllProducts() {
-        viewModelScope.launch {
-            val products = service.getProductsPerMarket()
-            allProductsList.addAll(products.ahorramas)
-            allProductsList.addAll(products.carrefour)
-            allProductsList.addAll(products.mercadona)
-            Log.d("HomeScreenViewModel", "getAllProducts: $products")
+        try{
+            viewModelScope.launch {
+                val products = service.getProductsPerMarket()
+                allProductsList.addAll(products.ahorramas)
+                allProductsList.addAll(products.carrefour)
+                allProductsList.addAll(products.mercadona)
+                Log.d("HomeScreenViewModel", "getAllProducts: $products")
+            }
+        }catch (e: Exception) {
+            Log.d("HomeScreenViewModel", "getAllProducts: ${e.message}")
         }
     }
 
     private fun getAllCategories() {
+        try{
 
-        viewModelScope.launch {
-            val categories = service.getAllCategories()
-            allCategoriesList.addAll(categories.categories)
-            Log.d("CategoriesScreenViewModel", "getAllCategories: ${categories.categories}")
+            viewModelScope.launch {
+                val categories = service.getAllCategories()
+                allCategoriesList.addAll(categories.categories)
+                Log.d("CategoriesScreenViewModel", "getAllCategories: ${categories.categories}")
+            }
+        }catch (e: Exception) {
+            Log.d("HomeScreenViewModel", "getAllCategories: ${e.message}")
         }
 
+
     }
+
     fun navigateToCategories(navController: NavController) {
         navController.navigate(AppScreens.CategoriesScreen.route)
+    }
+
+    fun navigateToProducts(navController: NavController) {
+        navController.navigate(AppScreens.ProductScreen.route)
     }
 
 }

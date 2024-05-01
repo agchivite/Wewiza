@@ -135,7 +135,7 @@ fun ProductsTextSubSection(viewModel: HomeScreenViewModel, navController: NavCon
                 text = "Ver más",
                 modifier = Modifier
                     .padding(end = 20.dp)
-                    .clickable { TODO("no implemented yet") },
+                    .clickable { viewModel.navigateToProducts(navController)},
                 color = Color.Blue,
                 fontFamily = FirsNeue
             )
