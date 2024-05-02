@@ -200,13 +200,25 @@ def get_products_by_category(category_id: str):
     }
 
 
-@app.get("/wewiza")
-def get_wewiza():
-    all_wewiza = product_service.get_all_products()
-    return {"message": all_wewiza}
+@app.get("/like/{product_id}")
+def like_product(product_id: str):
+    messsage = product_service.like_product(product_id)
+    return {"message": str(messsage)}
 
 
-@app.get("/update_likes_database")
+@app.get("/unlike/{product_id}")
+def unlike_product(product_id: str):
+    messsage = product_service.unlike_product(product_id)
+    return {"message": str(messsage)}
+
+
+@app.get("/like/{product_id}")
+def like_product(product_id: str):
+    product_service.like_product(product_id)
+    return {"message": "Product liked"}
+
+
+@app.get("/reset_likes")
 def update_database():
     response_products_market_01_json_list = requests.get(
         "http://api_market_01:8081/products"

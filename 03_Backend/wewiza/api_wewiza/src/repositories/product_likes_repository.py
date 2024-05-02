@@ -30,22 +30,6 @@ class ProductLikesRepository:
         except Exception as e:
             return Result.failure(str(e))
 
-    def insert_product_json(self, product_data_json):
-        try:
-            database = self.db_manager.connect_database()
-            collection = database[self.collection_name]
-
-            existing_product = collection.find_one({"uuid": product_data_json["uuid"]})
-            if existing_product:
-                print("Product with the same UUID already exists")
-                return Result.failure("Product with the same UUID already exists")
-            result = collection.insert_one(product_data_json)
-            self.db_manager.close_database()
-            return Result.success(result.inserted_id)
-        except Exception as e:
-            print(str(e))
-            return Result.failure(str(e))
-
     def get_all_products(self):
         try:
             database = self.db_manager.connect_database()
@@ -73,6 +57,16 @@ class ProductLikesRepository:
             result = collection.update_one(query, {"$set": new_data})
             self.db_manager.close_database()
             return Result.success(result.modified_count)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_product_by_uuid(self, query):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            product = collection.find_one(query)
+            self.db_manager.close_database()
+            return Result.success(product)
         except Exception as e:
             return Result.failure(str(e))
 
