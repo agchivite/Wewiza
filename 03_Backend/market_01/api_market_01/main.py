@@ -34,3 +34,13 @@ async def insert_new_scrapped_product(request: Request):
 @app.get("/products/{category_id}")
 def get_products_by_category(category_id: str):
     return product_service.get_all_products_by_category_id(category_id)
+
+
+@app.get("/product/{uuid}")
+def get_product_by_uuid(uuid: str):
+    return product_service.get_product_by_uuid(uuid)
+
+
+@app.get("/product/name/{product_name}")
+def get_product_by_name(product_name: str):
+    return product_service.get_products_by_name(product_name)

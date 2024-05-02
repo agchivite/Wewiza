@@ -37,6 +37,16 @@ class ProductLikesService:
 
         self.product_likes_repository.insert_products_json(products_data).value
 
+    def map_product_json(self, product_json):
+        uuid = product_json["uuid"]
+        product_data = self.product_likes_repository.get_product_by_uuid(
+            {"uuid": uuid}
+        ).value
+        if product_data:
+            product_json["num_likes"] = product_data["num_likes"]
+
+        return product_json
+
     def map_products_json_list(self, products_json_list):
         uuids = [product_json["uuid"] for product_json in products_json_list]
 

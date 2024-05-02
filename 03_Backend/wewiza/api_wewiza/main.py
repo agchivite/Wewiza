@@ -165,11 +165,62 @@ def get_all_products():
         response_products_market_02_json_list
     )
 
+    # TODO: delete de products that are not in the same month that today OR only get the products more
+
     return {
         "mercadona": map_list_market_01,
         "ahorramas": map_list_market_02,
         "carrefour": response_products_market_03_json_list,
     }
+
+
+@app.get("/product/{product_id}/{market_name}")
+def get_product(product_id: str, market_name: str):
+
+    if market_name == "Mercadona":
+        response_product_market_01_json = requests.get(
+            "http://api_market_01:8081/product/" + product_id
+        ).json()
+        mapped_product = product_service.map_product_json(
+            response_product_market_01_json
+        )
+        response_list_products_market_01_json_list = requests.get(
+            "http://api_market_01:8081/product/name/" + mapped_product["name"]
+        ).json()
+
+        product_uuid = mapped_product["uuid"]
+        response_list_products_market_01_json_list = [
+            product
+            for product in response_list_products_market_01_json_list
+            if product.get("uuid") != product_uuid
+        ]
+
+        response_list_products_market_01_json_list.append(mapped_product)
+        return response_list_products_market_01_json_list
+
+    if market_name == "Ahorramas":
+        response_product_market_02_json = requests.get(
+            "http://api_market_02:8082/product/" + product_id
+        ).json()
+        mapped_product = product_service.map_product_json(
+            response_product_market_02_json
+        )
+        response_list_products_market_02_json_list = requests.get(
+            "http://api_market_02:8082/product/name/" + mapped_product["name"]
+        ).json()
+
+        product_uuid = mapped_product["uuid"]
+        response_list_products_market_02_json_list = [
+            product
+            for product in response_list_products_market_02_json_list
+            if product.get("uuid") != product_uuid
+        ]
+
+        response_list_products_market_02_json_list.append(mapped_product)
+
+        return response_list_products_market_02_json_list
+
+    # TODO: add market 03 = carrefour
 
 
 @app.get("/products/{category_id}")
@@ -192,6 +243,8 @@ def get_products_by_category(category_id: str):
     map_list_market_02 = product_service.map_products_json_list(
         response_products_market_02_json_list
     )
+
+    # TODO: Filter products that are in the same month that today
 
     return {
         "mercadona": map_list_market_01,

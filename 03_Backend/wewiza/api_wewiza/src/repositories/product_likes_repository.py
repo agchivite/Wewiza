@@ -20,31 +20,30 @@ class ProductLikesRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def insert_products_json(self, products_data):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
 
-def insert_products_json(self, products_data):
-    try:
-        database = self.db_manager.connect_database()
-        collection = database[self.collection_name]
+            existing_uuids = [
+                product["uuid"]
+                for product in collection.find(
+                    {"uuid": {"$in": [product["uuid"] for product in products_data]}}
+                )
+            ]
+            filtered_products_data = [
+                product
+                for product in products_data
+                if product["uuid"] not in existing_uuids
+            ]
 
-        existing_uuids = [
-            product["uuid"]
-            for product in collection.find(
-                {"uuid": {"$in": [product["uuid"] for product in products_data]}}
-            )
-        ]
-        filtered_products_data = [
-            product
-            for product in products_data
-            if product["uuid"] not in existing_uuids
-        ]
+            if filtered_products_data:
+                collection.insert_many(filtered_products_data)
 
-        if filtered_products_data:
-            collection.insert_many(filtered_products_data)
-
-        self.db_manager.close_database()
-        return Result.success(None)
-    except Exception as e:
-        return Result.failure(str(e))
+            self.db_manager.close_database()
+            return Result.success(None)
+        except Exception as e:
+            return Result.failure(str(e))
 
     def get_all_products(self):
         try:

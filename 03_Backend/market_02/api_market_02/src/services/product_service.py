@@ -54,3 +54,32 @@ class ProductService:
             del product["_id"]
 
         return products_list_json
+
+    def get_product_by_uuid(self, uuid):
+        result = self.product_repository.get_product_by_uuid(uuid)
+
+        if result.is_failure():
+            print("Failed to get product by uuid:", result.error)
+            return []
+
+        product_json = result.value
+
+        # Removing _id key, we don't want it
+        del product_json["_id"]
+
+        return product_json
+
+    def get_products_by_name(self, product_name):
+        result = self.product_repository.get_products_by_name(product_name)
+
+        if result.is_failure():
+            print("Failed to get products by name:", result.error)
+            return []
+
+        products_list_json = result.value
+
+        # Removing _id key, we don't want it
+        for product in products_list_json:
+            del product["_id"]
+
+        return products_list_json
