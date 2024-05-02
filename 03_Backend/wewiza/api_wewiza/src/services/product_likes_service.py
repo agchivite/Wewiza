@@ -6,12 +6,16 @@ class ProductLikesService:
     def __init__(self, product_likes_repository: ProductLikesRepository):
         self.product_likes_repository = product_likes_repository
 
+    def get_all_products(self):
+        return self.product_likes_repository.get_all_products()
+
     def insert_products_json_list(self, products_json_list):
+        print("SERVICE: insert_products_json_list")
         for product_json in products_json_list:
             uuid = product_json["uuid"]
             num_likes: int = 0
             product_data = {"uuid": uuid, "num_likes": num_likes}
-            print(self.product_likes_repository.insert_product_json(product_data).value)
+            self.product_likes_repository.insert_product_json(product_data).value
 
     def map_products_json_list(self, products_json_list):
         for product_json in products_json_list:

@@ -8,8 +8,9 @@ app = FastAPI()
 
 # TODO: Inyect with IoC
 CONNECTION_MONGO = "mongodb://root:root@mongo_wewiza:27017"
-DATABASE_NAME = "wewiza_db"
-COLLECTION_NAME = "products_likes"
+DATABASE_NAME = "wewiza"
+COLLECTION_NAME = "products"
+
 # Fachade
 database_manager = DatabaseManager(CONNECTION_MONGO, DATABASE_NAME)
 product_repository = ProductLikesRepository(database_manager, COLLECTION_NAME)
@@ -156,7 +157,6 @@ def get_all_products():
     # TODO: add market 03 = carrefour
     response_products_market_03_json_list = list()
 
-    """
     # Map objetcs with LIKES data
     map_list_market_01 = product_service.map_products_json_list(
         response_products_market_01_json_list
@@ -164,11 +164,10 @@ def get_all_products():
     map_list_market_02 = product_service.map_products_json_list(
         response_products_market_02_json_list
     )
-    """
 
     return {
-        "mercadona": response_products_market_01_json_list,
-        "ahorramas": response_products_market_02_json_list,
+        "mercadona": map_list_market_01,
+        "ahorramas": map_list_market_02,
         "carrefour": response_products_market_03_json_list,
     }
 
@@ -199,6 +198,12 @@ def get_products_by_category(category_id: str):
         "ahorramas": map_list_market_02,
         "carrefour": response_products_market_03_json_list,
     }
+
+
+@app.get("/wewiza")
+def get_wewiza():
+    all_wewiza = product_service.get_all_products()
+    return {"message": all_wewiza}
 
 
 @app.get("/update_likes_database")

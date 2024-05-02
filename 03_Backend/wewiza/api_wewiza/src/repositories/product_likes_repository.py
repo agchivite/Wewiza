@@ -27,12 +27,13 @@ class ProductLikesRepository:
 
             existing_product = collection.find_one({"uuid": product_data_json["uuid"]})
             if existing_product:
+                print("Product with the same UUID already exists")
                 return Result.failure("Product with the same UUID already exists")
-            print(product_data_json)
             result = collection.insert_one(product_data_json)
             self.db_manager.close_database()
             return Result.success(result.inserted_id)
         except Exception as e:
+            print(str(e))
             return Result.failure(str(e))
 
     def get_all_products(self):
