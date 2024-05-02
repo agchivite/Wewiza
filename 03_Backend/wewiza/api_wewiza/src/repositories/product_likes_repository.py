@@ -20,6 +20,16 @@ class ProductLikesRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def insert_products_json(self, products_data):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            collection.insert_many(products_data)
+            self.db_manager.close_database()
+            return Result.success(None)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def insert_product_json(self, product_data_json):
         try:
             database = self.db_manager.connect_database()
@@ -66,12 +76,12 @@ class ProductLikesRepository:
         except Exception as e:
             return Result.failure(str(e))
 
-    def get_product_by_uuid(self, uuid):
+    def get_products_by_uuids(self, uuids):
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
-            product = collection.find_one({"uuid": uuid})
+            products = list(collection.find({"uuid": {"$in": uuids}}))
             self.db_manager.close_database()
-            return Result.success(product)
+            return Result.success(products)
         except Exception as e:
             return Result.failure(str(e))
