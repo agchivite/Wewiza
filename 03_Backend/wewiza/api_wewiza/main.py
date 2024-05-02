@@ -156,6 +156,7 @@ def get_all_products():
     # TODO: add market 03 = carrefour
     response_products_market_03_json_list = list()
 
+    """
     # Map objetcs with LIKES data
     map_list_market_01 = product_service.map_products_json_list(
         response_products_market_01_json_list
@@ -163,6 +164,7 @@ def get_all_products():
     map_list_market_02 = product_service.map_products_json_list(
         response_products_market_02_json_list
     )
+    """
 
     return {
         "mercadona": response_products_market_01_json_list,
