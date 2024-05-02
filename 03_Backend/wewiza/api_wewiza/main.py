@@ -212,13 +212,7 @@ def unlike_product(product_id: str):
     return {"message": str(messsage)}
 
 
-@app.get("/like/{product_id}")
-def like_product(product_id: str):
-    product_service.like_product(product_id)
-    return {"message": "Product liked"}
-
-
-@app.get("/reset_likes")
+@app.get("/start_likes")
 def update_database():
     response_products_market_01_json_list = requests.get(
         "http://api_market_01:8081/products"
