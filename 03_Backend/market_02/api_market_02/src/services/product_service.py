@@ -7,8 +7,8 @@ class ProductService:
     def __init__(self, product_repository: ProductRepository):
         self.product_repository = product_repository
 
-    def update_all(self):
-        result = self.product_repository.update_all()
+    def update_all_date(self):
+        result = self.product_repository.update_all_date()
 
         if result.is_failure():
             print("Failed to update all products:", result.error)

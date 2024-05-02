@@ -64,3 +64,13 @@ class ProductLikesRepository:
             return Result.success(result.modified_count)
         except Exception as e:
             return Result.failure(str(e))
+
+    def get_product_by_uuid(self, uuid):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            product = collection.find_one({"uuid": uuid})
+            self.db_manager.close_database()
+            return Result.success(product)
+        except Exception as e:
+            return Result.failure(str(e))

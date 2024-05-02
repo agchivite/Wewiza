@@ -59,7 +59,7 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
-    def update_all(self):
+    def update_all_date(self):
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]

@@ -19,10 +19,10 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 
 
-@app.get("/update")
-def update_all():
+@app.get("/update_all_date")
+def update_all_date():
     # Only update product with "date_created" in "2024-05-01 00:14:43"
-    product_service.update_all()
+    product_service.update_all_date()
     return {"result": "All products updated"}
 
 

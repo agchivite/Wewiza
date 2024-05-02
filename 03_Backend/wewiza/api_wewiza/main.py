@@ -156,9 +156,17 @@ def get_all_products():
     # TODO: add market 03 = carrefour
     response_products_market_03_json_list = list()
 
+    # Map objetcs with LIKES data
+    map_list_market_01 = product_service.map_products_json_list(
+        response_products_market_01_json_list
+    )
+    map_list_market_02 = product_service.map_products_json_list(
+        response_products_market_02_json_list
+    )
+
     return {
-        "mercadona": response_products_market_01_json_list,
-        "ahorramas": response_products_market_02_json_list,
+        "mercadona": map_list_market_01,
+        "ahorramas": map_list_market_02,
         "carrefour": response_products_market_03_json_list,
     }
 
@@ -176,9 +184,17 @@ def get_products_by_category(category_id: str):
     # TODO: add market 03 = carrefour
     response_products_market_03_json_list = list()
 
+    # Map objetcs with LIKES data
+    map_list_market_01 = product_service.map_products_json_list(
+        response_products_market_01_json_list
+    )
+    map_list_market_02 = product_service.map_products_json_list(
+        response_products_market_02_json_list
+    )
+
     return {
-        "mercadona": response_products_market_01_json_list,
-        "ahorramas": response_products_market_02_json_list,
+        "mercadona": map_list_market_01,
+        "ahorramas": map_list_market_02,
         "carrefour": response_products_market_03_json_list,
     }
 
@@ -186,11 +202,16 @@ def get_products_by_category(category_id: str):
 @app.get("/update_likes_database")
 def update_database():
     response_products_market_01_json_list = requests.get(
-        "http://api_market_01:8081/get_all_products"
+        "http://api_market_01:8081/products"
     ).json()
 
-    product_service.insert_products_json_list(response_products_market_01_json_list)
+    response_products_market_02_json_list = requests.get(
+        "http://api_market_02:8082/products"
+    ).json()
 
-    # TODO: market_02 and market_03
+    # TODO: market_03
+
+    product_service.insert_products_json_list(response_products_market_01_json_list)
+    product_service.insert_products_json_list(response_products_market_02_json_list)
 
     return {"message": "Database likes updated"}
