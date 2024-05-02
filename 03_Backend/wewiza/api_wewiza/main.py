@@ -165,8 +165,8 @@ def get_all_products():
     )
 
     return {
-        "mercadona": map_list_market_01,
-        "ahorramas": map_list_market_02,
+        "mercadona": response_products_market_01_json_list,
+        "ahorramas": response_products_market_02_json_list,
         "carrefour": response_products_market_03_json_list,
     }
 
