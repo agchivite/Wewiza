@@ -24,6 +24,6 @@ scrapping_service = ScrappingService(driver_chrome, product_service)
 
 # Num id_categories are includes when scrapping // 897 & 884 & 789 (so far away)
 # 26 - 244
-start_category = 882
-end_category = 885
+start_category = 787
+end_category = 790
 scrapping_service.run_scrapping_mercadona(start_category, end_category)

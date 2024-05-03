@@ -3,3 +3,6 @@ Error to process page: list index out of range
 Error to process page: list index out of range
 Error to process page: could not convert string to float: '1.050.00'
 Error to process page: could not convert string to float: '1.050.00'
+Error to process page: list index out of range
+Error to process page: could not convert string to float: '1.050.00'
+Error to process page: could not convert string to float: '1.050.00'
