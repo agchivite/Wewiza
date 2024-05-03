@@ -23,3 +23,28 @@ Stacktrace:
 	BaseThreadInitThunk [0x00007FF935B0257D+29]
 	RtlUserThreadStart [0x00007FF936DAAA48+40]
 
+Error processing page 26: Message: no such element: Unable to locate element: {"method":"css selector","selector":".category-detail__title.title1-b"}
+  (Session info: chrome=124.0.6367.119); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF777351502+60802]
+	(No symbol) [0x00007FF7772CAC02]
+	(No symbol) [0x00007FF777187CE4]
+	(No symbol) [0x00007FF7771D6D4D]
+	(No symbol) [0x00007FF7771D6E1C]
+	(No symbol) [0x00007FF77721CE37]
+	(No symbol) [0x00007FF7771FABBF]
+	(No symbol) [0x00007FF77721A224]
+	(No symbol) [0x00007FF7771FA923]
+	(No symbol) [0x00007FF7771C8FEC]
+	(No symbol) [0x00007FF7771C9C21]
+	GetHandleVerifier [0x00007FF77765411D+3217821]
+	GetHandleVerifier [0x00007FF7776960B7+3488055]
+	GetHandleVerifier [0x00007FF77768F03F+3459263]
+	GetHandleVerifier [0x00007FF77740B846+823494]
+	(No symbol) [0x00007FF7772D5F9F]
+	(No symbol) [0x00007FF7772D0EC4]
+	(No symbol) [0x00007FF7772D1052]
+	(No symbol) [0x00007FF7772C18A4]
+	BaseThreadInitThunk [0x00007FF935B0257D+29]
+	RtlUserThreadStart [0x00007FF936DAAA48+40]
+
