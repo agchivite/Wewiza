@@ -1,0 +1,26 @@
+Error processing page 28: 'NoneType' object has no attribute 'text'
+Error processing page 28: Message: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=124.0.6367.119)
+Stacktrace:
+	GetHandleVerifier [0x00007FF722CB1502+60802]
+	(No symbol) [0x00007FF722C2AC02]
+	(No symbol) [0x00007FF722AE7CE4]
+	(No symbol) [0x00007FF722ABDFDF]
+	(No symbol) [0x00007FF722B61E57]
+	(No symbol) [0x00007FF722B798D1]
+	(No symbol) [0x00007FF722B5A923]
+	(No symbol) [0x00007FF722B28FEC]
+	(No symbol) [0x00007FF722B29C21]
+	GetHandleVerifier [0x00007FF722FB411D+3217821]
+	GetHandleVerifier [0x00007FF722FF60B7+3488055]
+	GetHandleVerifier [0x00007FF722FEF03F+3459263]
+	GetHandleVerifier [0x00007FF722D6B846+823494]
+	(No symbol) [0x00007FF722C35F9F]
+	(No symbol) [0x00007FF722C30EC4]
+	(No symbol) [0x00007FF722C31052]
+	(No symbol) [0x00007FF722C218A4]
+	BaseThreadInitThunk [0x00007FF935B0257D+29]
+	RtlUserThreadStart [0x00007FF936DAAA48+40]
+
+Error processing page 28: 'NoneType' object has no attribute 'text'
