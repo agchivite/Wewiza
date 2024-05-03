@@ -1,7 +1,6 @@
 from python_on_rails.result import Result
 from api_market_01.src.schemas.product_schema import product_schema
 from api_market_01.src.database.database_manager import DatabaseManager
-import datetime
 
 
 class ProductRepository:
@@ -21,18 +20,6 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
-    def parse_date(date_str):
-        return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
-
-    def filter_current_month_element(element):
-        current_date_time = datetime.datetime.now()
-        current_month = current_date_time.month
-
-        if parse_date(element["date_created"]).month == current_month:
-            return True
-
-        return False
-
     def insert_product(self, product_data):
         try:
             database = self.db_manager.connect_database()
@@ -43,10 +30,18 @@ class ProductRepository:
                 {"price": product_data["price"]}
             )
 
+            # Check if is scrapped in the same day
+            # We can find in mongo compass with: { date_created: { $regex: /^2024-04-21/}}
+            product_date_created = product_data["date_created"].split()[0]
+            print(product_date_created)
+            existing_product_date = collection.find_one(
+                {"date_created": {"$regex": f"^{product_date_created}"}}
+            )
+
             if (
                 existing_product_name
                 and existing_product_price
-                and filter_current_month_element(product_data)
+                and existing_product_date
             ):
                 return Result.failure(
                     "Product already exists: "
