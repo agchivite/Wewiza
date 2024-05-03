@@ -28,6 +28,7 @@ def get_all_products():
 async def insert_new_scrapped_product(request: Request):
     data = await request.json()
     result = product_service.create_product_to_mongo_recieving_json(data)
+    print(result)
     return {"result": result}
 
 
