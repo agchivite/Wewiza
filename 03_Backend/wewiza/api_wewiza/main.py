@@ -3,6 +3,7 @@ from api_wewiza.src.database.database_manager import DatabaseManager
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
 from api_wewiza.src.services.product_likes_service import ProductLikesService
 import requests
+import datetime
 
 app = FastAPI()
 
@@ -165,15 +166,31 @@ def get_all_products():
         response_products_market_02_json_list
     )
 
-    # TODO: delete de products that are not in the same month that today OR only get the products more
-
     return {
-        "mercadona": map_list_market_01,
-        "ahorramas": map_list_market_02,
+        "mercadona": filter_current_month_elements(map_list_market_01),
+        "ahorramas": filter_current_month_elements(map_list_market_02),
         "carrefour": response_products_market_03_json_list,
     }
 
 
+def filter_current_month_elements(elements):
+    current_date_time = datetime.datetime.now()
+    current_month = current_date_time.month  # Obtener el mes actual
+
+    filtered_elements = [
+        element
+        for element in elements
+        if parse_date(element["date_created"]).month == current_month
+    ]
+
+    return filtered_elements
+
+
+def parse_date(date_str):
+    return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+
+
+# Is for details of a product an his chart with historical
 @app.get("/product/{product_id}/{market_name}")
 def get_product(product_id: str, market_name: str):
 
