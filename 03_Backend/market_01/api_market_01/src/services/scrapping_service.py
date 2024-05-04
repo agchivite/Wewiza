@@ -16,14 +16,18 @@ class ScrappingService:
         self.product_service = product_service
         self.output_folder = ""
 
-    def find_category(category_title, list_title_categories):
-        for sublist in list_title_categories:
-            for title in sublist:
-                if category_title.lower() in title.lower():
-                    return title
+    def find_category(self, category_title, dictionaty_titles_categories):
+        for category, subcategories in dictionaty_titles_categories.items():
+            if any(
+                category_title.lower() in subcategory.lower()
+                for subcategory in subcategories
+            ):
+                return category
         return "category_not_found"
 
-    def run_scrapping_mercadona(self, list_num_categories, list_title_categories):
+    def run_scrapping_mercadona(
+        self, list_num_categories, dictionaty_titles_categories
+    ):
         current_directory = os.path.dirname(os.path.realpath(__file__))
 
         api_market_02_folder = os.path.abspath(
@@ -55,7 +59,8 @@ class ScrappingService:
                         "css selector", ".category-detail__title.title1-b"
                     )
                     category_title = self.find_category(
-                        category_title_element.text.strip(), list_title_categories
+                        category_title_element.text.strip(),
+                        dictionaty_titles_categories,
                     )
                     id_category = self.map_category_title_to_id(category_title)
 
@@ -77,8 +82,8 @@ class ScrappingService:
 
                             if product_model.name != "[no-data]":
                                 # TODO: change when need it
-                                self.send_to_wewiza_server(product_model, id_category)
-                                # self.send_to_localhost_mongo(product_model)
+                                # self.send_to_wewiza_server(product_model, id_category)
+                                self.send_to_localhost_mongo(product_model)
 
                 except Exception as e:
                     print(f"Error processing page {i}: {e}")

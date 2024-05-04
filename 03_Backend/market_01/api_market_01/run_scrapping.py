@@ -22,7 +22,7 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 scrapping_service = ScrappingService(driver_chrome, product_service)
 
-list_title_categories = []
+dictionaty_titles_categories = {}
 
 ### aceite_especias_y_salsas ###
 list_aceite_especias_y_salsas = [
@@ -31,7 +31,7 @@ list_aceite_especias_y_salsas = [
     "Mayonesa, ketchup y mostaza",
     "Otras salsas",
 ]
-list_title_categories.extend(list_aceite_especias_y_salsas)
+dictionaty_titles_categories["aceite_especias_y_salsas"] = list_aceite_especias_y_salsas
 
 ### agua_y_refrescos ###
 list_agua_y_refrescos = [
@@ -42,7 +42,7 @@ list_agua_y_refrescos = [
     "Tónica y bitter",
     "Refresco de té y sin gas",
 ]
-list_title_categories.extend(list_agua_y_refrescos)
+dictionaty_titles_categories["agua_y_refrescos"] = list_agua_y_refrescos
 
 ### aperitivos ###
 list_aperitivos = [
@@ -50,11 +50,11 @@ list_aperitivos = [
     "Frutos secos y fruta desecada",
     "Patatas fritas y snacks",
 ]
-list_title_categories.extend(list_aperitivos)
+dictionaty_titles_categories["aperitivos"] = list_aperitivos
 
 ### arroz_legumbres_y_pasta ###
 list_arroz_legumbres_y_pasta = ["Arroz", "Legumbres", "Pasta y fideos"]
-list_title_categories.extend(list_arroz_legumbres_y_pasta)
+dictionaty_titles_categories["arroz_legumbres_y_pasta"] = list_arroz_legumbres_y_pasta
 
 ### azucar_caramelos_y_chocolate ###
 list_azucar_caramelos_y_chocolate = [
@@ -64,7 +64,9 @@ list_azucar_caramelos_y_chocolate = [
     "Golosinas",
     "Mermelada y miel",
 ]
-list_title_categories.extend(list_azucar_caramelos_y_chocolate)
+dictionaty_titles_categories["azucar_caramelos_y_chocolate"] = (
+    list_azucar_caramelos_y_chocolate
+)
 
 ### bebe ###
 list_bebe = [
@@ -73,7 +75,7 @@ list_bebe = [
     "Higiene y cuidado",
     "Toallitas y pañales",
 ]
-list_title_categories.extend(list_bebe)
+dictionaty_titles_categories["bebe"] = list_bebe
 
 ### bodega ###
 list_bodega = [
@@ -87,7 +89,7 @@ list_bodega = [
     "Vino rosado",
     "Vino tinto",
 ]
-list_title_categories.extend(list_bodega)
+dictionaty_titles_categories["bodega"] = list_bodega
 
 ### cacao_cafe_e_infusiones ###
 list_cacao_cafe_e_infusiones = [
@@ -97,7 +99,7 @@ list_cacao_cafe_e_infusiones = [
     "Café soluble y otras bebidas",
     "Té e infusiones",
 ]
-list_title_categories.extend(list_cacao_cafe_e_infusiones)
+dictionaty_titles_categories["cacao_cafe_e_infusiones"] = list_cacao_cafe_e_infusiones
 
 ### carne ###
 list_carne = [
@@ -111,11 +113,11 @@ list_carne = [
     "Vacuno",
     "Empanados y elaborados",
 ]
-list_title_categories.extend(list_carne)
+dictionaty_titles_categories["carne"] = list_carne
 
 ### cereales_y_galletas ###
 list_cereales_y_galletas = ["Cereales", "Galletas", "Tortitas"]
-list_title_categories.extend(list_cereales_y_galletas)
+dictionaty_titles_categories["cereales_y_galletas"] = list_cereales_y_galletas
 
 ### charcuteria_y_quesos ###
 list_charcuteria_y_quesos = [
@@ -129,7 +131,7 @@ list_charcuteria_y_quesos = [
     "Queso lonchas, rallado y en porciones",
     "Queso untable y fresco",
 ]
-list_title_categories.extend(list_charcuteria_y_quesos)
+dictionaty_titles_categories["charcuteria_y_quesos"] = list_charcuteria_y_quesos
 
 ### congelados ###
 list_congelados = [
@@ -144,7 +146,7 @@ list_congelados = [
     "Tartas y churros",
     "Verdura",
 ]
-list_title_categories.extend(list_congelados)
+dictionaty_titles_categories["congelados"] = list_congelados
 
 ### conservas_caldos_y_cremas ###
 list_conservas_caldos_y_cremas = [
@@ -155,15 +157,17 @@ list_conservas_caldos_y_cremas = [
     "Sopa y caldo",
     "Tomate",
 ]
-list_title_categories.extend(list_conservas_caldos_y_cremas)
+dictionaty_titles_categories["conservas_caldos_y_cremas"] = (
+    list_conservas_caldos_y_cremas
+)
 
 ### frutas ###
 list_frutas = ["Fruta"]
-list_title_categories.extend(list_frutas)
+dictionaty_titles_categories["frutas"] = list_frutas
 
 ### verduras ###
 list_verduras = ["Lechuga y ensalada preparada", "Verdura"]
-list_title_categories.extend(list_verduras)
+dictionaty_titles_categories["verduras"] = list_verduras
 
 ### huevos_leche_batidos_y_mantequilla ###
 list_huevos_leche_batidos_y_mantequilla = [
@@ -171,7 +175,9 @@ list_huevos_leche_batidos_y_mantequilla = [
     "Leche y bebidas vegetales",
     "Mantequilla y margarina",
 ]
-list_title_categories.extend(list_huevos_leche_batidos_y_mantequilla)
+dictionaty_titles_categories["huevos_leche_batidos_y_mantequilla"] = (
+    list_huevos_leche_batidos_y_mantequilla
+)
 
 ### marisco_y_pescado ###
 list_marisco_y_pescado = [
@@ -181,11 +187,11 @@ list_marisco_y_pescado = [
     "Salazones y ahumados",
     "Sushi",
 ]
-list_title_categories.extend(list_marisco_y_pescado)
+dictionaty_titles_categories["marisco_y_pescado"] = list_marisco_y_pescado
 
 ### mascotas ###
 list_mascotas = ["Gato", "Perro", "Otros"]
-list_title_categories.extend(list_mascotas)
+dictionaty_titles_categories["mascotas"] = list_mascotas
 
 ### panaderia_y_pasteleria ###
 list_panaderia_y_pasteleria = [
@@ -199,7 +205,7 @@ list_panaderia_y_pasteleria = [
     "Tartas y pasteles",
     "Velas y decoración",
 ]
-list_title_categories.extend(list_panaderia_y_pasteleria)
+dictionaty_titles_categories["panaderia_y_pasteleria"] = list_panaderia_y_pasteleria
 
 ### pizzas_y_platos_preparados ###
 list_pizzas_y_platos_preparados = [
@@ -208,7 +214,9 @@ list_pizzas_y_platos_preparados = [
     "Platos preparados calientes",
     "Platos preparados fríos",
 ]
-list_title_categories.extend(list_pizzas_y_platos_preparados)
+dictionaty_titles_categories["pizzas_y_platos_preparados"] = (
+    list_pizzas_y_platos_preparados
+)
 
 ### postres_y_yogures ###
 list_postres_y_yogures = [
@@ -222,11 +230,11 @@ list_postres_y_yogures = [
     "Yogures naturales y sabores",
     "Yogures y postres infantiles",
 ]
-list_title_categories.extend(list_postres_y_yogures)
+dictionaty_titles_categories["postres_y_yogures"] = list_postres_y_yogures
 
 ### zumos ###
 list_zumos = ["Fruta variada", "Melocotón y piña", "Naranja", "Tomate y otros sabores"]
-list_title_categories.extend(list_zumos)
+dictionaty_titles_categories["zumos"] = list_zumos
 
 list_num_categories = [
     105,
@@ -346,4 +354,6 @@ list_num_categories = [
     121,
     120,
 ]
-scrapping_service.run_scrapping_mercadona(list_num_categories, list_title_categories)
+scrapping_service.run_scrapping_mercadona(
+    list_num_categories, dictionaty_titles_categories
+)
