@@ -113,6 +113,16 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def delete_products_by_date(self, date):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            result = collection.delete_many({"date_created": {"$regex": f"^{date}"}})
+            self.db_manager.close_database()
+            return Result.success(result.deleted_count)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def update_product(self, query, new_data):
         """
         Probably this method, is not going to be used, because we introduce all products to test our API functionality

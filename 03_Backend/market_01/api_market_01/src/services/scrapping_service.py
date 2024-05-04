@@ -16,7 +16,14 @@ class ScrappingService:
         self.product_service = product_service
         self.output_folder = ""
 
-    def run_scrapping_mercadona(self, start_category, end_category):
+    def find_category(category_title, list_title_categories):
+        for sublist in list_title_categories:
+            for title in sublist:
+                if category_title.lower() in title.lower():
+                    return title
+        return "category_not_found"
+
+    def run_scrapping_mercadona(self, list_num_categories, list_title_categories):
         current_directory = os.path.dirname(os.path.realpath(__file__))
 
         api_market_02_folder = os.path.abspath(
@@ -29,7 +36,7 @@ class ScrappingService:
         if not os.path.exists(log_error_folder):
             os.makedirs(log_error_folder)
 
-        for i in range(start_category, end_category + 1):
+        for i in list_num_categories:
             url = f"https://tienda.mercadona.es/categories/{i}"
 
             response = requests.get(url)
@@ -47,7 +54,9 @@ class ScrappingService:
                     category_title_element = self.driver.find_element(
                         "css selector", ".category-detail__title.title1-b"
                     )
-                    category_title = category_title_element.text.strip()
+                    category_title = self.find_category(
+                        category_title_element.text.strip(), list_title_categories
+                    )
                     id_category = self.map_category_title_to_id(category_title)
 
                     # Obtaining content page after JavaScript has loaded the data dynamically

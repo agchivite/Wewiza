@@ -89,3 +89,12 @@ class ProductService:
             del product["_id"]
 
         return products_list_json
+
+    def delete_products_by_date(self, date):
+        result = self.product_repository.delete_products_by_date(date)
+
+        if result.is_failure():
+            print("Failed to delete products by date:", result.error)
+            return []
+
+        return result.value

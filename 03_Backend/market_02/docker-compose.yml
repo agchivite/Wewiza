@@ -16,7 +16,7 @@ services:
 
   mongo_market_02:
     # apcheamitru/arm32v7-mongo:3.2.20 # mongo:6.0.13
-    image: apcheamitru/arm32v7-mongo:3.2.2
+    image: apcheamitru/arm32v7-mongo:3.2.20
     restart: always
     ports:
       - "27022:27017"
