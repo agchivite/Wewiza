@@ -103,5 +103,8 @@ fun AppNavigation(
         composable(route = AppScreens.ProductScreen.route){
             ProductScreen(productScreenViewModel, navController)
         }
+        composable(route = AppScreens.ProductDetailsScreen.route){
+            ProductScreen(productScreenViewModel, navController)
+        }
     }
 }

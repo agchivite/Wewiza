@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
         val customerSupportViewModel = get<CustomerSupportScreenViewModel>()
         val productScreenViewModel = get<ProductScreenViewModel>()
 
+
         setContent {
             WewizaFrontTheme {
                 Surface {

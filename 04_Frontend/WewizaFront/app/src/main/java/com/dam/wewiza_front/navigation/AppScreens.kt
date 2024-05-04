@@ -1,6 +1,6 @@
 package com.dam.wewiza_front.navigation
 
-import androidx.navigation.NavDeepLink
+
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
@@ -22,6 +22,5 @@ sealed class AppScreens(val route: String){
     object SettingsScreen: AppScreens ("settings_screen")
     object SuggestionScreen: AppScreens ("suggestion_screen")
     object AboutUsScreen: AppScreens ("about_us_screen")
-
-
+    object ProductDetailsScreen: AppScreens ("product_details_screen")
 }

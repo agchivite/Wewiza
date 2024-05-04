@@ -7,10 +7,12 @@ import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
 import com.dam.wewiza_front.viewModels.MyListsScreenViewModel
+import com.dam.wewiza_front.viewModels.ProductDetailsScreenViewModel
 import com.dam.wewiza_front.viewModels.ProductScreenViewModel
 import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
 import com.dam.wewiza_front.viewModels.RegisterScreenViewModel
 import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
+import com.dam.wewiza_front.viewModels.SharedViewModel
 import com.dam.wewiza_front.viewModels.SuggestionScreenViewModel
 import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -29,4 +31,6 @@ val appModule = module {
     viewModel { MyListsScreenViewModel() }
     viewModel { CustomerSupportScreenViewModel() }
     viewModel { ProductScreenViewModel() }
+    viewModel { ProductDetailsScreenViewModel() }
+    viewModel { SharedViewModel()}
 }

@@ -26,16 +26,17 @@ class CategoriesScreenViewModel : ViewModel() {
         viewModelScope.launch {
             val categories = service.getAllCategories()
             allCategoriesList.addAll(categories.categories)
-            sharedViewModel.loadedCategories.addAll(categories.categories)
+            sharedViewModel.setCategories(categories.categories as MutableList<Category>)
             Log.d("CategoriesScreenViewModel", "getAllCategories: ${categories.categories}")
         }
 
     }
 
     fun navigateToProductsScreen(id: String, navController: NavController) {
-        val route = AppScreens.ProductScreen.route.replace("{id}", id)
+        val route = AppScreens.ProductScreen.route
+        sharedViewModel.resetSelectedCategories()
+        sharedViewModel.selectedCategories.value.value[id] = true
         navController.navigate(route)
     }
-
 
 }

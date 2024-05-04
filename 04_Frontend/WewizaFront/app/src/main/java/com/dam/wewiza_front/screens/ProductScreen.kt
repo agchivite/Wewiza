@@ -47,7 +47,6 @@ import com.dam.wewiza_front.viewModels.SharedViewModel
 
 var showDialog: MutableState<Boolean> = mutableStateOf(false)
 var sharedViewModel = SharedViewModel.instance
-var selectedCategories: MutableState<MutableMap<String, Boolean>> = mutableStateOf(sharedViewModel.loadedCategories.associate { it.id to true }.toMutableMap())
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +59,11 @@ fun ProductScreen(
     var isMercadonaChecked by remember { mutableStateOf(true) }
     var isAhorramasChecked by remember { mutableStateOf(true) }
     var isCarrefourChecked by remember { mutableStateOf(true) }
+
+
+    var selectedCategories by remember {
+        sharedViewModel.selectedCategories
+    }
 
     Scaffold(
         bottomBar = {
@@ -81,7 +85,8 @@ fun ProductScreen(
                     isAhorramasChecked = isAhorramasChecked,
                     onAhorramasCheckedChange = { isAhorramasChecked = it },
                     isCarrefourChecked = isCarrefourChecked,
-                    onCarrefourCheckedChange = { isCarrefourChecked = it }
+                    onCarrefourCheckedChange = { isCarrefourChecked = it },
+                    selectedCategories
                 )
                 ProductScreenBodyContent(
                     productScreenViewModel,
@@ -89,7 +94,8 @@ fun ProductScreen(
                     searchText,
                     isMercadonaChecked,
                     isAhorramasChecked,
-                    isCarrefourChecked
+                    isCarrefourChecked,
+                    selectedCategories
                 )
             }
         }
@@ -103,11 +109,18 @@ fun ProductScreenBodyContent(
     searchText: String,
     isMercadonaChecked: Boolean,
     isAhorramasChecked: Boolean,
-    isCarrefourChecked: Boolean
+    isCarrefourChecked: Boolean,
+    selectedCategories: MutableState<MutableMap<String, Boolean>>
 ) {
-    val products = viewModel.allProductsList
+    val products by remember { viewModel.allProductsList }
     val filteredProducts = products.filter { it.name.contains(searchText, ignoreCase = true) }
-    ProductGrid(products = filteredProducts, isMercadonaChecked, isAhorramasChecked, isCarrefourChecked)
+    ProductGrid(
+        products = filteredProducts,
+        isMercadonaChecked,
+        isAhorramasChecked,
+        isCarrefourChecked,
+        selectedCategories
+    )
 }
 
 @Composable
@@ -115,16 +128,15 @@ fun ProductGrid(
     products: List<Product>,
     isMercadonaChecked: Boolean,
     isAhorramasChecked: Boolean,
-    isCarrefourChecked: Boolean
+    isCarrefourChecked: Boolean,
+    selectedCategories: MutableState<MutableMap<String, Boolean>>
 ) {
-    val keys = selectedCategories.value.keys
+
     val filteredProducts = products.filter {
         ((it.store_name == "Mercadona" && isMercadonaChecked) ||
                 (it.store_name == "Ahorramas" && isAhorramasChecked) ||
                 (it.store_name == "Carrefour" && isCarrefourChecked)) && (
-                (selectedCategories.value[it.category_id] == true)
-                        )
-
+                (selectedCategories.value[it.category_id] == true))
     }
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
@@ -173,7 +185,8 @@ fun ProductsSearchBar(
     isAhorramasChecked: Boolean,
     onAhorramasCheckedChange: (Boolean) -> Unit,
     isCarrefourChecked: Boolean,
-    onCarrefourCheckedChange: (Boolean) -> Unit
+    onCarrefourCheckedChange: (Boolean) -> Unit,
+    selectedCategories: MutableState<MutableMap<String, Boolean>>
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
         TextField(
@@ -196,7 +209,7 @@ fun ProductsSearchBar(
 
     if (showDialog.value) {
         AlertDialog(
-            onDismissRequest = { showDialog.value = false  },
+            onDismissRequest = { showDialog.value = false },
             title = { Text(text = "Filtro de productos") },
             text = {
                 Column(
@@ -250,9 +263,11 @@ fun ProductsSearchBar(
                         }
                     }
                     Text(text = "Categorias: ")
-                    Column( modifier = Modifier.padding(10.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally ) {
-                        sharedViewModel.loadedCategories.forEach { category ->
+                    Column(
+                        modifier = Modifier.padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        sharedViewModel.getCategories().forEach { category ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(start = 20.dp)
@@ -263,7 +278,9 @@ fun ProductsSearchBar(
                                 Checkbox(
                                     checked = selectedCategories.value[category.id] ?: false,
                                     onCheckedChange = { isChecked ->
-                                        selectedCategories.value = selectedCategories.value.toMutableMap().also { it[category.id] = isChecked }
+                                        selectedCategories.value =
+                                            selectedCategories.value.toMutableMap()
+                                                .also { it[category.id] = isChecked }
                                     },
                                     modifier = Modifier.padding(8.dp)
                                 )
@@ -290,7 +307,7 @@ fun ProductsSearchBar(
             },
             confirmButton = {
                 Button(
-                    onClick = { showDialog.value = false  }
+                    onClick = { showDialog.value = false }
                 ) {
                     Text("Cerrar")
                 }

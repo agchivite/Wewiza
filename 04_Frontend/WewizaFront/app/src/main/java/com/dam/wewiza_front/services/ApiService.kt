@@ -2,6 +2,7 @@ package com.dam.wewiza_front.services
 
 import com.dam.wewiza_front.models.Categories
 import com.dam.wewiza_front.models.Markets
+import com.dam.wewiza_front.models.Product
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -16,7 +17,10 @@ interface ApiService {
     suspend fun getAllCategories(): Categories
 
     @GET("products")
-    suspend fun getProductsPerMarket(): Markets
+    suspend fun getAllMarketsProduct(): Markets
+
+    @GET("products/{market_id}")
+    suspend fun getProductsPerMarket(@Path("market_id") market_id: String): List<Product>
 
     @GET("products/{id}")
     suspend fun getProductsPerCategory(@Path("id") id: String): Markets
