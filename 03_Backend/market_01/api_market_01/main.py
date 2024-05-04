@@ -24,6 +24,11 @@ def get_all_products():
     return product_service.get_all_products()
 
 
+@app.get("/products/{market_name}")
+def get_all_products_by_market(market_name: str):
+    return product_service.get_all_products_by_market(market_name)
+
+
 @app.post("/insert_new_scrapped_product")
 async def insert_new_scrapped_product(request: Request):
     data = await request.json()

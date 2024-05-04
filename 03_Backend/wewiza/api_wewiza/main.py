@@ -173,6 +173,29 @@ def get_all_products():
     }
 
 
+@app.get("/products/{market_name}")
+def get_all_products_by_market(market_name: str):
+    if market_name.lower().strip() == "mercadona":
+        response_products_market_01_json_list = requests.get(
+            f"http://api_market_01:8081/products/Mercadona"
+        ).json()
+        map_list_market_01 = product_service.map_products_json_list(
+            response_products_market_01_json_list
+        )
+        return filter_current_month_elements(map_list_market_01)
+
+    if market_name.lower().strip() == "ahorramas":
+        response_products_market_02_json_list = requests.get(
+            f"http://api_market_02:8082/products/Ahorramas"
+        ).json()
+        map_list_market_02 = product_service.map_products_json_list(
+            response_products_market_02_json_list
+        )
+        return filter_current_month_elements(map_list_market_02)
+
+    # TODO: add market 03 = carrefour
+
+
 def filter_current_month_elements(elements):
     current_date_time = datetime.datetime.now()
     current_month = current_date_time.month  # Obtener el mes actual
@@ -194,7 +217,7 @@ def parse_date(date_str):
 @app.get("/product/{product_id}/{market_name}")
 def get_product(product_id: str, market_name: str):
 
-    if market_name == "Mercadona":
+    if market_name.lower().strip() == "mercadona":
         response_product_market_01_json = requests.get(
             "http://api_market_01:8081/product/" + product_id
         ).json()
@@ -215,7 +238,7 @@ def get_product(product_id: str, market_name: str):
         response_list_products_market_01_json_list.append(mapped_product)
         return response_list_products_market_01_json_list
 
-    if market_name == "Ahorramas":
+    if market_name.lower().strip() == "ahorramas":
         response_product_market_02_json = requests.get(
             "http://api_market_02:8082/product/" + product_id
         ).json()

@@ -40,6 +40,21 @@ class ProductService:
         else:
             return result.value
 
+    def get_all_products_by_market(self, market_name):
+        result = self.product_repository.get_all_products_by_market(market_name)
+
+        if result.is_failure():
+            print("Failed to get all products by market name:", result.error)
+            return []
+
+        products_list_json = result.value
+
+        # Removing _id key, we don't want it
+        for product in products_list_json:
+            del product["_id"]
+
+        return products_list_json
+
     def get_all_products_by_category_id(self, category_id):
         result = self.product_repository.get_all_products_by_category_id(category_id)
 

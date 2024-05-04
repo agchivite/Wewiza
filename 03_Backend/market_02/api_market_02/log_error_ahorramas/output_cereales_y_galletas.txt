@@ -1,2 +1,0 @@
-Error to obtain data from product: 'NoneType' object has no attribute 'text'
-Error to obtain data from product: 'NoneType' object has no attribute 'text'
