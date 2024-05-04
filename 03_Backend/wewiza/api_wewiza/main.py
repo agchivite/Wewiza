@@ -306,7 +306,7 @@ def unlike_product(product_id: str):
 
 
 @app.get("/start_likes")
-def update_database():
+def start_likes_database():
     response_products_market_01_json_list = requests.get(
         "http://api_market_01:8081/products"
     ).json()
