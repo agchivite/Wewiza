@@ -67,7 +67,7 @@ def read_root():
             },
             {
                 "endpoint": "/start_likes",
-                "description": "Start the database with likes",
+                "description": "Start the database with likes in the same month we are",
                 "warning": "This will reset all the likes, only is used when scrapping monthly",
             },
         ]
