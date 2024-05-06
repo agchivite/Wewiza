@@ -135,7 +135,10 @@ fun ProductsTextSubSection(viewModel: HomeScreenViewModel, navController: NavCon
                 text = "Ver más",
                 modifier = Modifier
                     .padding(end = 20.dp)
-                    .clickable { viewModel.navigateToProducts(navController)},
+                    .clickable {
+                        sharedViewModel.initializeSelectedCategories()
+                        viewModel.navigateToProducts(navController)
+                    },
                 color = Color.Blue,
                 fontFamily = FirsNeue
             )
@@ -228,8 +231,11 @@ fun HomeCategoryItem(category: Category) {
 
         Text(
             text = category.name,
-            modifier = Modifier.width(110.dp).padding(top = 1.dp).align(Alignment.CenterHorizontally),
-            fontSize = 12.sp ,
+            modifier = Modifier
+                .width(110.dp)
+                .padding(top = 1.dp)
+                .align(Alignment.CenterHorizontally),
+            fontSize = 12.sp,
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
@@ -237,6 +243,7 @@ fun HomeCategoryItem(category: Category) {
     }
 
 }
+
 @Composable
 private fun CategoryTextsSubSection(
     viewModel: HomeScreenViewModel,

@@ -12,5 +12,6 @@ data class Product(
     val store_image_url: String,
     val store_name: String,
     val url: String,
-    val uuid: String
+    val uuid: String,
+    val num_likes: Int,
 )

@@ -7,6 +7,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
 
@@ -24,6 +25,16 @@ interface ApiService {
 
     @GET("products/{id}")
     suspend fun getProductsPerCategory(@Path("id") id: String): Markets
+
+    @GET("like/{user_email}/{product_id}")
+    suspend fun likeProduct(@Path("user_email") user_email: String, @Path("product_id") product_id: String)
+
+    @GET("unlike/{user_email}/{product_id}")
+    suspend fun unlikeProduct(@Path("user_email") user_email: String, @Path("product_id") product_id: String)
+
+    @GET("product/{product_id}/{market_id}")
+    suspend fun getProductHistoryDetails(@Path("product_id") product_id: String, @Path("market_id") market_id: String): List<Product>
+
 }
 
 
