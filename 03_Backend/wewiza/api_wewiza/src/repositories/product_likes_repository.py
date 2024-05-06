@@ -1,6 +1,7 @@
 from python_on_rails.result import Result
 from api_wewiza.src.schemas.product_likes_schema import product_likes_schema
 from api_wewiza.src.database.database_manager import DatabaseManager
+import datetime
 
 
 class ProductLikesRepository:
@@ -75,7 +76,7 @@ class ProductLikesRepository:
         except Exception as e:
             return Result.failure(str(e))
 
-    def get_product_by_uuid(self, query):
+    def get_product_by_query(self, query):
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
@@ -92,5 +93,20 @@ class ProductLikesRepository:
             products = list(collection.find({"uuid": {"$in": uuids}}))
             self.db_manager.close_database()
             return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def delete_all_products_by_actual_month(self):
+        # get month and year from actual date
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y-%m")
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            result = collection.delete_many(
+                {"date_created": {"$regex": f"^{formatted_date}"}}
+            )
+            self.db_manager.close_database()
+            return Result.success(result.deleted_count)
         except Exception as e:
             return Result.failure(str(e))

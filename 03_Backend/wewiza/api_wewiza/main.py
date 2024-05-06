@@ -43,7 +43,7 @@ def read_root():
             },
             {
                 "endpoint": "/products/{market_name}/{init_num}/{end_num}",
-                "description": "Get all products by market and range",
+                "description": "Get all products by market and range, start index = 0",
             },
             {
                 "endpoint": "/size/{market_name}",
@@ -58,12 +58,12 @@ def read_root():
                 "description": "Get a product by id and market",
             },
             {
-                "endpoint": "/like/{product_id}",
-                "description": "Like a product",
+                "endpoint": "/like/{product_id}/{email_user}",
+                "description": "Like a product only one time per user",
             },
             {
-                "endpoint": "/unlike/{product_id}",
-                "description": "Unlike a product",
+                "endpoint": "/unlike/{product_id}/{email_user}",
+                "description": "Unlike a product only one time per user",
             },
             {
                 "endpoint": "/start_likes",
@@ -387,16 +387,19 @@ def get_products_by_category(category_id: str):
     }
 
 
-@app.get("/like/{product_id}")
-def like_product(product_id: str):
-    messsage = product_service.like_product(product_id)
+@app.get("/like/{product_id}/{email_user}")
+def like_product(product_id: str, email_user: str):
+    messsage = product_service.like_product(product_id, email_user)
     return {"message": str(messsage)}
 
 
-@app.get("/unlike/{product_id}")
-def unlike_product(product_id: str):
-    messsage = product_service.unlike_product(product_id)
+@app.get("/unlike/{product_id}/{email_user}")
+def unlike_product(product_id: str, email_user: str):
+    messsage = product_service.unlike_product(product_id, email_user)
     return {"message": str(messsage)}
+
+
+# TODO: endpoint to check if a user has liked a product and unliked
 
 
 @app.get("/start_likes")
@@ -410,6 +413,8 @@ def start_likes_database():
     ).json()
 
     # TODO: market_03
+
+    product_service.delete_all_products_by_actual_month()
 
     product_service.insert_products_json_list(response_products_market_01_json_list)
     product_service.insert_products_json_list(response_products_market_02_json_list)

@@ -9,29 +9,71 @@ class ProductLikesService:
     def get_all_products(self):
         return self.product_likes_repository.get_all_products()
 
-    def like_product(self, product_id):
-        query = {"uuid": product_id}
-        product_data = self.product_likes_repository.get_product_by_uuid(query).value
+    def like_product(self, product_id, email_user):
+        uuid_query = {"uuid": product_id}
+        product_data = self.product_likes_repository.get_product_by_query(
+            uuid_query
+        ).value
+
         if not product_data:
             return "Product not found"
 
-        new_data = {"num_likes": product_data["num_likes"] + 1}
-        self.product_likes_repository.update_product(query, new_data)
+        if email_user in product_data.get("likes_email", []):
+            return "Product was liked before by " + email_user
+
+        new_num_likes = product_data.get("num_likes", 0) + 1
+        likes_emails = product_data.get("likes_email", [])
+        likes_emails.append(email_user)
+
+        update_query = {"uuid": product_id}
+        update_data = {
+            "$set": {"num_likes": new_num_likes, "likes_email": likes_emails}
+        }
+
+        # Remove email from unlikes_email if it was there
+        if email_user in product_data.get("unlikes_email", []):
+            update_data["$pull"] = {"unlikes_email": email_user}
+
+        self.product_likes_repository.update_product(update_query, update_data)
         return "Product liked"
 
-    def unlike_product(self, product_id):
-        query = {"uuid": product_id}
-        product_data = self.product_likes_repository.get_product_by_uuid(query).value
+    def unlike_product(self, product_id, email_user):
+        uuid_query = {"uuid": product_id}
+        product_data = self.product_likes_repository.get_product_by_query(
+            uuid_query
+        ).value
+
         if not product_data:
             return "Product not found"
 
-        new_data = {"num_likes": product_data["num_likes"] - 1}
-        self.product_likes_repository.update_product(query, new_data)
+        if email_user in product_data.get("unlikes_email", []):
+            return "Product was unliked before by " + email_user
+
+        new_num_likes = product_data.get("num_likes", 0) - 1
+        unlikes_emails = product_data.get("unlikes_email", [])
+        unlikes_emails.append(email_user)
+
+        update_query = {"uuid": product_id}
+        update_data = {
+            "$set": {"num_likes": new_num_likes, "unlikes_email": unlikes_emails}
+        }
+
+        # Remove email from likes_email if it was there
+        if email_user in product_data.get("likes_email", []):
+            update_data["$pull"] = {"likes_email": email_user}
+
+        self.product_likes_repository.update_product(update_query, update_data)
         return "Product unliked"
 
     def insert_products_json_list(self, products_json_list):
         products_data = [
-            {"uuid": product_json["uuid"], "num_likes": 0}
+            {
+                "uuid": product_json["uuid"],
+                "num_likes": 0,
+                "likes_email": [],
+                "unlikes_email": [],
+                "date_created": product_json["date_created"],
+            }
             for product_json in products_json_list
         ]
 
@@ -39,7 +81,7 @@ class ProductLikesService:
 
     def map_product_json(self, product_json):
         uuid = product_json["uuid"]
-        product_data = self.product_likes_repository.get_product_by_uuid(
+        product_data = self.product_likes_repository.get_product_by_query(
             {"uuid": uuid}
         ).value
         if product_data:
@@ -60,3 +102,6 @@ class ProductLikesService:
                 product_json["num_likes"] = product_data["num_likes"]
 
         return products_json_list
+
+    def delete_all_products_by_actual_month(self):
+        return self.product_likes_repository.delete_all_products_by_actual_month()

@@ -53,6 +53,7 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    # TODO: Implement this method no HARDCODE dates
     def update_all_date(self):
         try:
             database = self.db_manager.connect_database()
