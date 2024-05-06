@@ -20,6 +20,60 @@ product_service = ProductLikesService(product_repository)
 # https://127.0.0.1 -> To call API
 
 
+@app.get("/")
+def read_root():
+    # Set all the endpoints
+    return {
+        "endpoints": [
+            {
+                "endpoint": "/",
+                "description": "Root endpoint",
+            },
+            {
+                "endpoint": "/categories",
+                "description": "Get all categories",
+            },
+            {
+                "endpoint": "/products",
+                "description": "Get all products",
+            },
+            {
+                "endpoint": "/products/{market_name}",
+                "description": "Get all products by market",
+            },
+            {
+                "endpoint": "/products/{market_name}/{init_num}/{end_num}",
+                "description": "Get all products by market and range",
+            },
+            {
+                "endpoint": "/size/{market_name}",
+                "description": "Get the size of products by market",
+            },
+            {
+                "endpoint": "/products/{category_id}",
+                "description": "Get all products by category",
+            },
+            {
+                "endpoint": "/product/{product_id}/{market_name}",
+                "description": "Get a product by id and market",
+            },
+            {
+                "endpoint": "/like/{product_id}",
+                "description": "Like a product",
+            },
+            {
+                "endpoint": "/unlike/{product_id}",
+                "description": "Unlike a product",
+            },
+            {
+                "endpoint": "/start_likes",
+                "description": "Start the database with likes",
+                "warning": "This will reset all the likes, only is used when scrapping monthly",
+            },
+        ]
+    }
+
+
 @app.get("/categories")
 def get_categories():
     """
@@ -261,6 +315,46 @@ def get_product(product_id: str, market_name: str):
         return response_list_products_market_02_json_list
 
     # TODO: add market 03 = carrefour
+
+
+@app.get("/products/{market_name}/{init_num}/{end_num}")
+def get_products_by_range(market_name: str, init_num: int, end_num: int):
+    if market_name.lower().strip() == "mercadona":
+        response_products_market_01_json_list = requests.get(
+            "http://api_market_01:8081/products/" + str(init_num) + "/" + str(end_num)
+        ).json()
+        return product_service.map_products_json_list(
+            response_products_market_01_json_list
+        )
+
+    if market_name.lower().strip() == "ahorramas":
+        response_products_market_02_json_list = requests.get(
+            "http://api_market_02:8082/products/" + str(init_num) + "/" + str(end_num)
+        ).json()
+        return product_service.map_products_json_list(
+            response_products_market_02_json_list
+        )
+
+    # TODO: response_products_market_03_json_list
+    return list()
+
+
+@app.get("/size/{market_name}")
+def get_products_by_category(market_name: str):
+    if market_name.lower().strip() == "mercadona":
+        response_products_market_01_json_list = requests.get(
+            "http://api_market_01:8081/size"
+        ).json()
+        return response_products_market_01_json_list
+
+    if market_name.lower().strip() == "ahorramas":
+        response_products_market_02_json_list = requests.get(
+            "http://api_market_02:8082/size"
+        ).json()
+        return response_products_market_02_json_list
+
+    # TODO: last market
+    return 0
 
 
 @app.get("/products/{category_id}")

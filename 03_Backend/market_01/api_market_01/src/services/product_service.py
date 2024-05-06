@@ -7,6 +7,15 @@ class ProductService:
     def __init__(self, product_repository: ProductRepository):
         self.product_repository = product_repository
 
+    def get_size(self):
+        result = self.product_repository.get_size()
+
+        if result.is_failure():
+            print("Failed to get size:", result.error)
+            return []
+
+        return result.value
+
     def get_all_products(self):
         result = self.product_repository.get_all_products()
 
@@ -36,6 +45,21 @@ class ProductService:
 
         if result.is_failure():
             print("Failed to get all products by market name:", result.error)
+            return []
+
+        products_list_json = result.value
+
+        # Removing _id key, we don't want it
+        for product in products_list_json:
+            del product["_id"]
+
+        return products_list_json
+
+    def get_products_by_range(self, init_num, end_num):
+        result = self.product_repository.get_products_by_range(init_num, end_num)
+
+        if result.is_failure():
+            print("Failed to get products by range:", result.error)
             return []
 
         products_list_json = result.value

@@ -42,6 +42,16 @@ def get_products_by_category(category_id: str):
     return product_service.get_all_products_by_category_id(category_id)
 
 
+@app.get("/size")
+def get_size():
+    return product_service.get_size()
+
+
+@app.get("/products/{init_num}/{end_num}")
+def get_products_by_range(init_num: int, end_num: int):
+    return product_service.get_products_by_range(init_num, end_num)
+
+
 @app.get("/product/{uuid}")
 def get_product_by_uuid(uuid: str):
     return product_service.get_product_by_uuid(uuid)

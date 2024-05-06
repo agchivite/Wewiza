@@ -69,6 +69,16 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def get_size(self):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            size = collection.count_documents({})
+            self.db_manager.close_database()
+            return Result.success(size)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def get_all_products(self):
         try:
             database = self.db_manager.connect_database()
@@ -84,6 +94,16 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
             products = list(collection.find({"store_name": market_name}))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_products_by_range(self, init_num, end_num):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find().skip(init_num).limit(end_num - init_num))
             self.db_manager.close_database()
             return Result.success(products)
         except Exception as e:

@@ -31,9 +31,19 @@ def get_all_products():
     return product_service.get_all_products()
 
 
+@app.get("/size")
+def get_size():
+    return product_service.get_size()
+
+
 @app.get("/products/{market_name}")
 def get_all_products_by_market(market_name: str):
     return product_service.get_all_products_by_market(market_name)
+
+
+@app.get("/products/{init_num}/{end_num}")
+def get_products_by_range(init_num: int, end_num: int):
+    return product_service.get_products_by_range(init_num, end_num)
 
 
 @app.post("/insert_new_scrapped_product")
