@@ -18,6 +18,63 @@ product_service = ProductLikesService(product_repository)
 # https://127.0.0.1 -> To call API
 
 
+<<<<<<< HEAD
+=======
+@app.get("/")
+def read_root():
+    # Set all the endpoints
+    return {
+        "endpoints": [
+            {
+                "endpoint": "/",
+                "description": "Root endpoint",
+            },
+            {
+                "endpoint": "/categories",
+                "description": "Get all categories",
+            },
+            {
+                "endpoint": "/products",
+                "description": "Get all products",
+            },
+            {
+                "endpoint": "/products/{market_name}",
+                "description": "Get all products by market",
+            },
+            {
+                "endpoint": "/products/{market_name}/{init_num}/{end_num}",
+                "description": "Get all products by market and range, start index = 0",
+            },
+            {
+                "endpoint": "/size/{market_name}",
+                "description": "Get the size of products by market",
+            },
+            {
+                "endpoint": "/products/{category_id}",
+                "description": "Get all products by category",
+            },
+            {
+                "endpoint": "/product/{product_id}/{market_name}",
+                "description": "Get a product by id and market",
+            },
+            {
+                "endpoint": "/like/{product_id}/{email_user}",
+                "description": "Like a product only one time per user",
+            },
+            {
+                "endpoint": "/unlike/{product_id}/{email_user}",
+                "description": "Unlike a product only one time per user",
+            },
+            {
+                "endpoint": "/start_likes",
+                "description": "Start the database with likes in the same month we are",
+                "warning": "This will reset all the likes, only is used when scrapping monthly",
+            },
+        ]
+    }
+
+
+>>>>>>> origin/feature
 @app.get("/categories")
 def get_categories():
     """

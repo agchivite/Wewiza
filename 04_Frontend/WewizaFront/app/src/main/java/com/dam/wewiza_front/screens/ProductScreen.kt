@@ -119,7 +119,9 @@ fun ProductScreenBodyContent(
         isMercadonaChecked,
         isAhorramasChecked,
         isCarrefourChecked,
-        selectedCategories
+        selectedCategories,
+        viewModel,
+        navController
     )
 }
 
@@ -129,7 +131,9 @@ fun ProductGrid(
     isMercadonaChecked: Boolean,
     isAhorramasChecked: Boolean,
     isCarrefourChecked: Boolean,
-    selectedCategories: MutableState<MutableMap<String, Boolean>>
+    selectedCategories: MutableState<MutableMap<String, Boolean>>,
+    viewModel: ProductScreenViewModel,
+    navController: NavHostController
 ) {
 
     val filteredProducts = products.filter {
@@ -139,21 +143,33 @@ fun ProductGrid(
                 (selectedCategories.value[it.category_id] == true))
     }
     LazyColumn(
+        modifier = Modifier.padding(bottom = 70.dp),
         contentPadding = PaddingValues(8.dp),
         content = {
             items(filteredProducts.size) { index ->
-                ProductItem(filteredProducts[index])
+                ProductItem(filteredProducts[index], viewModel, navController)
             }
         }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductItem(product: Product) {
+fun ProductItem(
+    product: Product,
+    viewModel: ProductScreenViewModel,
+    navController: NavHostController
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        onClick = {
+            sharedViewModel.clearCurrentProduct()
+            sharedViewModel.setCurrentProduct(product)
+            sharedViewModel.setProductHistoryDetails()
+            viewModel.navigateToProductDetailsScreen(navController)
+        }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

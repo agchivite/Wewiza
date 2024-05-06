@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.dam.wewiza_front.models.Product
+import com.dam.wewiza_front.navigation.AppScreens
 import com.dam.wewiza_front.screens.sharedViewModel
 import com.dam.wewiza_front.services.RetrofitServiceFactory
 import kotlinx.coroutines.Dispatchers
@@ -78,6 +80,9 @@ class ProductScreenViewModel : ViewModel() {
         }
     }
 
+    fun navigateToProductDetailsScreen(navController: NavHostController) {
+        navController.navigate(AppScreens.ProductDetailsScreen.route)
+    }
 
 
 }
