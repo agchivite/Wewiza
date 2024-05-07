@@ -24,7 +24,7 @@ class ScrappingService:
         api_market_02_folder = os.path.abspath(
             os.path.join(current_directory, "..", "..")
         )
-        log_error_folder = os.path.join(api_market_02_folder, "log_error_ahorramas")
+        log_error_folder = os.path.join(api_market_02_folder, "log_error_carrefour")
         self.output_folder = log_error_folder
 
         # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
@@ -36,10 +36,10 @@ class ScrappingService:
             os.path.join(current_directory, "..", "..", "static")
         )
         categories_folder = os.path.join(
-            static_folder, "ahorramas_categories_ids_to_scrap"
+            static_folder, "carrefour_categories_urls_to_scrap"
         )
 
-        categories_dict = {}
+        categories_urls_dict = {}
 
         for category_id_wewiza in os.listdir(categories_folder):
             file_path = os.path.join(categories_folder, category_id_wewiza)
@@ -50,20 +50,24 @@ class ScrappingService:
 
                 categories = contenido.split(";")
                 category_id_wewiza = category_id_wewiza.replace(".csv", "")
-                categories_dict[category_id_wewiza] = categories
+                categories_urls_dict[category_id_wewiza] = categories
 
-        self.scrap_categories(categories_dict)
+        self.scrap_categories(categories_urls_dict)
 
+    # https://www.carrefour.es/supermercado/productos-frescos/carniceria/cat20018/c?offset=216
+    # Va de 24 en 24, el offfset:
+    #
+    # Si no da Not found en sus ervidor renvia al cliente a: https://www.carrefour.es/supermercado
     def scrap_categories(self, categories_dict):
         for category_id_wewiza, categories_list in categories_dict.items():
-            for categorie_ahorramas in categories_list:
-                url = f"https://www.ahorramas.com/on/demandware.store/Sites-Ahorramas-Site/es/Search-UpdateGrid?cgid={categorie_ahorramas}&pmin=0.01&start=0&sz=1500"
+            for categorie_carrefour in categories_list:
+                url = f"https://www.ahorramas.com/on/demandware.store/Sites-Ahorramas-Site/es/Search-UpdateGrid?cgid={categorie_carrefour}&pmin=0.01&start=0&sz=1500"
 
                 response = requests.get(url)
                 if response.status_code == 200:
                     print(f"Accessing to page: {url}")
 
-                    output_file = f"output{categorie_ahorramas}.txt"
+                    output_file = f"output{categorie_carrefour}.txt"
                     self.driver.get(url)
 
                     try:
@@ -234,7 +238,7 @@ class ScrappingService:
             only_numbers_price = only_numbers_price.replace(",", ".")
             price_float = float(only_numbers_price)
 
-            store_name = "Ahorramas"
+            store_name = "Carrefour"
             store_image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlu7l3PhGxyJUajK_-O_CQoAaPiOy_kDxdpYm7Gy-n2A&s"
 
             if quantity_measure == "0.0":

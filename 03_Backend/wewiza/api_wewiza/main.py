@@ -3,13 +3,15 @@ from api_wewiza.src.database.database_manager import DatabaseManager
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
 from api_wewiza.src.services.product_likes_service import ProductLikesService
 import requests
+import datetime
 
 app = FastAPI()
 
 # TODO: Inyect with IoC
 CONNECTION_MONGO = "mongodb://root:root@mongo_wewiza:27017"
-DATABASE_NAME = "wewiza_db"
-COLLECTION_NAME = "products_likes"
+DATABASE_NAME = "wewiza"
+COLLECTION_NAME = "products"
+
 # Fachade
 database_manager = DatabaseManager(CONNECTION_MONGO, DATABASE_NAME)
 product_repository = ProductLikesRepository(database_manager, COLLECTION_NAME)
@@ -18,8 +20,6 @@ product_service = ProductLikesService(product_repository)
 # https://127.0.0.1 -> To call API
 
 
-<<<<<<< HEAD
-=======
 @app.get("/")
 def read_root():
     # Set all the endpoints
@@ -74,7 +74,6 @@ def read_root():
     }
 
 
->>>>>>> origin/feature
 @app.get("/categories")
 def get_categories():
     """
@@ -213,11 +212,149 @@ def get_all_products():
     # TODO: add market 03 = carrefour
     response_products_market_03_json_list = list()
 
+    # Map objetcs with LIKES data
+    map_list_market_01 = product_service.map_products_json_list(
+        response_products_market_01_json_list
+    )
+    map_list_market_02 = product_service.map_products_json_list(
+        response_products_market_02_json_list
+    )
+
     return {
-        "mercadona": response_products_market_01_json_list,
-        "ahorramas": response_products_market_02_json_list,
+        "mercadona": filter_current_month_elements(map_list_market_01),
+        "ahorramas": filter_current_month_elements(map_list_market_02),
         "carrefour": response_products_market_03_json_list,
     }
+
+
+@app.get("/products/{market_name}")
+def get_all_products_by_market(market_name: str):
+    if market_name.lower().strip() == "mercadona":
+        response_products_market_01_json_list = requests.get(
+            f"http://api_market_01:8081/products/Mercadona"
+        ).json()
+        map_list_market_01 = product_service.map_products_json_list(
+            response_products_market_01_json_list
+        )
+        return filter_current_month_elements(map_list_market_01)
+
+    if market_name.lower().strip() == "ahorramas":
+        response_products_market_02_json_list = requests.get(
+            f"http://api_market_02:8082/products/Ahorramas"
+        ).json()
+        map_list_market_02 = product_service.map_products_json_list(
+            response_products_market_02_json_list
+        )
+        return filter_current_month_elements(map_list_market_02)
+
+    # TODO: add market 03 = carrefour
+
+
+def filter_current_month_elements(elements):
+    current_date_time = datetime.datetime.now()
+    current_month = current_date_time.month  # Obtener el mes actual
+
+    filtered_elements = [
+        element
+        for element in elements
+        if parse_date(element["date_created"]).month == current_month
+    ]
+
+    return filtered_elements
+
+
+def parse_date(date_str):
+    return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+
+
+# Is for details of a product an his chart with historical
+@app.get("/product/{product_id}/{market_name}")
+def get_product(product_id: str, market_name: str):
+
+    if market_name.lower().strip() == "mercadona":
+        response_product_market_01_json = requests.get(
+            "http://api_market_01:8081/product/" + product_id
+        ).json()
+        mapped_product = product_service.map_product_json(
+            response_product_market_01_json
+        )
+        response_list_products_market_01_json_list = requests.get(
+            "http://api_market_01:8081/product/name/" + mapped_product["name"]
+        ).json()
+
+        product_uuid = mapped_product["uuid"]
+        response_list_products_market_01_json_list = [
+            product
+            for product in response_list_products_market_01_json_list
+            if product.get("uuid") != product_uuid
+        ]
+
+        response_list_products_market_01_json_list.append(mapped_product)
+        return response_list_products_market_01_json_list
+
+    if market_name.lower().strip() == "ahorramas":
+        response_product_market_02_json = requests.get(
+            "http://api_market_02:8082/product/" + product_id
+        ).json()
+        mapped_product = product_service.map_product_json(
+            response_product_market_02_json
+        )
+        response_list_products_market_02_json_list = requests.get(
+            "http://api_market_02:8082/product/name/" + mapped_product["name"]
+        ).json()
+
+        product_uuid = mapped_product["uuid"]
+        response_list_products_market_02_json_list = [
+            product
+            for product in response_list_products_market_02_json_list
+            if product.get("uuid") != product_uuid
+        ]
+
+        response_list_products_market_02_json_list.append(mapped_product)
+
+        return response_list_products_market_02_json_list
+
+    # TODO: add market 03 = carrefour
+
+
+@app.get("/products/{market_name}/{init_num}/{end_num}")
+def get_products_by_range(market_name: str, init_num: int, end_num: int):
+    if market_name.lower().strip() == "mercadona":
+        response_products_market_01_json_list = requests.get(
+            "http://api_market_01:8081/products/" + str(init_num) + "/" + str(end_num)
+        ).json()
+        return product_service.map_products_json_list(
+            response_products_market_01_json_list
+        )
+
+    if market_name.lower().strip() == "ahorramas":
+        response_products_market_02_json_list = requests.get(
+            "http://api_market_02:8082/products/" + str(init_num) + "/" + str(end_num)
+        ).json()
+        return product_service.map_products_json_list(
+            response_products_market_02_json_list
+        )
+
+    # TODO: response_products_market_03_json_list
+    return list()
+
+
+@app.get("/size/{market_name}")
+def get_products_by_category(market_name: str):
+    if market_name.lower().strip() == "mercadona":
+        response_products_market_01_json_list = requests.get(
+            "http://api_market_01:8081/size"
+        ).json()
+        return response_products_market_01_json_list
+
+    if market_name.lower().strip() == "ahorramas":
+        response_products_market_02_json_list = requests.get(
+            "http://api_market_02:8082/size"
+        ).json()
+        return response_products_market_02_json_list
+
+    # TODO: last market
+    return 0
 
 
 @app.get("/products/{category_id}")
@@ -233,21 +370,53 @@ def get_products_by_category(category_id: str):
     # TODO: add market 03 = carrefour
     response_products_market_03_json_list = list()
 
+    # Map objetcs with LIKES data
+    map_list_market_01 = product_service.map_products_json_list(
+        response_products_market_01_json_list
+    )
+    map_list_market_02 = product_service.map_products_json_list(
+        response_products_market_02_json_list
+    )
+
+    # TODO: Filter products that are in the same month that today
+
     return {
-        "mercadona": response_products_market_01_json_list,
-        "ahorramas": response_products_market_02_json_list,
+        "mercadona": map_list_market_01,
+        "ahorramas": map_list_market_02,
         "carrefour": response_products_market_03_json_list,
     }
 
 
-@app.get("/update_likes_database")
-def update_database():
+@app.get("/like/{product_id}/{email_user}")
+def like_product(product_id: str, email_user: str):
+    messsage = product_service.like_product(product_id, email_user)
+    return {"message": str(messsage)}
+
+
+@app.get("/unlike/{product_id}/{email_user}")
+def unlike_product(product_id: str, email_user: str):
+    messsage = product_service.unlike_product(product_id, email_user)
+    return {"message": str(messsage)}
+
+
+# TODO: endpoint to check if a user has liked a product and unliked
+
+
+@app.get("/start_likes")
+def start_likes_database():
     response_products_market_01_json_list = requests.get(
-        "http://api_market_01:8081/get_all_products"
+        "http://api_market_01:8081/products"
     ).json()
 
-    product_service.insert_products_json_list(response_products_market_01_json_list)
+    response_products_market_02_json_list = requests.get(
+        "http://api_market_02:8082/products"
+    ).json()
 
-    # TODO: market_02 and market_03
+    # TODO: market_03
+
+    product_service.delete_all_products_by_actual_month()
+
+    product_service.insert_products_json_list(response_products_market_01_json_list)
+    product_service.insert_products_json_list(response_products_market_02_json_list)
 
     return {"message": "Database likes updated"}

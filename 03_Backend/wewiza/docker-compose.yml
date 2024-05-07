@@ -14,6 +14,8 @@ services:
       - public-wewiza-network
       - private-wewiza-network
     command: uvicorn api_wewiza.main:app --host 0.0.0.0 --port 443 --ssl-keyfile=/certs/ssl/server.key --ssl-certfile=/certs/ssl/server.cer --reload
+    depends_on:
+      - mongo_wewiza
 
   mongo_wewiza:
     # apcheamitru/arm32v7-mongo:3.2.20 # mongo:6.0.13

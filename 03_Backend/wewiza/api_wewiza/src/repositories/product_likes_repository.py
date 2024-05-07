@@ -1,6 +1,7 @@
 from python_on_rails.result import Result
 from api_wewiza.src.schemas.product_likes_schema import product_likes_schema
 from api_wewiza.src.database.database_manager import DatabaseManager
+import datetime
 
 
 class ProductLikesRepository:
@@ -20,18 +21,28 @@ class ProductLikesRepository:
         except Exception as e:
             return Result.failure(str(e))
 
-    def insert_product_json(self, product_data_json):
+    def insert_products_json(self, products_data):
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
 
-            existing_product = collection.find_one({"uuid": product_data_json["uuid"]})
-            if existing_product:
-                return Result.failure("Product with the same UUID already exists")
-            print(product_data_json)
-            result = collection.insert_one(product_data_json)
+            existing_uuids = [
+                product["uuid"]
+                for product in collection.find(
+                    {"uuid": {"$in": [product["uuid"] for product in products_data]}}
+                )
+            ]
+            filtered_products_data = [
+                product
+                for product in products_data
+                if product["uuid"] not in existing_uuids
+            ]
+
+            if filtered_products_data:
+                collection.insert_many(filtered_products_data)
+
             self.db_manager.close_database()
-            return Result.success(result.inserted_id)
+            return Result.success(None)
         except Exception as e:
             return Result.failure(str(e))
 
@@ -59,8 +70,43 @@ class ProductLikesRepository:
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
-            result = collection.update_one(query, {"$set": new_data})
+            result = collection.update_one(query, new_data)
             self.db_manager.close_database()
             return Result.success(result.modified_count)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_product_by_query(self, query):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            product = collection.find_one(query)
+            self.db_manager.close_database()
+            return Result.success(product)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_products_by_uuids(self, uuids):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find({"uuid": {"$in": uuids}}))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def delete_all_products_by_actual_month(self):
+        # get month and year from actual date
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y-%m")
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            result = collection.delete_many(
+                {"date_created": {"$regex": f"^{formatted_date}"}}
+            )
+            self.db_manager.close_database()
+            return Result.success(result.deleted_count)
         except Exception as e:
             return Result.failure(str(e))

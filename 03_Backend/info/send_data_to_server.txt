@@ -1,2 +1,0 @@
-1. Run containers in docker-compose with -> mongo:6.0.13 
-2. Must do it from a PC with Chrome Browser and run file: run_scrapping.py

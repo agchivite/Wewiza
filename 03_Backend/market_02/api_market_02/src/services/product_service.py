@@ -7,6 +7,24 @@ class ProductService:
     def __init__(self, product_repository: ProductRepository):
         self.product_repository = product_repository
 
+    def update_all_date(self):
+        result = self.product_repository.update_all_date()
+
+        if result.is_failure():
+            print("Failed to update all products:", result.error)
+            return []
+
+        return result.value
+
+    def get_size(self):
+        result = self.product_repository.get_size()
+
+        if result.is_failure():
+            print("Failed to get size:", result.error)
+            return []
+
+        return result.value
+
     def get_all_products(self):
         result = self.product_repository.get_all_products()
 
@@ -31,11 +49,70 @@ class ProductService:
         else:
             return result.value
 
+    def get_all_products_by_market(self, market_name):
+        result = self.product_repository.get_all_products_by_market(market_name)
+
+        if result.is_failure():
+            print("Failed to get all products by market name:", result.error)
+            return []
+
+        products_list_json = result.value
+
+        # Removing _id key, we don't want it
+        for product in products_list_json:
+            del product["_id"]
+
+        return products_list_json
+
+    def get_products_by_range(self, init_num, end_num):
+        result = self.product_repository.get_products_by_range(init_num, end_num)
+
+        if result.is_failure():
+            print("Failed to get products by range:", result.error)
+            return []
+
+        products_list_json = result.value
+
+        # Removing _id key, we don't want it
+        for product in products_list_json:
+            del product["_id"]
+
+        return products_list_json
+
     def get_all_products_by_category_id(self, category_id):
         result = self.product_repository.get_all_products_by_category_id(category_id)
 
         if result.is_failure():
             print("Failed to get all products by category id:", result.error)
+            return []
+
+        products_list_json = result.value
+
+        # Removing _id key, we don't want it
+        for product in products_list_json:
+            del product["_id"]
+
+        return products_list_json
+
+    def get_product_by_uuid(self, uuid):
+        result = self.product_repository.get_product_by_uuid(uuid)
+
+        if result.is_failure():
+            print("Failed to get product by uuid:", result.error)
+            return []
+
+        product_json = result.value
+
+        # Removing _id key, we don't want it
+        del product_json["_id"]
+
+        return product_json
+
+    def get_products_by_name(self, product_name):
+        result = self.product_repository.get_products_by_name(product_name)
+
+        if result.is_failure():
+            print("Failed to get products by name:", result.error)
             return []
 
         products_list_json = result.value

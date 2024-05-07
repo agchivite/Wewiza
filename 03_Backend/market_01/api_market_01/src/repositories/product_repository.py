@@ -25,28 +25,22 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
 
-            existing_product_name = collection.find_one({"name": product_data["name"]})
-            existing_product_price = collection.find_one(
-                {"price": product_data["price"]}
-            )
-
             # Check if is scrapped in the same day
             # We can find in mongo compass with: { date_created: { $regex: /^2024-04-21/}}
             product_date_created = product_data["date_created"].split()[0]
-            existing_product_date = collection.find_one(
-                {"date_created": {"$regex": f"^{product_date_created}"}}
+            existing_product = collection.find_one(
+                {
+                    "$and": [
+                        {"name": product_data["name"]},
+                        {"date_created": {"$regex": f"^{product_date_created}"}},
+                    ]
+                }
             )
 
-            if (
-                existing_product_name
-                and existing_product_price
-                and existing_product_date
-            ):
+            if existing_product:
                 return Result.failure(
                     "Product already exists: "
                     + product_data["name"]
-                    + " and price: "
-                    + str(product_data["price"])
                     + " and date: "
                     + str(product_data["date_created"])
                 )
@@ -59,11 +53,31 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def get_size(self):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            size = collection.count_documents({})
+            self.db_manager.close_database()
+            return Result.success(size)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def get_all_products(self):
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
             products = list(collection.find())
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_all_products_by_market(self, market_name):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find({"store_name": market_name}))
             self.db_manager.close_database()
             return Result.success(products)
         except Exception as e:
@@ -79,11 +93,51 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def get_products_by_range(self, init_num, end_num):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find().skip(init_num).limit(end_num - init_num))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_product_by_uuid(self, uuid):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            product = collection.find_one({"uuid": uuid})
+            self.db_manager.close_database()
+            return Result.success(product)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_products_by_name(self, product_name):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find({"name": product_name}))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def delete_product(self, query):
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
             result = collection.delete_one(query)
+            self.db_manager.close_database()
+            return Result.success(result.deleted_count)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def delete_products_by_date(self, date):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            result = collection.delete_many({"date_created": {"$regex": f"^{date}"}})
             self.db_manager.close_database()
             return Result.success(result.deleted_count)
         except Exception as e:
