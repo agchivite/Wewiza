@@ -48,6 +48,7 @@ def read_root():
             {
                 "endpoint": "/size/{market_name}",
                 "description": "Get the size of products by market",
+                "return": "number",
             },
             {
                 "endpoint": "/products/{category_id}",
@@ -60,10 +61,16 @@ def read_root():
             {
                 "endpoint": "/like/{product_id}/{email_user}",
                 "description": "Like a product only one time per user",
+                "return": "true if liked or false if was liked before",
             },
             {
                 "endpoint": "/unlike/{product_id}/{email_user}",
                 "description": "Unlike a product only one time per user",
+                "return": "true if unliked or false if was unliked before",
+            },
+            {
+                "endpoint": "/reaction/{email_user}/product/{product_id}",
+                "description": "Check if a user has liked a product",
             },
             {
                 "endpoint": "/start_likes",
@@ -72,6 +79,12 @@ def read_root():
             },
         ]
     }
+
+
+@app.get("/reaction/{email_user}/product/{product_id}")
+def get_reaction(email_user: str, product_id: str):
+    reaction = product_service.get_reaction(email_user, product_id)
+    return {"reaction": reaction}
 
 
 @app.get("/categories")
@@ -389,14 +402,14 @@ def get_products_by_category(category_id: str):
 
 @app.get("/like/{product_id}/{email_user}")
 def like_product(product_id: str, email_user: str):
-    messsage = product_service.like_product(product_id, email_user)
-    return {"message": str(messsage)}
+    boolean_result = product_service.like_product(product_id, email_user)
+    return {"result": boolean_result}
 
 
 @app.get("/unlike/{product_id}/{email_user}")
 def unlike_product(product_id: str, email_user: str):
-    messsage = product_service.unlike_product(product_id, email_user)
-    return {"message": str(messsage)}
+    boolean_result = product_service.unlike_product(product_id, email_user)
+    return {"result": boolean_result}
 
 
 # TODO: endpoint to check if a user has liked a product and unliked

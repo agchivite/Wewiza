@@ -16,10 +16,12 @@ class ProductLikesService:
         ).value
 
         if not product_data:
-            return "Product not found"
+            print("PRODUCT_LIKES_SERVICE: Product not found")
+            return False
 
         if email_user in product_data.get("likes_email", []):
-            return "Product was liked before by " + email_user
+            print("PRODUCT_LIKES_SERVICE: Product was liked before by " + email_user)
+            return False
 
         new_num_likes = product_data.get("num_likes", 0) + 1
         likes_emails = product_data.get("likes_email", [])
@@ -37,7 +39,7 @@ class ProductLikesService:
             update_data["$set"]["num_likes"] = new_num_likes + 1
 
         self.product_likes_repository.update_product(update_query, update_data)
-        return "Product liked"
+        return True
 
     def unlike_product(self, product_id, email_user):
         uuid_query = {"uuid": product_id}
@@ -46,10 +48,12 @@ class ProductLikesService:
         ).value
 
         if not product_data:
-            return "Product not found"
+            print("PRODUCT_LIKES_SERVICE: Product not found")
+            return False
 
         if email_user in product_data.get("unlikes_email", []):
-            return "Product was unliked before by " + email_user
+            print("PRODUCT_LIKES_SERVICE: Product was unliked before by " + email_user)
+            return False
 
         new_num_likes = product_data.get("num_likes", 0) - 1
         unlikes_emails = product_data.get("unlikes_email", [])
@@ -67,7 +71,24 @@ class ProductLikesService:
             update_data["$set"]["num_likes"] = new_num_likes - 1
 
         self.product_likes_repository.update_product(update_query, update_data)
-        return "Product unliked"
+        return True
+
+    def get_reaction(self, email_user, product_id):
+        uuid_query = {"uuid": product_id}
+        product_data = self.product_likes_repository.get_product_by_query(
+            uuid_query
+        ).value
+
+        if not product_data:
+            return "Product not found"
+
+        if email_user in product_data.get("likes_email", []):
+            return "liked"
+
+        if email_user in product_data.get("unlikes_email", []):
+            return "unliked"
+
+        return "none"
 
     def insert_products_json_list(self, products_json_list):
         products_data = [
