@@ -55,8 +55,19 @@ def read_root():
                 "description": "Get all products by category",
             },
             {
-                "endpoint": "/product/{product_id}/{market_name}",
-                "description": "Get a product by id and market",
+                "endpoint": "/product/{product_id}",
+                "description": "Product details by id",
+                "not found": "return {name: 'Product not found'}",
+            },
+            {
+                "endpoint": "/product/details/{product_id}",
+                "description": "List of same product with different date_created, the latest one will be the main product",
+                "not found": "return empty list",
+            },
+            {
+                "endpoint": "/product/details/{product_id}/{market_name}",
+                "description": "List of same product with different date_created, the latest one will be the main product",
+                "not found": "return empty list",
             },
             {
                 "endpoint": "/like/{product_id}/{email_user}",
@@ -280,9 +291,34 @@ def parse_date(date_str):
     return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
 
-# Is for details of a product an his chart with historical
-@app.get("/product/{product_id}/{market_name}")
-def get_product(product_id: str, market_name: str):
+@app.get("/product/{product_id}")
+def get_product_by_id(product_id: str):
+    response_product_market_01_raw_json = requests.get(
+        "http://api_market_01:8081/product/" + product_id
+    )
+
+    if response_product_market_01_raw_json.status_code == 200:
+        mapped_product = product_service.map_product_json(
+            response_product_market_01_raw_json.json()
+        )
+        return mapped_product
+
+    response_product_market_02_raw_json = requests.get(
+        "http://api_market_02:8082/product/" + product_id
+    )
+
+    if response_product_market_02_raw_json.status_code == 200:
+        mapped_product = product_service.map_product_json(
+            response_product_market_02_raw_json.json()
+        )
+        return mapped_product
+
+    # TODO: response_product_market_03_json
+    return {"name": "Product not found"}
+
+
+@app.get("/product/details/{product_id}/{market_name}")
+def get_product_details_by_id_and_market(product_id: str, market_name: str):
 
     if market_name.lower().strip() == "mercadona":
         response_product_market_01_json = requests.get(
@@ -328,6 +364,53 @@ def get_product(product_id: str, market_name: str):
         return response_list_products_market_02_json_list
 
     # TODO: add market 03 = carrefour
+
+
+@app.get("/product/details/{product_id}")
+def get_product_details_by_id(product_id: str):
+    # MARKET 01
+    response_product_market_01_json = requests.get(
+        "http://api_market_01:8081/product/" + product_id
+    ).json()
+    mapped_product = product_service.map_product_json(response_product_market_01_json)
+    response_list_products_market_01_json_list = requests.get(
+        "http://api_market_01:8081/product/name/" + mapped_product["name"]
+    ).json()
+
+    product_uuid = mapped_product["uuid"]
+    response_list_products_market_01_json_list = [
+        product
+        for product in response_list_products_market_01_json_list
+        if product.get("uuid") != product_uuid
+    ]
+
+    response_list_products_market_01_json_list.append(mapped_product)
+    if response_list_products_market_01_json_list != []:
+        return response_list_products_market_01_json_list
+
+    # MARKET 02
+    response_product_market_02_json = requests.get(
+        "http://api_market_02:8082/product/" + product_id
+    ).json()
+    mapped_product = product_service.map_product_json(response_product_market_02_json)
+    response_list_products_market_02_json_list = requests.get(
+        "http://api_market_02:8082/product/name/" + mapped_product["name"]
+    ).json()
+
+    product_uuid = mapped_product["uuid"]
+    response_list_products_market_02_json_list = [
+        product
+        for product in response_list_products_market_02_json_list
+        if product.get("uuid") != product_uuid
+    ]
+
+    response_list_products_market_02_json_list.append(mapped_product)
+
+    if response_list_products_market_02_json_list != []:
+        return response_list_products_market_02_json_list
+
+    # TODO: response_product_market_03_json
+    return list()
 
 
 @app.get("/products/{market_name}/{init_num}/{end_num}")
