@@ -67,7 +67,7 @@ object Constants {
                 BottomMenuItem(
                     icon = R.drawable.google,
                     text = "Sugerencias",
-                    onClick = { navController.navigate(AppScreens.SuggestionScreen.route) }
+                    onClick = { navController.navigate(AppScreens.MyListScreen.route) }
                 )
                 BottomMenuItem(
                     icon = R.drawable.google,

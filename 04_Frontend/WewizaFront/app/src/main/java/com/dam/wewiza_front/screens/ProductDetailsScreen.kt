@@ -36,6 +36,7 @@ import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.ProductDetailsScreenViewModel
 import com.dam.wewiza_front.viewModels.SharedViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -73,8 +74,8 @@ fun ProductDetailsScreenBodyContent(
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
     ) {
         PhotoField(currentProduct)
-        ProductDetailsFields(currentProduct,viewModel)
-        GraphicField(viewModel)
+        ProductDetailsFields(currentProduct, viewModel)
+       // GraphicField(viewModel)
     }
 
 }
@@ -94,7 +95,12 @@ fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
             Offset(index.toFloat(), (canvasHeight - normalizedPrice).toFloat())
         }
 
-        Canvas(modifier = Modifier.fillMaxWidth().background(Color.Blue).height(canvasHeight.dp)) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Blue)
+                .height(canvasHeight.dp)
+        ) {
             val path = Path().apply {
                 moveTo(entries.first().x, entries.first().y)
                 entries.drop(1).forEach { point ->
@@ -112,6 +118,7 @@ fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
         Text(text = "No hay datos para mostrar")
     }
 }
+
 @Composable
 fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScreenViewModel) {
     Column(
@@ -120,21 +127,30 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
             .fillMaxWidth()
     ) {
 
+        val auth = FirebaseAuth.getInstance()
+
         Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
 
-            Column (modifier = Modifier.padding(20.dp)){
+            Column(modifier = Modifier.padding(20.dp)) {
                 Text(text = "Nombre: ${currentProduct.name}")
                 Text(text = "Tienda: ${currentProduct.store_name}")
                 Text(text = "Precio: ${currentProduct.price} €")
             }
 
             Row(modifier = Modifier.padding(20.dp)) {
-                Button(onClick = { viewModel.unlikeProduct(currentProduct.uuid) }) {
+                Button(onClick = {
+                    viewModel.unlikeProduct(currentProduct.uuid)
+
+                    viewModel.updateUserReviews()
+                }) {
                     Text(text = "-")
                 }
                 Text(text = currentProduct.num_likes.toString())
 
-                Button(onClick = { viewModel.likeProduct(currentProduct.uuid) }) {
+                Button(onClick = {
+                    viewModel.likeProduct(currentProduct.uuid)
+                    viewModel.updateUserReviews()
+                }) {
                     Text(text = "+")
                 }
             }

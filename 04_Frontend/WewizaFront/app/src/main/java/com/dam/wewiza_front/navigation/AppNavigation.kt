@@ -45,10 +45,10 @@ fun AppNavigation(
     categoriesScreenViewModel: CategoriesScreenViewModel,
     profileScreenViewModel: ProfileScreenViewModel?,
     settingsScreenViewModel: SettingsScrennViewModel,
-    myListsScreenViewModel: MyListsScreenViewModel,
+    myListsScreenViewModel: MyListsScreenViewModel?,
     customerSupportScreenViewModel: CustomerSupportScreenViewModel,
     productScreenViewModel: ProductScreenViewModel,
-    productDetailsScreenViewModel: ProductDetailsScreenViewModel,
+    productDetailsScreenViewModel: ProductDetailsScreenViewModel?,
     mainActivity: MainActivity
 ) {
     val navController = rememberNavController()
@@ -98,7 +98,11 @@ fun AppNavigation(
             SettingsScreen(settingsScreenViewModel, navController, mainActivity)
         }
         composable(route = AppScreens.MyListScreen.route){
-            MyListsScreen(myListsScreenViewModel, navController)
+            if (myListsScreenViewModel != null) {
+                MyListsScreen(myListsScreenViewModel, navController)
+            } else {
+                WelcomeScreen(welcomeScreenViewModel, navController)
+            }
         }
         composable(route = AppScreens.CustomerSupportScreen.route){
             CustomerSupportScreen(customerSupportScreenViewModel, navController)
@@ -107,7 +111,11 @@ fun AppNavigation(
             ProductScreen(productScreenViewModel, navController)
         }
         composable(route = AppScreens.ProductDetailsScreen.route){
-            ProductDetailsScreen(productDetailsScreenViewModel, navController)
+            if (productDetailsScreenViewModel != null) {
+                ProductDetailsScreen(productDetailsScreenViewModel, navController)
+            } else {
+                WelcomeScreen(welcomeScreenViewModel, navController)
+            }
         }
     }
 }

@@ -5,24 +5,19 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dam.wewiza_front.models.Categories
 import com.dam.wewiza_front.models.Category
 import com.dam.wewiza_front.models.Product
-import com.dam.wewiza_front.screens.sharedViewModel
+import com.dam.wewiza_front.models.Profile
+import com.dam.wewiza_front.models.ShoppingList
 import com.dam.wewiza_front.services.RetrofitServiceFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SharedViewModel: ViewModel() {
+class SharedViewModel : ViewModel() {
 
-    private val currentProduct = mutableStateOf<Product?>(null)
-    private val loadedCategories = mutableListOf<Category>()
-    private val loadedProducts = mutableListOf<Product>()
-    var selectedCategories: MutableState<MutableState<MutableMap<String, Boolean>>> = mutableStateOf(
-        mutableStateOf(loadedCategories.associate { it.id to true }.toMutableMap()))
 
-    private val productHistoryDetails = mutableListOf<Product>()
+    /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AFTER THIS, THERE ARE THE UTILS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 
     private val service = RetrofitServiceFactory.makeRetrofitService()
 
@@ -30,12 +25,49 @@ class SharedViewModel: ViewModel() {
         val instance: SharedViewModel by lazy { SharedViewModel() }
     }
 
+
+    /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AFTER THIS, THERE ARE ALL THE VARIABLES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+
+
+    private val currentProduct = mutableStateOf<Product?>(null)
+    private val loadedCategories = mutableListOf<Category>()
+    private val loadedProducts = mutableListOf<Product>()
+    var selectedCategories: MutableState<MutableState<MutableMap<String, Boolean>>> =
+        mutableStateOf(
+            mutableStateOf(loadedCategories.associate { it.id to true }.toMutableMap())
+        )
+    private val productHistoryDetails = mutableListOf<Product>()
+    private val loggedUserProfile = mutableStateOf<Profile?>(null)
+    private val localShoppingList = mutableStateOf<List<ShoppingList>?>(null)
+
+
+    /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AFTER THIS, THERE ARE ALL THE FUNCTIONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+
+
+    fun setLocalShoppingList(shoppingList: List<ShoppingList>?) {
+        localShoppingList.value = shoppingList
+    }
+
+    fun getLocalShoppingList(): MutableState<List<ShoppingList>?> {
+        return localShoppingList
+    }
+
+    fun setLocalProfile(profile: Profile?) {
+        if (profile != null) {
+            this.loggedUserProfile.value = profile
+        }
+    }
+
+    fun getLocalProfile(): MutableState<Profile?> {
+        return loggedUserProfile
+    }
+
     fun getCategories(): MutableList<Category> {
-         return loadedCategories
+        return loadedCategories
     }
 
     fun getProducts(): MutableList<Product> {
-         return loadedProducts
+        return loadedProducts
     }
 
     fun setCategories(categories: MutableList<Category>) {
@@ -53,7 +85,8 @@ class SharedViewModel: ViewModel() {
     }
 
     fun resetSelectedCategories() {
-        selectedCategories.value.value = loadedCategories.associate { it.id to false }.toMutableMap()
+        selectedCategories.value.value =
+            loadedCategories.associate { it.id to false }.toMutableMap()
     }
 
     fun getCurrentProduct(): Product {
@@ -75,7 +108,7 @@ class SharedViewModel: ViewModel() {
     }
 
     fun getHistoryDetails(): MutableList<Product> {
-       return productHistoryDetails
+        return productHistoryDetails
     }
 
 
@@ -92,5 +125,11 @@ class SharedViewModel: ViewModel() {
                 Log.d("ProductDetailsScreenViewModel", "getProductHistoryDetails: ${e.message}")
             }
         }
+    }
+
+    fun resetLocalData() {
+        loggedUserProfile.value = null
+        productHistoryDetails.clear()
+        localShoppingList.value = null
     }
 }

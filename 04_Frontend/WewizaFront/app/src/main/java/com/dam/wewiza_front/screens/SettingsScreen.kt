@@ -95,7 +95,7 @@ fun SettingsScreenBodyContent(
 
 
         Spacer(modifier = Modifier.height(20.dp))
-        DeleteAccountSection(viewModel, navController, context)
+        DeleteAccountSection(viewModel, navController, context, mainActivity)
         Spacer(modifier = Modifier.height(20.dp))
     }
 }
@@ -163,13 +163,14 @@ fun AboutUsSection(navController: NavController) {
 fun DeleteAccountSection(
     viewModel: SettingsScrennViewModel,
     navController: NavController,
-    context: Context
+    context: Context,
+    mainActivity: MainActivity
 ) {
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             onClick = {
-                viewModel.deleteAccount(navController, context)
+                viewModel.deleteAccount(navController, context, mainActivity)
 
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Red)

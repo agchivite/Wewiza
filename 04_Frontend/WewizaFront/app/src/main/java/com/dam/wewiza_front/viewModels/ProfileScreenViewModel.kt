@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.storage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ProfileScreenViewModel() : ViewModel() {
@@ -23,6 +24,7 @@ class ProfileScreenViewModel() : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
     private lateinit var user: FirebaseUser
+    private val sharedViewModel = SharedViewModel.instance
 
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         if (firebaseAuth.currentUser != null) {
@@ -41,7 +43,7 @@ class ProfileScreenViewModel() : ViewModel() {
 
     private fun loadProfileData() {
         user = auth.currentUser!!
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             isLoading.value = true
             recoverProfileData(user)
             isLoading.value = false
@@ -59,6 +61,7 @@ class ProfileScreenViewModel() : ViewModel() {
                     val loadedProfile = document.toObject(Profile::class.java)
                     Log.d("Profile", "Profile data recovered")
                     profile.value = loadedProfile
+                    sharedViewModel.setLocalProfile(loadedProfile)
                 } else {
                     Log.d("Profile", "Profile data not found")
                 }
