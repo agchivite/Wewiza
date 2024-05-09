@@ -39,10 +39,19 @@ class SharedViewModel : ViewModel() {
     private val productHistoryDetails = mutableListOf<Product>()
     private val loggedUserProfile = mutableStateOf<Profile?>(null)
     private val localShoppingList = mutableStateOf<List<ShoppingList>?>(null)
+    private val selectedList = mutableStateOf<ShoppingList?>(null)
 
 
     /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AFTER THIS, THERE ARE ALL THE FUNCTIONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 
+
+    fun setSelectedList(shoppingList: ShoppingList) {
+        selectedList.value = shoppingList
+    }
+
+    fun getSelectedList(): MutableState<ShoppingList?> {
+        return selectedList
+    }
 
     fun setLocalShoppingList(shoppingList: List<ShoppingList>?) {
         localShoppingList.value = shoppingList

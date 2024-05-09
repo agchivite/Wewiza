@@ -6,11 +6,11 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dam.wewiza_front.models.Product
+import androidx.navigation.NavHostController
 import com.dam.wewiza_front.models.Profile
 import com.dam.wewiza_front.models.ShoppingList
+import com.dam.wewiza_front.navigation.AppScreens
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -101,6 +101,12 @@ class MyListsScreenViewModel: ViewModel() {
             }
 
         }
+    }
+
+    fun navigateToListScreen(navController: NavHostController, uuid: String) {
+        val selectedList = myLists.value.find { it.uuid == uuid }
+        sharedViewModel.setSelectedList(selectedList!!)
+        navController.navigate( AppScreens.ListScreen.route)
     }
 
 

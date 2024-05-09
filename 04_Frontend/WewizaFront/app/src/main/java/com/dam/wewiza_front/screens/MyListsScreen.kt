@@ -129,6 +129,9 @@ private fun MyListItem(
                 detectTapGestures(
                     onLongPress = {
                         onLongPressItem(shoppingList.uuid)
+                    },
+                    onPress = {
+                        viewModel.navigateToListScreen(navController, shoppingList.uuid)
                     }
                 )
             },

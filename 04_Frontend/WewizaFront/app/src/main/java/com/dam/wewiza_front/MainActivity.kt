@@ -11,6 +11,7 @@ import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
 import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
+import com.dam.wewiza_front.viewModels.ListScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
 import com.dam.wewiza_front.viewModels.MyListsScreenViewModel
 import com.dam.wewiza_front.viewModels.ProductDetailsScreenViewModel
@@ -62,6 +63,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
 
         val customerSupportViewModel = get<CustomerSupportScreenViewModel>()
         val productScreenViewModel = get<ProductScreenViewModel>()
+        val listScreenViewModel = get<ListScreenViewModel>()
 
         setContent {
             WewizaFrontTheme {
@@ -81,6 +83,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
                         customerSupportViewModel,
                         productScreenViewModel,
                         productDetailsScreenViewModel,
+                        listScreenViewModel,
                         this
                     )
                 }

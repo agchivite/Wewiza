@@ -9,6 +9,7 @@ import com.dam.wewiza_front.screens.AboutUsScreen
 import com.dam.wewiza_front.screens.CategoriesScreen
 import com.dam.wewiza_front.screens.CustomerSupportScreen
 import com.dam.wewiza_front.screens.HomeScreen
+import com.dam.wewiza_front.screens.ListScreen
 import com.dam.wewiza_front.screens.LoginScreen
 import com.dam.wewiza_front.screens.MyListsScreen
 import com.dam.wewiza_front.screens.ProductDetailsScreen
@@ -22,6 +23,7 @@ import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
 import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
+import com.dam.wewiza_front.viewModels.ListScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
 import com.dam.wewiza_front.viewModels.MyListsScreenViewModel
 import com.dam.wewiza_front.viewModels.ProductDetailsScreenViewModel
@@ -49,6 +51,7 @@ fun AppNavigation(
     customerSupportScreenViewModel: CustomerSupportScreenViewModel,
     productScreenViewModel: ProductScreenViewModel,
     productDetailsScreenViewModel: ProductDetailsScreenViewModel?,
+    listScreenViewModel: ListScreenViewModel,
     mainActivity: MainActivity
 ) {
     val navController = rememberNavController()
@@ -116,6 +119,10 @@ fun AppNavigation(
             } else {
                 WelcomeScreen(welcomeScreenViewModel, navController)
             }
+        }
+
+        composable(route = AppScreens.ListScreen.route){
+            ListScreen(listScreenViewModel, navController)
         }
     }
 }
