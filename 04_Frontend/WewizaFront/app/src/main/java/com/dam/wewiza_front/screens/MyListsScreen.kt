@@ -1,26 +1,21 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
-import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -34,12 +29,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.ShoppingList
 import com.dam.wewiza_front.ui.theme.MyLightTheme
@@ -56,9 +51,8 @@ fun MyListsScreen(myListScreenViewModel: MyListsScreenViewModel, navController: 
             }
         ) {
             var showDialog = mutableStateOf(false)
-            val selectedItemUuid = remember { mutableStateOf<String?>("") }
 
-            MyListsScreenBodyContent(myListScreenViewModel, navController, showDialog, selectedItemUuid)
+            MyListsScreenBodyContent(myListScreenViewModel, navController, showDialog)
         }
     }
 }
@@ -68,7 +62,6 @@ fun MyListsScreenBodyContent(
     viewModel: MyListsScreenViewModel,
     navController: NavHostController,
     showDialog: MutableState<Boolean>,
-    selectedItemUuid: MutableState<String?>
 ) {
     Column(
         modifier = Modifier
@@ -79,24 +72,9 @@ fun MyListsScreenBodyContent(
             val myLists by remember { viewModel.myLists }
 
             LazyColumn {
-                items(myLists) { shoppingList ->
+                items(myLists.size) { index ->
                     MyListItem(
-                        shoppingList = shoppingList,
-                        viewModel = viewModel,
-                        navController = navController,
-                        showPopUp = selectedItemUuid.value == shoppingList.uuid,
-                        onLongPressItem = { selectedUuid ->
-                            selectedItemUuid.value = selectedUuid
-                            Log.d("onLongPress", selectedUuid)
-                            Log.d("onLongPress",  selectedItemUuid.value.toString())
-                        },
-                        onDismissRequest = { selectedUuid ->
-                            if (selectedItemUuid.value == selectedUuid) {
-                                selectedItemUuid.value = null
-                                Log.d("onDimiss", selectedUuid)
-                                Log.d("onDimiss",  selectedItemUuid.value.toString())
-                            }
-                        }
+                        myLists[index], viewModel, navController
                     )
                 }
             }
@@ -110,60 +88,55 @@ fun MyListsScreenBodyContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MyListItem(
     shoppingList: ShoppingList,
     viewModel: MyListsScreenViewModel,
-    navController: NavHostController,
-    showPopUp: Boolean,
-    onLongPressItem: (String) -> Unit,
-    onDismissRequest: (String) -> Unit
+    navController: NavHostController
 ) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)
-            .height(60.dp)
-            .background(Color.White)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onLongPress = {
-                        onLongPressItem(shoppingList.uuid)
-                    },
-                    onPress = {
-                        viewModel.navigateToListScreen(navController, shoppingList.uuid)
-                    }
-                )
-            },
+            .height(60.dp),
+        onClick = {
+
+            viewModel.navigateToListScreen(navController, shoppingList.uuid)
+        },
         shape = RoundedCornerShape(8.dp)
     ) {
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            contentAlignment = Alignment.Center
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = shoppingList.name)
+            Column(horizontalAlignment = Alignment.Start) {
+                Text(text = shoppingList.name)
+            }
+
+
+            // Delete button
+            Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.End) {
+                Button(
+                    onClick = {
+                        viewModel.deleteList(shoppingList.uuid)
+                        viewModel.updateUserList()
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.delete),
+                        contentDescription = "Delete"
+                    )
+                }
+
+            }
+
         }
     }
 
-    if (showPopUp) {
-        DropdownMenu(
-            expanded = true,
-            onDismissRequest = {
-                onDismissRequest(shoppingList.uuid)
-            }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Eliminar ${shoppingList.name}") },
-                onClick = {
-                    onDismissRequest(shoppingList.uuid)
-                    viewModel.deleteList(shoppingList.uuid)
-                    viewModel.updateUserList()
-                }
-            )
-        }
-    }
 }
 
 @Composable

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.Profile
+import com.dam.wewiza_front.models.ShoppingList
 import com.dam.wewiza_front.screens.sharedViewModel
 import com.dam.wewiza_front.services.RetrofitServiceFactory
 import com.google.firebase.auth.FirebaseAuth
@@ -17,7 +18,7 @@ import kotlinx.coroutines.tasks.await
 
 class ListScreenViewModel : ViewModel() {
 
-    private val selectedList = sharedViewModel.getSelectedList()
+    private val selectedList = sharedViewModel.selectedList.value
     private val service = RetrofitServiceFactory.makeRetrofitService()
     val productsList = mutableStateOf(mutableListOf<Product>())
     private val auth = FirebaseAuth.getInstance()
@@ -26,32 +27,11 @@ class ListScreenViewModel : ViewModel() {
     private val profilesCollection = db.collection("profiles")
 
 
-
-    private var previousListSize = selectedList.value?.products?.size ?: 0
     init {
-        viewModelScope.launch(Dispatchers.IO){
-            while (sharedViewModel.getSelectedList().value == null) {
-                // Wait 100 milliseconds before checking again
-                delay(100)
-            }
-            getProductsFromList()
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
-            while (true) {
-                if (productsList.value.size != previousListSize) {
-                    previousListSize = productsList.value.size
-                    updateUserList(selectedList.value?.uuid ?: "", productsList.value)
-                }
-                delay(100)  // Espera 100 milisegundos antes de verificar de nuevo
-            }
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            setProfileAndLists()
+            setProfile()
             clearData()
         }
-
     }
 
     private suspend fun clearData() {
@@ -61,7 +41,7 @@ class ListScreenViewModel : ViewModel() {
         sharedViewModel.resetLocalData()
     }
 
-    private suspend fun setProfileAndLists() {
+    private suspend fun setProfile() {
         while (sharedViewModel.getLocalProfile().value == null) {
             delay(100) // Espera 100 milisegundos antes de verificar de nuevo
         }
@@ -114,15 +94,20 @@ class ListScreenViewModel : ViewModel() {
 
 
 
-    private fun getProductsFromList() {
-        viewModelScope.launch {
-            if (selectedList.value != null) {
-                for (productId in selectedList.value!!.products) {
-                    productsList.value.add(service.getProductById(productId))
+    suspend fun getProductsFromList(selectedProductsIds: ShoppingList?): List<Product> {
+        var updatedProducts = listOf<Product>()
+
+            if (selectedProductsIds != null && selectedProductsIds.products.isNotEmpty()) {
+                updatedProducts = selectedProductsIds.products.map { service.getProductById(it) }
+                Log.d("getProductsFromList", updatedProducts.toString())
+                while (updatedProducts.size != selectedProductsIds.products.size) {
+                    delay(100)
                 }
             }
-        }
+
+        return updatedProducts
     }
+
 
 }
 

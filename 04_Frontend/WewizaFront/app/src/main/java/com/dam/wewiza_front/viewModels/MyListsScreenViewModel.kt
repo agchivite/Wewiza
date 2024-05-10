@@ -15,9 +15,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
-class MyListsScreenViewModel: ViewModel() {
+class MyListsScreenViewModel : ViewModel() {
 
     val myLists = mutableStateOf(mutableListOf<ShoppingList>())
     private val db = FirebaseFirestore.getInstance()
@@ -52,9 +53,15 @@ class MyListsScreenViewModel: ViewModel() {
     fun createNewList(text: String, context: Context) {
         if (text.isNotEmpty()) {
             val newList = myLists.value.toMutableList()
-            newList.add(ShoppingList(uuid= UUID.randomUUID().toString(), products = mutableListOf(), name = text))
+            newList.add(
+                ShoppingList(
+                    uuid = UUID.randomUUID().toString(),
+                    products = mutableListOf(),
+                    name = text
+                )
+            )
             myLists.value = newList
-        }else{
+        } else {
             Toast.makeText(context, "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show()
         }
     }
@@ -74,7 +81,8 @@ class MyListsScreenViewModel: ViewModel() {
 
                     if (profile != null) {
                         profile!!.shoppingListsList = myLists.value
-                        db.collection("profiles").document(auth.currentUser!!.email.toString()).set(profile!!)
+                        db.collection("profiles").document(auth.currentUser!!.email.toString())
+                            .set(profile!!)
                     }
 
                     Log.d("UpdateUserReview", profile.toString())
@@ -89,14 +97,14 @@ class MyListsScreenViewModel: ViewModel() {
 
     private fun setLists() {
         if (profile != null) {
-            if (sharedViewModel.getLocalShoppingList().value == null){
+            if (sharedViewModel.getLocalShoppingLists().value == null) {
                 myLists.value.clear()
                 val newList = profile!!.shoppingListsList
                 sharedViewModel.setLocalShoppingList(newList)
                 Log.d("MyListsScreenViewModel", "setLists: ${newList!!}")
                 myLists.value = newList.toMutableList()
-            }else {
-                val newList = sharedViewModel.getLocalShoppingList().value
+            } else {
+                val newList = sharedViewModel.getLocalShoppingLists().value
                 myLists.value = newList!!.toMutableList()
             }
 
@@ -104,10 +112,41 @@ class MyListsScreenViewModel: ViewModel() {
     }
 
     fun navigateToListScreen(navController: NavHostController, uuid: String) {
-        val selectedList = myLists.value.find { it.uuid == uuid }
-        sharedViewModel.setSelectedList(selectedList!!)
-        navController.navigate( AppScreens.ListScreen.route)
+        viewModelScope.launch {
+            retrieveShoppingListFromProfile(auth.currentUser!!.email!!, uuid) { selectedList ->
+                selectedList?.let { // Verifica si la lista seleccionada no es nula
+                    Log.d("MyListsScreenViewModel", "selectedList: $selectedList")
+                    sharedViewModel.setSelectedList(selectedList)
+                    navController.navigate(AppScreens.ListScreen.route)
+                } ?: run {
+
+                    Log.e("MyListsScreenViewModel", "Error: No se pudo recuperar la lista seleccionada")
+                }
+            }
+        }
     }
+
+
+
+    private fun retrieveShoppingListFromProfile(profileEmail: String, listUuid: String, callback: (ShoppingList?) -> Unit) {
+        val profileRef = db.collection("profiles").document(profileEmail)
+        var shoppingList: ShoppingList? = null
+
+        profileRef.get().addOnSuccessListener { document ->
+            val profile = document.toObject(Profile::class.java)
+
+            if (profile?.shoppingListsList?.isNotEmpty() == true) {
+                val wantedList = profile.shoppingListsList!!.find { it.uuid == listUuid }
+                callback(wantedList)
+            } else {
+                callback(null)
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("RetrieveListFromFirebase", "Error retrieving profile", exception)
+            callback(null)
+        }
+    }
+
 
 
 }
