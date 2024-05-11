@@ -36,12 +36,12 @@ def get_size():
     return product_service.get_size()
 
 
-@app.get("/products/{market_name}")
+@app.get("/products/market/{market_name}")
 def get_all_products_by_market(market_name: str):
     return product_service.get_all_products_by_market(market_name)
 
 
-@app.get("/products/{init_num}/{end_num}")
+@app.get("/products/range/{init_num}/{end_num}")
 def get_products_by_range(init_num: int, end_num: int):
     return product_service.get_products_by_range(init_num, end_num)
 
@@ -53,12 +53,12 @@ async def insert_new_scrapped_product(request: Request):
     return {"result": result}
 
 
-@app.get("/products/{category_id}")
+@app.get("/products/category/id/{category_id}")
 def get_products_by_category(category_id: str):
     return product_service.get_all_products_by_category_id(category_id)
 
 
-@app.get("/product/{uuid}")
+@app.get("/product/id/{uuid}")
 def get_product_by_uuid(uuid: str):
     return product_service.get_product_by_uuid(uuid)
 
