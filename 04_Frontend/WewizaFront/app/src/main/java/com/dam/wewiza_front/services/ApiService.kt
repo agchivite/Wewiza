@@ -35,6 +35,9 @@ interface ApiService {
     @GET("product/{product_id}/{market_id}")
     suspend fun getProductHistoryDetails(@Path("product_id") product_id: String, @Path("market_id") market_id: String): List<Product>
 
+    @GET("product/{product_id}")
+    suspend fun getProductById(@Path("product_id") product_id: String): Product
+
 }
 
 

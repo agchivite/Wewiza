@@ -5,18 +5,26 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.dam.wewiza_front.MainActivity
 import com.dam.wewiza_front.navigation.AppScreens
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class SettingsScrennViewModel: ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
     val isUserSignedOut = MutableLiveData<Boolean>()
-    fun deleteAccount(navController: NavController, context: Context) {
+    private val sharedViewModel = SharedViewModel.instance
+
+
+
+    fun deleteAccount(navController: NavController, context: Context, mainActivity: MainActivity) {
         val currentUser = auth.currentUser
 
         currentUser?.let { user ->
@@ -56,6 +64,7 @@ class SettingsScrennViewModel: ViewModel() {
 
     fun signOut(navController: NavController, context: Context, mainActivity: MainActivity) {
         auth.signOut()
+        sharedViewModel.resetLocalData()
         navController.navigate(AppScreens.WelcomeScreen.route)
         Toast.makeText(context, "Sesión cerrada correctamente", Toast.LENGTH_LONG).show()
         isUserSignedOut.value = true

@@ -11,6 +11,7 @@ import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
 import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
+import com.dam.wewiza_front.viewModels.ListScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
 import com.dam.wewiza_front.viewModels.MyListsScreenViewModel
 import com.dam.wewiza_front.viewModels.ProductDetailsScreenViewModel
@@ -23,8 +24,8 @@ import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 import com.google.firebase.auth.FirebaseAuth
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
-import org.koin.core.context.startKoin
 import org.koin.core.component.get
+import org.koin.core.context.startKoin
 
 class MainActivity : ComponentActivity(), KoinComponent {
 
@@ -33,12 +34,10 @@ class MainActivity : ComponentActivity(), KoinComponent {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        startKoin{
+        startKoin {
             androidContext(this@MainActivity)
             modules(appModule)
         }
-
-
 
         val auth = FirebaseAuth.getInstance()
         val welcomeViewModel = get<WelcomeScreenViewModel>()
@@ -56,11 +55,15 @@ class MainActivity : ComponentActivity(), KoinComponent {
             }
         }
         profileViewModel = if (auth.currentUser != null) get() else null
-        val myListsViewModel = get<MyListsScreenViewModel>()
+
+
+        val productDetailsScreenViewModel = get<ProductDetailsScreenViewModel>()
+        val myListsScreenViewModel = get<MyListsScreenViewModel>()
+
+
         val customerSupportViewModel = get<CustomerSupportScreenViewModel>()
         val productScreenViewModel = get<ProductScreenViewModel>()
-        val productDetailsScreenViewModel = get<ProductDetailsScreenViewModel>()
-
+        val listScreenViewModel = get<ListScreenViewModel>()
 
         setContent {
             WewizaFrontTheme {
@@ -76,10 +79,11 @@ class MainActivity : ComponentActivity(), KoinComponent {
                         categoriesViewModel,
                         profileViewModel,
                         settingsViewModel,
-                        myListsViewModel,
+                        myListsScreenViewModel,
                         customerSupportViewModel,
                         productScreenViewModel,
                         productDetailsScreenViewModel,
+                        listScreenViewModel,
                         this
                     )
                 }
@@ -94,7 +98,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
     @Deprecated("deprecated")
     override fun onBackPressed() {
         val aux = false
-        if (aux){
+        if (aux) {
             super.onBackPressed()
         }
     }

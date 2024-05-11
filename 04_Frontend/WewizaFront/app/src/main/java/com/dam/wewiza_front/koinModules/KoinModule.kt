@@ -5,6 +5,7 @@ import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
 import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
+import com.dam.wewiza_front.viewModels.ListScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
 import com.dam.wewiza_front.viewModels.MyListsScreenViewModel
 import com.dam.wewiza_front.viewModels.ProductDetailsScreenViewModel
@@ -33,4 +34,5 @@ val appModule = module {
     viewModel { ProductScreenViewModel() }
     viewModel { ProductDetailsScreenViewModel() }
     viewModel { SharedViewModel()}
+    viewModel {ListScreenViewModel()}
 }

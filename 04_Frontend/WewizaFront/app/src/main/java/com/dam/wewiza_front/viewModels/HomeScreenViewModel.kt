@@ -103,5 +103,4 @@ class HomeScreenViewModel : ViewModel() {
     fun navigateToProducts(navController: NavController) {
         navController.navigate(AppScreens.ProductScreen.route)
     }
-
 }

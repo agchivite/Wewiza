@@ -9,6 +9,7 @@ import com.dam.wewiza_front.screens.AboutUsScreen
 import com.dam.wewiza_front.screens.CategoriesScreen
 import com.dam.wewiza_front.screens.CustomerSupportScreen
 import com.dam.wewiza_front.screens.HomeScreen
+import com.dam.wewiza_front.screens.ListScreen
 import com.dam.wewiza_front.screens.LoginScreen
 import com.dam.wewiza_front.screens.MyListsScreen
 import com.dam.wewiza_front.screens.ProductDetailsScreen
@@ -22,6 +23,7 @@ import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
 import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
+import com.dam.wewiza_front.viewModels.ListScreenViewModel
 import com.dam.wewiza_front.viewModels.LoginScreenViewModel
 import com.dam.wewiza_front.viewModels.MyListsScreenViewModel
 import com.dam.wewiza_front.viewModels.ProductDetailsScreenViewModel
@@ -45,10 +47,11 @@ fun AppNavigation(
     categoriesScreenViewModel: CategoriesScreenViewModel,
     profileScreenViewModel: ProfileScreenViewModel?,
     settingsScreenViewModel: SettingsScrennViewModel,
-    myListsScreenViewModel: MyListsScreenViewModel,
+    myListsScreenViewModel: MyListsScreenViewModel?,
     customerSupportScreenViewModel: CustomerSupportScreenViewModel,
     productScreenViewModel: ProductScreenViewModel,
-    productDetailsScreenViewModel: ProductDetailsScreenViewModel,
+    productDetailsScreenViewModel: ProductDetailsScreenViewModel?,
+    listScreenViewModel: ListScreenViewModel,
     mainActivity: MainActivity
 ) {
     val navController = rememberNavController()
@@ -98,7 +101,11 @@ fun AppNavigation(
             SettingsScreen(settingsScreenViewModel, navController, mainActivity)
         }
         composable(route = AppScreens.MyListScreen.route){
-            MyListsScreen(myListsScreenViewModel, navController)
+            if (myListsScreenViewModel != null) {
+                MyListsScreen(myListsScreenViewModel, navController)
+            } else {
+                WelcomeScreen(welcomeScreenViewModel, navController)
+            }
         }
         composable(route = AppScreens.CustomerSupportScreen.route){
             CustomerSupportScreen(customerSupportScreenViewModel, navController)
@@ -107,7 +114,15 @@ fun AppNavigation(
             ProductScreen(productScreenViewModel, navController)
         }
         composable(route = AppScreens.ProductDetailsScreen.route){
-            ProductDetailsScreen(productDetailsScreenViewModel, navController)
+            if (productDetailsScreenViewModel != null) {
+                ProductDetailsScreen(productDetailsScreenViewModel, navController)
+            } else {
+                WelcomeScreen(welcomeScreenViewModel, navController)
+            }
+        }
+
+        composable(route = AppScreens.ListScreen.route){
+            ListScreen(listScreenViewModel, navController)
         }
     }
 }

@@ -17,10 +17,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +50,7 @@ import com.dam.wewiza_front.models.Category
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,18 +101,33 @@ fun ProductsSection(viewModel: HomeScreenViewModel, navController: NavController
 
     val products = viewModel.allProductsList
     val firstSixProducts = products.shuffled().take(20)
+    val productsLoaded = firstSixProducts.isNotEmpty()
 
-    Box {
-        LazyRow(
-            modifier = Modifier.padding(16.dp),
-            content = {
-                items(firstSixProducts.size) { index ->
-                    HomeProductItem(product = firstSixProducts[index])
-                }
-            }
-        )
+
+    LaunchedEffect(productsLoaded) {
+        if (productsLoaded) {
+            delay(100) // Añade un pequeño retraso opcional si es necesario
+
+   }
     }
+
+    if (!productsLoaded) {
+        LoadingIndicator()
+    } else {
+        Box {
+            LazyRow(
+                modifier = Modifier.padding(16.dp),
+                content = {
+                    items(firstSixProducts!!.size) { index ->
+                        HomeProductItem(product = firstSixProducts[index])
+                    }
+                }
+            )
+        }
+    }
+
 }
+
 
 @Composable
 fun ProductsTextSubSection(viewModel: HomeScreenViewModel, navController: NavController) {
@@ -161,20 +179,28 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
 
     val categories = viewModel.allCategoriesList
     val firstSixCategories = categories.take(6)
+    val categoriesLoaded = firstSixCategories.isNotEmpty()
 
-    Box {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3), // Define el número de columnas aquí
-            modifier = Modifier.padding(16.dp),
-            content = {
-                items(firstSixCategories.size) { index ->
-                    HomeCategoryItem(category = firstSixCategories[index])
-                }
-            }
-        )
+    LaunchedEffect(categoriesLoaded) {
+        delay(100) // Añade un pequeño retraso opcional si es necesario
     }
 
 
+    if (!categoriesLoaded) {
+        LoadingIndicator()
+    } else {
+        Box {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier.padding(16.dp),
+                content = {
+                    items(firstSixCategories.size) { index ->
+                        HomeCategoryItem(category = firstSixCategories[index])
+                    }
+                }
+            )
+        }
+    }
 }
 
 
@@ -299,3 +325,15 @@ fun WewizaLogoSection() {
 
 }
 
+
+@Composable
+fun LoadingIndicator() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
