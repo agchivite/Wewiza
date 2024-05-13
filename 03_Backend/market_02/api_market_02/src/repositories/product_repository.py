@@ -1,6 +1,7 @@
 from python_on_rails.result import Result
 from api_market_02.src.schemas.product_schema import product_schema
 from api_market_02.src.database.database_manager import DatabaseManager
+from datetime import datetime
 
 
 class ProductRepository:
@@ -74,7 +75,9 @@ class ProductRepository:
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
-            size = collection.count_documents({})
+            actual_date_year_month = datetime.now().strftime("%Y-%m")
+            query = {"date_created": {"$regex": f"^{actual_date_year_month}"}}
+            size = collection.count_documents(query)
             self.db_manager.close_database()
             return Result.success(size)
         except Exception as e:
