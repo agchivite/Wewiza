@@ -20,22 +20,22 @@ interface ApiService {
     @GET("products")
     suspend fun getAllMarketsProduct(): Markets
 
-    @GET("products/{market_id}")
+    @GET("products/market/{market_id}")
     suspend fun getProductsPerMarket(@Path("market_id") market_id: String): List<Product>
 
-    @GET("products/{id}")
+    @GET("products/category/id/{id}")
     suspend fun getProductsPerCategory(@Path("id") id: String): Markets
 
-    @GET("like/{user_email}/{product_id}")
+    @GET("like/{product_id}/email/{user_email}")
     suspend fun likeProduct(@Path("user_email") user_email: String, @Path("product_id") product_id: String)
 
-    @GET("unlike/{user_email}/{product_id}")
+    @GET("unlike/{product_id}/email/{user_email}")
     suspend fun unlikeProduct(@Path("user_email") user_email: String, @Path("product_id") product_id: String)
 
-    @GET("product/{product_id}/{market_id}")
+    @GET("product/details/id/{product_id}/market/{market_id}")
     suspend fun getProductHistoryDetails(@Path("product_id") product_id: String, @Path("market_id") market_id: String): List<Product>
 
-    @GET("product/{product_id}")
+    @GET("product/id/{product_id}")
     suspend fun getProductById(@Path("product_id") product_id: String): Product
 
 }

@@ -2,6 +2,7 @@ package com.dam.wewiza_front.screens
 
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -166,18 +168,22 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                     }
                 }
 
-                val availableLists = sharedViewModel.getLocalShoppingLists().value
+             //   val availableLists = sharedViewModel.getLocalShoppingLists().value
                 val context  = LocalContext.current
 
                 if (showDialog.value) {
+
+                    val availableLists = viewModel.recoverProfileData(auth.currentUser!!).collectAsState(initial = emptyList())
+                    Log.d("ProductDetailsScreen", "Profile: ${availableLists.value}")
+
                     AlertDialog(
                         onDismissRequest = { showDialog.value = false },
                         title = { Text(text = "Selecciona la lista a la que quieres agregar este producto") },
                         text = {
                             Column {
-                                availableLists?.forEach { shoppingList ->
+                                availableLists.value.forEach { shoppingList ->
                                     Button(onClick = {
-                                        //viewModel.addProductToList(shoppingList.uuid, currentProduct.uuid, context)
+                                        viewModel.addProductToList(shoppingList.uuid, currentProduct.uuid, context)
                                         showDialog.value = false
                                     }) {
                                         Text(shoppingList.name)
