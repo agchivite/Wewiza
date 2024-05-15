@@ -217,17 +217,21 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                         onDismissRequest = { showDialog.value = false },
                         title = { Text(text = "Selecciona la lista a la que quieres agregar este producto") },
                         text = {
-                            Column {
-                                availableLists.value.forEach { shoppingList ->
-                                    Button(onClick = {
-                                        viewModel.addProductToList(
-                                            shoppingList.uuid,
-                                            currentProduct.uuid,
-                                            context
-                                        )
-                                        showDialog.value = false
-                                    }) {
-                                        Text(shoppingList.name)
+                            if (availableLists.value.isEmpty()) {
+                                Text("Parece que no tienes ninguna lista... ¡Crea tu primer lista!")
+                            }else {
+                                Column {
+                                    availableLists.value.forEach { shoppingList ->
+                                        Button(onClick = {
+                                            viewModel.addProductToList(
+                                                shoppingList.uuid,
+                                                currentProduct.uuid,
+                                                context
+                                            )
+                                            showDialog.value = false
+                                        }) {
+                                            Text(shoppingList.name)
+                                        }
                                     }
                                 }
                             }
