@@ -9,6 +9,7 @@ import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.Profile
 import com.dam.wewiza_front.models.ShoppingList
 import com.dam.wewiza_front.services.RetrofitServiceFactory
+import com.github.mikephil.charting.data.Entry
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,6 +20,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class ProductDetailsScreenViewModel : ViewModel() {
 
@@ -134,6 +138,27 @@ class ProductDetailsScreenViewModel : ViewModel() {
             }
         }
         Toast.makeText(context, "Producto añadido a la lista", Toast.LENGTH_SHORT).show()
+    }
+
+    fun prepareChartData(productHistoryDetails: List<Product>): List<Entry> {
+        val entries = mutableListOf<Entry>()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+        productHistoryDetails.forEach { product ->
+            val date = dateFormat.parse(product.date_created)
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+            val monthYear = "${calendar.get(Calendar.MONTH) + 1}-${calendar.get(Calendar.YEAR)}"
+
+            // Convierte la fecha a un valor numérico que pueda ser usado en la gráfica
+            val monthValue =
+                (calendar.get(Calendar.MONTH) + 1 + (calendar.get(Calendar.YEAR) - 2024) * 12).toFloat()
+
+            val entry = Entry(monthValue, product.price.toFloat())
+            entries.add(entry)
+        }
+
+        return entries
     }
 
 }

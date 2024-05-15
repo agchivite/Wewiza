@@ -49,9 +49,6 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.google.firebase.auth.FirebaseAuth
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -104,7 +101,7 @@ fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
         productHistoryDetails.isNotEmpty() &&
         productHistoryDetails[0].uuid == sharedViewModel.getCurrentProduct().uuid
     ) {
-        val entries = prepareChartData(productHistoryDetails)
+        val entries = viewModel.prepareChartData(productHistoryDetails)
         Log.d("ProductDetailsScreen", "Entries: $entries")
         LineChartView(entries)
     } else {
@@ -125,11 +122,11 @@ fun LineChartView(entries: List<Entry>) {
                     description = Description().apply {
                         text = ""
                     }
-                    setTouchEnabled(false)
+                    setTouchEnabled(true)
                     setDrawGridBackground(false)
                     isDragEnabled = false
                     setScaleEnabled(true)
-                    setPinchZoom(false)
+                    setPinchZoom(true)
                     axisLeft.setDrawGridLines(true)
                     axisLeft.setDrawAxisLine(false)
                     axisRight.isEnabled = false
@@ -147,7 +144,7 @@ fun LineChartView(entries: List<Entry>) {
                         valueTextColor = android.graphics.Color.BLACK
                         lineWidth = 1.5f
                         setDrawCircles(true)
-                        setDrawValues(false)
+                        setDrawValues(true)
                     }
 
                     val lineData = LineData(dataSet)
@@ -161,26 +158,6 @@ fun LineChartView(entries: List<Entry>) {
     }
 }
 
-private fun prepareChartData(productHistoryDetails: List<Product>): List<Entry> {
-    val entries = mutableListOf<Entry>()
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-
-    productHistoryDetails.forEach { product ->
-        val date = dateFormat.parse(product.date_created)
-        val calendar = Calendar.getInstance()
-        calendar.time = date
-        val monthYear = "${calendar.get(Calendar.MONTH) + 1}-${calendar.get(Calendar.YEAR)}"
-
-        // Convierte la fecha a un valor numérico que pueda ser usado en la gráfica
-        val monthValue =
-            (calendar.get(Calendar.MONTH) + 1 + (calendar.get(Calendar.YEAR) - 2024) * 12).toFloat()
-
-        val entry = Entry(monthValue, product.price.toFloat())
-        entries.add(entry)
-    }
-
-    return entries
-}
 
 @Composable
 fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScreenViewModel) {
