@@ -31,10 +31,7 @@ class ProductDetailsScreenViewModel : ViewModel() {
 
 
     fun getProductHistoryDetails(): MutableList<Product> {
-        if (sharedViewModel.getHistoryDetails().isNotEmpty()) {
-            return sharedViewModel.getHistoryDetails()
-        }
-        return mutableListOf()
+        return sharedViewModel.getHistoryDetails()
     }
 
 

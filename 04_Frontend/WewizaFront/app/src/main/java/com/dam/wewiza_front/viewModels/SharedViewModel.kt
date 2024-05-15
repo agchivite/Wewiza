@@ -127,6 +127,7 @@ class SharedViewModel : ViewModel() {
                     service.getProductHistoryDetails(product_id, market_id)
                 }
                 withContext(Dispatchers.Main) {
+                    productHistoryDetails.clear()
                     productHistoryDetails.addAll(products)
                 }
             } catch (e: Exception) {

@@ -3,18 +3,18 @@ package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -25,25 +25,33 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.dam.wewiza_front.Formatter.MonthAxisValueFormatter
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.ProductDetailsScreenViewModel
 import com.dam.wewiza_front.viewModels.SharedViewModel
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -82,48 +90,96 @@ fun ProductDetailsScreenBodyContent(
     ) {
         PhotoField(currentProduct)
         ProductDetailsFields(currentProduct, viewModel)
-       // GraphicField(viewModel)
+        GraphicField(viewModel)
     }
 
 }
 
-
 @Composable
 fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
     val productHistoryDetails = viewModel.getProductHistoryDetails().sortedBy { it.date_created }
-    if (productHistoryDetails.isNotEmpty()) {
-        val maxPrice = productHistoryDetails.maxOf { it.price }
-        val minPrice = productHistoryDetails.minOf { it.price }
-        val priceRange = maxPrice - minPrice
+    Log.d("ProductDetailsScreen", "ProductHistoryDetails: $productHistoryDetails")
 
-        val canvasHeight = 200f // Altura del Canvas en dp
-        val entries = productHistoryDetails.mapIndexed { index, product ->
-            val normalizedPrice = ((product.price - minPrice) / priceRange) * canvasHeight
-            Offset(index.toFloat(), (canvasHeight - normalizedPrice).toFloat())
-        }
-
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Blue)
-                .height(canvasHeight.dp)
-        ) {
-            val path = Path().apply {
-                moveTo(entries.first().x, entries.first().y)
-                entries.drop(1).forEach { point ->
-                    lineTo(point.x, point.y)
-                }
-            }
-
-            drawPath(
-                path = path,
-                color = Color.Blue,
-                style = Stroke(width = 4f)
-            )
-        }
+    if (
+        productHistoryDetails.isNotEmpty() &&
+        productHistoryDetails[0].uuid == sharedViewModel.getCurrentProduct().uuid
+    ) {
+        val entries = prepareChartData(productHistoryDetails)
+        Log.d("ProductDetailsScreen", "Entries: $entries")
+        LineChartView(entries)
     } else {
-        Text(text = "No hay datos para mostrar")
+        CircularProgressIndicator()
     }
+}
+
+@Composable
+fun LineChartView(entries: List<Entry>) {
+    Column(modifier = Modifier
+        .padding(50.dp)
+        .padding(bottom = 40.dp)) {
+        AndroidView(
+            factory = { context ->
+                LineChart(context).apply {
+                    setViewPortOffsets(0f, 0f, 0f, 0f)
+                    setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                    description = Description().apply {
+                        text = ""
+                    }
+                    setTouchEnabled(false)
+                    setDrawGridBackground(false)
+                    isDragEnabled = false
+                    setScaleEnabled(true)
+                    setPinchZoom(false)
+                    axisLeft.setDrawGridLines(true)
+                    axisLeft.setDrawAxisLine(false)
+                    axisRight.isEnabled = false
+                    xAxis.apply {
+                        position = XAxis.XAxisPosition.BOTTOM
+                        valueFormatter = MonthAxisValueFormatter()
+                        setDrawLabels(true)
+                        labelRotationAngle =
+                            -45f // Rotar el texto en -45 grados para que aparezca en diagonal
+                    }
+
+
+                    val dataSet = LineDataSet(entries, "Precios a lo largo del tiempo").apply {
+                        color = android.graphics.Color.RED
+                        valueTextColor = android.graphics.Color.BLACK
+                        lineWidth = 1.5f
+                        setDrawCircles(true)
+                        setDrawValues(false)
+                    }
+
+                    val lineData = LineData(dataSet)
+                    data = lineData
+                    animateX(1500)
+                    invalidate()
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+private fun prepareChartData(productHistoryDetails: List<Product>): List<Entry> {
+    val entries = mutableListOf<Entry>()
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+    productHistoryDetails.forEach { product ->
+        val date = dateFormat.parse(product.date_created)
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        val monthYear = "${calendar.get(Calendar.MONTH) + 1}-${calendar.get(Calendar.YEAR)}"
+
+        // Convierte la fecha a un valor numérico que pueda ser usado en la gráfica
+        val monthValue =
+            (calendar.get(Calendar.MONTH) + 1 + (calendar.get(Calendar.YEAR) - 2024) * 12).toFloat()
+
+        val entry = Entry(monthValue, product.price.toFloat())
+        entries.add(entry)
+    }
+
+    return entries
 }
 
 @Composable
@@ -164,16 +220,20 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
 
                 Column() {
                     Button(onClick = { showDialog.value = true }) {
-                        Icon(painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), contentDescription = "addToList" )
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24),
+                            contentDescription = "addToList"
+                        )
                     }
                 }
 
-             //   val availableLists = sharedViewModel.getLocalShoppingLists().value
-                val context  = LocalContext.current
+                //   val availableLists = sharedViewModel.getLocalShoppingLists().value
+                val context = LocalContext.current
 
                 if (showDialog.value) {
 
-                    val availableLists = viewModel.recoverProfileData(auth.currentUser!!).collectAsState(initial = emptyList())
+                    val availableLists = viewModel.recoverProfileData(auth.currentUser!!)
+                        .collectAsState(initial = emptyList())
                     Log.d("ProductDetailsScreen", "Profile: ${availableLists.value}")
 
                     AlertDialog(
@@ -183,7 +243,11 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                             Column {
                                 availableLists.value.forEach { shoppingList ->
                                     Button(onClick = {
-                                        viewModel.addProductToList(shoppingList.uuid, currentProduct.uuid, context)
+                                        viewModel.addProductToList(
+                                            shoppingList.uuid,
+                                            currentProduct.uuid,
+                                            context
+                                        )
                                         showDialog.value = false
                                     }) {
                                         Text(shoppingList.name)
