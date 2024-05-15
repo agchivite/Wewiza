@@ -21,10 +21,10 @@ class ScrappingService:
     def run_scrapping_carrefour(self):
         current_directory = os.path.dirname(os.path.realpath(__file__))
 
-        api_market_02_folder = os.path.abspath(
+        api_market_03_folder = os.path.abspath(
             os.path.join(current_directory, "..", "..")
         )
-        log_error_folder = os.path.join(api_market_02_folder, "log_error_carrefour")
+        log_error_folder = os.path.join(api_market_03_folder, "log_error_carrefour")
         self.output_folder = log_error_folder
 
         # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
