@@ -1,0 +1,4 @@
+Error to process page: could not convert string to float: 'Empanada'
+Error to process page: could not convert string to float: 'Harina'
+Error to process page: could not convert string to float: 'Preparado'
+Error to process page: could not convert string to float: 'Preparado'
