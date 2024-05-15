@@ -11,7 +11,6 @@ import requests
 from datetime import datetime
 
 
-# TODO: change to carrefour
 class ScrappingService:
     def __init__(self, driver, product_service: ProductService):
         self.driver = driver
@@ -65,7 +64,7 @@ class ScrappingService:
     def scrap_categories(self, categories_dict):
         for category_id_wewiza, categories_list in categories_dict.items():
             for categorie_carrefour in categories_list:
-                url = f"https://www.carrefour.es/supermercado/{categorie_carrefour}"
+                url = f"https://www.carrefour.es/supermercado/{categorie_carrefour}".strip()
 
                 response = requests.get(url, headers=self.headers)
                 if response.status_code == 200:
@@ -92,31 +91,34 @@ class ScrappingService:
 
                         # SUM +24 until counter is > num_products
                         while counter_products_to_change_page < int(num_products):
-                            url = f"https://www.carrefour.es/supermercado/{categorie_carrefour}?offset={counter_products_to_change_page}"
+                            new_url = f"https://www.carrefour.es/supermercado/{categorie_carrefour}?offset={counter_products_to_change_page}".strip()
                             counter_products_to_change_page += 24
 
-                            self.driver.get(url)
-                            self.driver.implicitly_wait(20)
+                            self.driver.get(new_url)
+                            self.driver.implicitly_wait(5)
                             page_source = self.driver.page_source
                             soup = BeautifulSoup(page_source, "html.parser")
-
                             products_html = soup.find_all("div", class_="product-card")
 
                             for product_html in products_html:
-                                product_model = self.map_product_html_to_model(
-                                    product_html, category_id_wewiza
-                                )
-
-                                if product_model.name != "[no-data]":
-                                    # TODO: change when need it
-                                    """
-                                    self.send_to_wewiza_server(
-                                        product_model, category_id_wewiza
+                                try:
+                                    product_model = self.map_product_html_to_model(
+                                        product_html, category_id_wewiza
                                     )
-                                    """
-                                    self.send_to_localhost_mongo(product_model)
-                                else:
-                                    print("Can not retrieve product data.")
+
+                                    if product_model.name != "[no-data]":
+                                        # TODO: change when need it
+
+                                        self.send_to_wewiza_server(
+                                            product_model, category_id_wewiza
+                                        )
+
+                                        # self.send_to_localhost_mongo(product_model)
+                                    else:
+                                        print("Can not retrieve product data.")
+                                except Exception as e:
+                                    print(f"Error processing product: {e}")
+                                    continue
                     except Exception as e:
                         print(f"Error to process page: {e}")
                         output_file = (
@@ -164,14 +166,24 @@ class ScrappingService:
                 ]
             )
             self.driver.get(url_details_product)
-            self.driver.implicitly_wait(20)
+            self.driver.implicitly_wait(10)
             page_source = self.driver.page_source
             soup = BeautifulSoup(page_source, "html.parser")
 
             name = soup.find("h1", class_="product-header__name").text.strip()
             print(name)
 
-            price = soup.find("span", class_="buybox__price").text.strip()
+            # Check if has offer
+            price = 0.0
+            buybox_prices_div = soup.find("div", class_="buybox__prices")
+            if buybox_prices_div:
+                children = buybox_prices_div.find_all(recursive=False)
+                if len(children) == 3:
+                    price = soup.find(
+                        "span", class_="buybox__price--current"
+                    ).text.strip()
+                else:
+                    price = soup.find("span", class_="buybox__price").text.strip()
             price_float = float(
                 price.replace("€", "").replace(",", ".").replace(" ", "")
             )
@@ -183,35 +195,56 @@ class ScrappingService:
             nutrition_info_box = nutrition_more_info_container.find(
                 "div", class_="nutrition-more-info__box"
             )
-            nutrition_more_info_inner_container_quantity_measure = (
-                nutrition_info_box.find_all(
-                    "div", class_="nutrition-more-info__container"
-                )[1]
+            all_nutrition_more_info_inner_container = nutrition_info_box.find_all(
+                "div", class_="nutrition-more-info__container"
             )
 
-            not_clear_quantity_measure = (
-                nutrition_more_info_inner_container_quantity_measure.find(
-                    "span", class_="nutrition-more-info__list-value"
-                ).text
-            ).strip()
+            nutrition_more_info_inner_container_quantity_measure = "NONE"
+
+            for (
+                nutrition_more_info_inner_container
+            ) in all_nutrition_more_info_inner_container:
+                if (
+                    nutrition_more_info_inner_container.find(
+                        "p", class_="info-title"
+                    ).text.strip()
+                    == "Medidas"
+                ):
+                    nutrition_more_info_inner_container_quantity_measure = (
+                        nutrition_more_info_inner_container
+                    )
+
+            if nutrition_more_info_inner_container_quantity_measure != "NONE":
+                not_clear_quantity_measure = (
+                    nutrition_more_info_inner_container_quantity_measure.find(
+                        "span", class_="nutrition-more-info__list-value"
+                    ).text
+                ).strip()
+            else:
+                not_clear_quantity_measure = "0.0 [no-data]"
+
             quantity_measure = float(not_clear_quantity_measure.split(" ")[0])
             print(quantity_measure)
 
             measure = str(not_clear_quantity_measure.split(" ")[1])
+            if measure == "docena":
+                measure = "ud."
             print(measure)
 
-            price_per_standard_measure_span_tag = soup.find(
+            price_per_standard_measure = 0.0
+            price_per_standard_measure_div = soup.find(
                 "div", class_="buybox__price-per-unit"
-            ).span
-            not_clear_price_per_standard_measure = (
-                price_per_standard_measure_span_tag.get_text(strip=True)
             )
-            price_per_standard_measure = not_clear_price_per_standard_measure.strip()
-            price_per_standard_measure = float(
-                price_per_standard_measure.split(" ")[0]
-                .replace(",", ".")
-                .replace(" ", "")
-            )
+            if price_per_standard_measure_div:
+                span_tags = price_per_standard_measure_div.find_all("span")
+                if span_tags:
+                    last_span = span_tags[-1]
+                    price_per_standard_measure = last_span.get_text(strip=True)
+                    price_per_standard_measure = float(
+                        price_per_standard_measure.split(" ")[0]
+                        .replace(",", ".")
+                        .replace(" ", "")
+                    )
             print(price_per_standard_measure)
 
             image_wrapper = soup.find("div", class_="main-image__container")

@@ -1,2 +1,0 @@
-Error to process page: could not convert string to float: 'Paleta'
-Error to process page: could not convert string to float: 'QUESO'

@@ -76,20 +76,24 @@ class ScrappingService:
                         products_html = soup.find_all("div", class_="product-tile")
 
                         for product_html in products_html:
-                            product_model = self.map_product_html_to_model(
-                                product_html, category_id_wewiza
-                            )
-
-                            if product_model.name != "[no-data]":
-                                # TODO: change when need it
-
-                                self.send_to_wewiza_server(
-                                    product_model, category_id_wewiza
+                            try:
+                                product_model = self.map_product_html_to_model(
+                                    product_html, category_id_wewiza
                                 )
 
-                                # self.send_to_localhost_mongo(product_model)
-                            else:
-                                print("Can not retrieve product data.")
+                                if product_model.name != "[no-data]":
+                                    # TODO: change when need it
+
+                                    self.send_to_wewiza_server(
+                                        product_model, category_id_wewiza
+                                    )
+
+                                    # self.send_to_localhost_mongo(product_model)
+                                else:
+                                    print("Can not retrieve product data.")
+                            except Exception as e:
+                                print(f"Error processing product: {e}")
+                                continue
 
                     except Exception as e:
                         print(f"Error to process page: {e}")

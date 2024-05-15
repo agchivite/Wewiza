@@ -1,1 +1,0 @@
-Error to process page: could not convert string to float: 'Zumo'

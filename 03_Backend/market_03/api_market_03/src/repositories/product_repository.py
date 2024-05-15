@@ -25,28 +25,22 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
 
-            existing_product_name = collection.find_one({"name": product_data["name"]})
-            existing_product_price = collection.find_one(
-                {"price": product_data["price"]}
-            )
-
-            # Check if is scrapped in the same day
+            # Check if is scrapped in the same month
             # We can find in mongo compass with: { date_created: { $regex: /^2024-04-21/}}
             product_date_created = product_data["date_created"].split()[0]
-            existing_product_date = collection.find_one(
-                {"date_created": {"$regex": f"^{product_date_created}"}}
+            existing_product = collection.find_one(
+                {
+                    "$and": [
+                        {"name": product_data["name"]},
+                        {"date_created": {"$regex": f"^{product_date_created}"}},
+                    ]
+                }
             )
 
-            if (
-                existing_product_name
-                and existing_product_price
-                and existing_product_date
-            ):
+            if existing_product:
                 return Result.failure(
                     "Product already exists: "
                     + product_data["name"]
-                    + " and price: "
-                    + str(product_data["price"])
                     + " and date: "
                     + str(product_data["date_created"])
                 )
