@@ -23,8 +23,9 @@ class HomeScreenViewModel : ViewModel() {
         getAllCategories()
         getMercadonaProducts()
         getAhorramasProducts()
-        sharedViewModel.setProducts(allProductsList)
       //  getCarrefourProducts()
+        sharedViewModel.setProducts(allProductsList)
+
     }
 
 
@@ -102,5 +103,16 @@ class HomeScreenViewModel : ViewModel() {
 
     fun navigateToProducts(navController: NavController) {
         navController.navigate(AppScreens.ProductScreen.route)
+    }
+
+    fun navigateToProductsScreen(id: String, navController: NavController) {
+        val route = AppScreens.ProductScreen.route
+        sharedViewModel.resetSelectedCategories()
+        sharedViewModel.selectedCategories.value.value[id] = true
+        navController.navigate(route)
+    }
+
+    fun navigateToProductDetailsScreen(navController: NavController) {
+        navController.navigate(AppScreens.ProductDetailsScreen.route)
     }
 }

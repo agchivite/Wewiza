@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
@@ -108,7 +110,7 @@ fun ProductsSection(viewModel: HomeScreenViewModel, navController: NavController
         if (productsLoaded) {
             delay(100) // Añade un pequeño retraso opcional si es necesario
 
-   }
+        }
     }
 
     if (!productsLoaded) {
@@ -119,7 +121,7 @@ fun ProductsSection(viewModel: HomeScreenViewModel, navController: NavController
                 modifier = Modifier.padding(16.dp),
                 content = {
                     items(firstSixProducts!!.size) { index ->
-                        HomeProductItem(product = firstSixProducts[index])
+                        HomeProductItem(product = firstSixProducts[index], viewModel, navController)
                     }
                 }
             )
@@ -195,7 +197,11 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
                 modifier = Modifier.padding(16.dp),
                 content = {
                     items(firstSixCategories.size) { index ->
-                        HomeCategoryItem(category = firstSixCategories[index])
+                        HomeCategoryItem(
+                            category = firstSixCategories[index],
+                            viewModel,
+                            navController
+                        )
                     }
                 }
             )
@@ -205,7 +211,7 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
 
 
 @Composable
-fun HomeProductItem(product: Product) {
+fun HomeProductItem(product: Product, viewModel: HomeScreenViewModel, navController: NavController) {
     val painter: Painter = rememberImagePainter(data = product.image_url)
 
     Card(
@@ -214,6 +220,12 @@ fun HomeProductItem(product: Product) {
             .size(80.dp)
             .clip(CircleShape), // Hace que el Card tenga una forma circular
         shape = CircleShape, // Asegura que el Card mantenga su forma circular incluso si tiene un elevación
+        onClick = {
+            sharedViewModel.clearCurrentProduct()
+            sharedViewModel.setCurrentProduct(product)
+            sharedViewModel.setProductHistoryDetails()
+            viewModel.navigateToProductDetailsScreen(navController)
+        }
 
     ) {
         Image(
@@ -228,7 +240,11 @@ fun HomeProductItem(product: Product) {
 
 
 @Composable
-fun HomeCategoryItem(category: Category) {
+fun HomeCategoryItem(
+    category: Category,
+    viewModel: HomeScreenViewModel,
+    navController: NavController
+) {
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(context = LocalContext.current)
             .data(category.icon)
@@ -244,7 +260,9 @@ fun HomeCategoryItem(category: Category) {
                 .padding(20.dp)
                 .size(80.dp)
                 .clip(CircleShape), // Hace que el Card tenga una forma circular
-            shape = CircleShape, // Asegura que el Card mantenga su forma circular incluso si tiene un elevación
+            shape = CircleShape, // Asegura que el Card mantenga su forma circular incluso si tiene un elevación,
+            onClick = { viewModel.navigateToProductsScreen(category.id, navController) }
+
 
         ) {
             Image(
