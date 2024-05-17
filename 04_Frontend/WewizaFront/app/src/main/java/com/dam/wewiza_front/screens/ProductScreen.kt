@@ -21,6 +21,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -44,7 +46,6 @@ import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.ProductScreenViewModel
 import com.dam.wewiza_front.viewModels.SharedViewModel
 
-
 var showDialog: MutableState<Boolean> = mutableStateOf(false)
 var sharedViewModel = SharedViewModel.instance
 
@@ -59,11 +60,10 @@ fun ProductScreen(
     var isMercadonaChecked by remember { mutableStateOf(true) }
     var isAhorramasChecked by remember { mutableStateOf(true) }
     var isCarrefourChecked by remember { mutableStateOf(true) }
-
-
     var selectedCategories by remember {
         sharedViewModel.selectedCategories
     }
+    var priceSortOrder by remember { mutableStateOf("Ninguno") }
 
     Scaffold(
         bottomBar = {
@@ -86,7 +86,9 @@ fun ProductScreen(
                     onAhorramasCheckedChange = { isAhorramasChecked = it },
                     isCarrefourChecked = isCarrefourChecked,
                     onCarrefourCheckedChange = { isCarrefourChecked = it },
-                    selectedCategories
+                    selectedCategories,
+                    priceSortOrder,
+                    onPriceSortOrderChange = { priceSortOrder = it }
                 )
                 ProductScreenBodyContent(
                     productScreenViewModel,
@@ -95,7 +97,8 @@ fun ProductScreen(
                     isMercadonaChecked,
                     isAhorramasChecked,
                     isCarrefourChecked,
-                    selectedCategories
+                    selectedCategories,
+                    priceSortOrder
                 )
             }
         }
@@ -110,10 +113,26 @@ fun ProductScreenBodyContent(
     isMercadonaChecked: Boolean,
     isAhorramasChecked: Boolean,
     isCarrefourChecked: Boolean,
-    selectedCategories: MutableState<MutableMap<String, Boolean>>
+    selectedCategories: MutableState<MutableMap<String, Boolean>>,
+    priceSortOrder: String
 ) {
     val products by remember { viewModel.allProductsList }
-    val filteredProducts = products.filter { it.name.contains(searchText, ignoreCase = true) }
+    val filteredProducts = products
+        .filter { it.name.contains(searchText, ignoreCase = true) }
+        .filter {
+            ((it.store_name == "Mercadona" && isMercadonaChecked) ||
+                    (it.store_name == "Ahorramas" && isAhorramasChecked) ||
+                    (it.store_name == "Carrefour" && isCarrefourChecked)) && (
+                    (selectedCategories.value[it.category_id] == true))
+        }
+        .sortedWith(
+            when (priceSortOrder) {
+                "Ascendente" -> compareBy { it.price }
+                "Descendente" -> compareByDescending { it.price }
+                else -> compareBy { it.uuid } // Default order if no sorting is selected
+            }
+        )
+
     ProductGrid(
         products = filteredProducts,
         isMercadonaChecked,
@@ -135,19 +154,12 @@ fun ProductGrid(
     viewModel: ProductScreenViewModel,
     navController: NavHostController
 ) {
-
-    val filteredProducts = products.filter {
-        ((it.store_name == "Mercadona" && isMercadonaChecked) ||
-                (it.store_name == "Ahorramas" && isAhorramasChecked) ||
-                (it.store_name == "Carrefour" && isCarrefourChecked)) && (
-                (selectedCategories.value[it.category_id] == true))
-    }
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
         contentPadding = PaddingValues(8.dp),
         content = {
-            items(filteredProducts.size) { index ->
-                ProductItem(filteredProducts[index], viewModel, navController)
+            items(products.size) { index ->
+                ProductItem(products[index], viewModel, navController)
             }
         }
     )
@@ -202,7 +214,9 @@ fun ProductsSearchBar(
     onAhorramasCheckedChange: (Boolean) -> Unit,
     isCarrefourChecked: Boolean,
     onCarrefourCheckedChange: (Boolean) -> Unit,
-    selectedCategories: MutableState<MutableMap<String, Boolean>>
+    selectedCategories: MutableState<MutableMap<String, Boolean>>,
+    priceSortOrder: String,
+    onPriceSortOrderChange: (String) -> Unit
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
         TextField(
@@ -319,6 +333,38 @@ fun ProductsSearchBar(
                         }
                     }
 
+                    Column(
+                        modifier = Modifier.padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        var expanded by remember { mutableStateOf(false) }
+
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Button(onClick = { expanded = !expanded }) {
+                                Text("Ordenar por precio: $priceSortOrder")
+                            }
+
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                DropdownMenuItem(onClick = {
+                                    onPriceSortOrderChange("Ascendente")
+                                    expanded = false
+                                }, text = {
+                                    Text("Ordenar por precio: Ascendente")
+                                }
+                                )
+                                DropdownMenuItem(onClick = {
+                                    onPriceSortOrderChange("Descendente")
+                                    expanded = false
+                                }, text = {
+                                    Text("Ordenar por precio: Descendente")
+                                }
+                                )
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {
