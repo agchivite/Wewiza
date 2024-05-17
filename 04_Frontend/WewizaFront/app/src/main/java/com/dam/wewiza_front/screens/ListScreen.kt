@@ -1,46 +1,27 @@
 package com.dam.wewiza_front.screens
 
-
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
+import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
@@ -51,16 +32,15 @@ import com.dam.wewiza_front.viewModels.ListScreenViewModel
 @Composable
 fun ListScreen(listScreenViewModel: ListScreenViewModel, navController: NavHostController) {
     val selectedProductsIds = sharedViewModel.selectedList.value
-    val productsList = remember { mutableStateOf(emptyList<Product>()) }
+    var productsList by remember { mutableStateOf(emptyList<Product>()) }
     Log.d("ListScreen", "Selected Products: ${selectedProductsIds!!.products.size}")
     var loading by remember { mutableStateOf(false) }
 
-    if (selectedProductsIds!!.products.size > 0) {
-
+    if (selectedProductsIds!!.products.isNotEmpty()) {
         LaunchedEffect(selectedProductsIds) {
             loading = true
             val products = listScreenViewModel.getProductsFromList(selectedProductsIds)
-            productsList.value = products
+            productsList = products
             Log.d("ListScreen", "Products: $products")
             loading = false
         }
@@ -77,20 +57,21 @@ fun ListScreen(listScreenViewModel: ListScreenViewModel, navController: NavHostC
                     CircularProgressIndicator()
                 }
             } else {
-                ListScreenBodyContent(listScreenViewModel, navController, productsList)
+                ListScreenBodyContent(listScreenViewModel, navController, productsList) { updatedProductsList ->
+                    productsList = updatedProductsList
+                }
             }
         }
     }
 }
 
-
 @Composable
 fun ListScreenBodyContent(
     viewModel: ListScreenViewModel,
     navController: NavHostController,
-    productsList: MutableState<List<Product>>
+    productsList: List<Product>,
+    onProductsListChanged: (List<Product>) -> Unit
 ) {
-    val productsList = productsList.value
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -102,7 +83,12 @@ fun ListScreenBodyContent(
             modifier = Modifier.weight(1f) // Ocupa todo el espacio restante
         ) {
             items(productsList.size) { index ->
-                ListProductItem(product = productsList[index])
+                ListProductItem(product = productsList[index], viewModel, navController) { deletedProduct ->
+                    val updatedProductsList = productsList.toMutableList().apply {
+                        remove(deletedProduct)
+                    }
+                    onProductsListChanged(updatedProductsList)
+                }
             }
         }
 
@@ -123,8 +109,10 @@ fun ListScreenBodyContent(
             ) {
 
                 //product list total price
-                Text(text = "Total: ${"%.2f".format(productsList.sumOf { it.price })} €", style = TextStyle(fontSize = 20.sp))
-
+                Text(
+                    text = "Total: ${"%.2f".format(productsList.sumOf { it.price })} €",
+                    style = TextStyle(fontSize = 20.sp)
+                )
 
                 Button(onClick = { /* Aquí puedes colocar la lógica para sugerir */ }) {
                     Text(text = "Sugerir")
@@ -134,16 +122,28 @@ fun ListScreenBodyContent(
     }
 }
 
-
 @Composable
-fun ListProductItem(product: Product) {
+fun ListProductItem(
+    product: Product,
+    viewModel: ListScreenViewModel,
+    navController: NavHostController,
+    onDelete: (Product) -> Unit
+) {
     Card(
-        shape = RoundedCornerShape(10.dp), modifier = Modifier
+        shape = RoundedCornerShape(10.dp),
+        modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)
             .padding(8.dp)
+            .clickable(onClick = {
+                sharedViewModel.clearCurrentProduct()
+                sharedViewModel.setCurrentProduct(product)
+                sharedViewModel.setProductHistoryDetails()
+                viewModel.navigateToProductDetailsScreen(navController)
+            })
+
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Image(
                 painter = rememberImagePainter(data = product.image_url),
                 contentDescription = "Product Image",
@@ -151,11 +151,31 @@ fun ListProductItem(product: Product) {
                     .size(100.dp)
                     .clip(RectangleShape)
             )
-            Column(modifier = Modifier.padding(start = 8.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .weight(1f) // This makes the column take available space
+            ) {
                 Text(text = product.name)
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(text = "Price: ${product.price} €")
                 Text(text = "Store: ${product.store_name}")
+            }
+
+            Button(
+                onClick = {
+                    viewModel.deleteProduct(product)
+                    onDelete(product)
+                },
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(69.dp) // Adjust size as needed
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.delete),
+                    contentDescription = "Delete product",
+                    modifier = Modifier.size(24.dp) // Adjust size as needed
+                )
             }
         }
     }

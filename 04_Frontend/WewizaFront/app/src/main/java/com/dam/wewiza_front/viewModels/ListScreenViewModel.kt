@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.Profile
 import com.dam.wewiza_front.models.ShoppingList
+import com.dam.wewiza_front.navigation.AppScreens
 import com.dam.wewiza_front.screens.sharedViewModel
 import com.dam.wewiza_front.services.RetrofitServiceFactory
 import com.google.firebase.auth.FirebaseAuth
@@ -18,13 +20,13 @@ import kotlinx.coroutines.tasks.await
 
 class ListScreenViewModel : ViewModel() {
 
-    private val selectedList = sharedViewModel.selectedList.value
     private val service = RetrofitServiceFactory.makeRetrofitService()
     val productsList = mutableStateOf(mutableListOf<Product>())
     private val auth = FirebaseAuth.getInstance()
     private var profile: Profile? = null
     private val db = FirebaseFirestore.getInstance()
     private val profilesCollection = db.collection("profiles")
+    val sharedViewModel = SharedViewModel.instance
 
 
     init {
@@ -106,6 +108,20 @@ class ListScreenViewModel : ViewModel() {
             }
 
         return updatedProducts
+    }
+
+    fun deleteProduct(product: Product) {
+
+        db.collection("profiles").document(auth.currentUser!!.email.toString()).get().addOnSuccessListener { document ->
+            val profile = document.toObject(Profile::class.java)
+            val shoppingList = profile?.shoppingListsList?.find { it.uuid == sharedViewModel.selectedList.value?.uuid }
+            shoppingList?.products?.remove(product.uuid)
+            db.collection("profiles").document(auth.currentUser!!.email.toString()).set(profile!!)
+        }
+    }
+
+    fun navigateToProductDetailsScreen(navController: NavController) {
+        navController.navigate(AppScreens.ProductDetailsScreen.route)
     }
 
 
