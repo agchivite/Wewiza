@@ -1,6 +1,7 @@
 from python_on_rails.result import Result
 from api_market_03.src.schemas.product_schema import product_schema
 from api_market_03.src.database.database_manager import DatabaseManager
+from datetime import datetime
 
 
 class ProductRepository:
@@ -53,6 +54,35 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    # TODO: Implement this method no HARDCODE dates
+    def update_all_date(self):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+
+            # Realizar la actualización
+            result = collection.update_many(
+                {"date_created": {"$regex": "^2024-05-01"}},
+                {"$set": {"date_created": "2024-04-30 00:00:00"}},
+            )
+
+            self.db_manager.close_database()
+            return Result.success(result.modified_count)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_size(self):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            actual_date_year_month = datetime.now().strftime("%Y-%m")
+            query = {"date_created": {"$regex": f"^{actual_date_year_month}"}}
+            size = collection.count_documents(query)
+            self.db_manager.close_database()
+            return Result.success(size)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def get_all_products(self):
         try:
             database = self.db_manager.connect_database()
@@ -63,11 +93,51 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def get_all_products_by_market(self, market_name):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find({"store_name": market_name}))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_products_by_range(self, init_num, end_num):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find().skip(init_num).limit(end_num - init_num))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def get_all_products_by_category_id(self, category_id):
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
             products = list(collection.find({"category_id": category_id}))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_product_by_uuid(self, uuid):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            product = collection.find_one({"uuid": uuid})
+            self.db_manager.close_database()
+            return Result.success(product)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def get_products_by_name(self, product_name):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find({"name": product_name}))
             self.db_manager.close_database()
             return Result.success(products)
         except Exception as e:

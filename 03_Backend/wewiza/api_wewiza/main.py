@@ -42,7 +42,7 @@ def parse_date(date_str):
 def read_root():
     # Set all the endpoints
     return {
-        "endpoints": [
+        "docs": [
             {
                 "endpoint": "/docs",
                 "description": "To see all endpoints allowed and documentation",
@@ -185,7 +185,6 @@ def get_categories():
     }
 
 
-# TODO: not working
 @app.get(
     "/products/category/id/{category_id}",
     description="Get all products by category",
@@ -199,8 +198,9 @@ def get_products_by_category(category_id: str):
         "http://api_market_02:8082/products/category/id/" + category_id
     ).json()
 
-    # TODO: add market 03 = carrefour
-    response_products_market_03_json_list = list()
+    response_products_market_03_json_list = requests.get(
+        "http://api_market_03:8083/products/category/id/" + category_id
+    ).json()
 
     # Map objetcs with LIKES data
     map_list_market_01 = product_service.map_products_json_list(
@@ -209,19 +209,22 @@ def get_products_by_category(category_id: str):
     map_list_market_02 = product_service.map_products_json_list(
         response_products_market_02_json_list
     )
+    map_list_market_03 = product_service.map_products_json_list(
+        response_products_market_03_json_list
+    )
 
     # TODO: Filter products that are in the same month that today
 
     return {
         "mercadona": map_list_market_01,
         "ahorramas": map_list_market_02,
-        "carrefour": response_products_market_03_json_list,
+        "carrefour": map_list_market_03,
     }
 
 
 @app.get(
     "/products",
-    description="Get all products by market",
+    description="Get all products",
 )
 def get_all_products():
     response_products_market_01_json_list = requests.get(
@@ -256,7 +259,7 @@ def get_all_products():
 
 @app.get(
     "/products/market/{market_name}",
-    description="Get all products by market and range",
+    description="Get all products by market name (no case sensitive), if not found returns empty list",
 )
 def get_all_products_by_market(market_name: str):
     if market_name.lower().strip() == "mercadona":
@@ -277,12 +280,21 @@ def get_all_products_by_market(market_name: str):
         )
         return filter_current_month_elements(map_list_market_02)
 
-    # TODO: add market 03 = carrefour
+    if market_name.lower().strip() == "carrefour":
+        response_products_market_03_json_list = requests.get(
+            f"http://api_market_03:8083/products/market/Carrefour"
+        ).json()
+        map_list_market_03 = product_service.map_products_json_list(
+            response_products_market_03_json_list
+        )
+        return filter_current_month_elements(map_list_market_03)
+
+    return []
 
 
 @app.get(
     "/product/id/{product_id}",
-    description="Product details by id, if not found returns empty string",
+    description="Product details by id, if not found returns 'name': 'Product not found'",
 )
 def get_product_by_id(product_id: str):
     response_product_market_01_raw_json = requests.get(
@@ -305,7 +317,16 @@ def get_product_by_id(product_id: str):
         )
         return mapped_product
 
-    # TODO: response_product_market_03_json
+    response_product_market_03_raw_json = requests.get(
+        "http://api_market_03:8083/product/id/" + product_id
+    )
+
+    if response_product_market_03_raw_json.status_code == 200:
+        mapped_product = product_service.map_product_json(
+            response_product_market_03_raw_json.json()
+        )
+        return mapped_product
+
     return {"name": "Product not found"}
 
 
@@ -355,10 +376,30 @@ def get_product_details_by_id_and_market(product_id: str, market_name: str):
         ]
 
         response_list_products_market_02_json_list.append(mapped_product)
-
         return response_list_products_market_02_json_list
 
-    # TODO: add market 03 = carrefour
+    if market_name.lower().strip() == "carrefour":
+        response_product_market_03_json = requests.get(
+            "http://api_market_03:8083/product/id/" + product_id
+        ).json()
+        mapped_product = product_service.map_product_json(
+            response_product_market_03_json
+        )
+        response_list_products_market_03_json_list = requests.get(
+            "http://api_market_03:8083/product/name/" + mapped_product["name"]
+        ).json()
+
+        product_uuid = mapped_product["uuid"]
+        response_list_products_market_03_json_list = [
+            product
+            for product in response_list_products_market_03_json_list
+            if product.get("uuid") != product_uuid
+        ]
+
+        response_list_products_market_03_json_list.append(mapped_product)
+        return response_list_products_market_03_json_list
+
+    return []
 
 
 @app.get(
@@ -408,12 +449,33 @@ def get_product_details_by_id(product_id: str):
         return response_list_products_market_02_json_list
 
     # TODO: response_product_market_03_json
-    return list()
+    # MARKET 03
+    response_product_market_03_json = requests.get(
+        "http://api_market_03:8083/product/id/" + product_id
+    )
+    mapped_product = product_service.map_product_json(response_product_market_03_json)
+    response_list_products_market_03_json_list = requests.get(
+        "http://api_market_03:8083/product/name/" + mapped_product["name"]
+    )
+
+    product_uuid = mapped_product["uuid"]
+    response_list_products_market_03_json_list = [
+        product
+        for product in response_list_products_market_03_json_list
+        if product.get("uuid") != product_uuid
+    ]
+
+    response_list_products_market_03_json_list.append(mapped_product)
+
+    if response_list_products_market_03_json_list != []:
+        return response_list_products_market_03_json_list
+
+    return []
 
 
 @app.get(
     "/products/market/{market_name}/range/{init_num}/{end_num}",
-    description="Get all products by market and range, start index = 0",
+    description="Get all products by market and range (start index = 0), if not found returns empty list",
 )
 def get_products_by_range(market_name: str, init_num: int, end_num: int):
     if market_name.lower().strip() == "mercadona":
@@ -438,8 +500,18 @@ def get_products_by_range(market_name: str, init_num: int, end_num: int):
             response_products_market_02_json_list
         )
 
-    # TODO: response_products_market_03_json_list
-    return list()
+    if market_name.lower().strip() == "carrefour":
+        response_products_market_03_json_list = requests.get(
+            "http://api_market_03:8083/products/range/"
+            + str(init_num)
+            + "/"
+            + str(end_num)
+        ).json()
+        return product_service.map_products_json_list(
+            response_products_market_03_json_list
+        )
+
+    return []
 
 
 @app.get(
@@ -459,7 +531,12 @@ def get_products_by_category(market_name: str):
         ).json()
         return response_products_market_02_json_list
 
-    # TODO: last market
+    if market_name.lower().strip() == "carrefour":
+        response_products_market_03_json_list = requests.get(
+            "http://api_market_03:8083/size"
+        ).json()
+        return response_products_market_03_json_list
+
     return 0
 
 
@@ -497,11 +574,15 @@ def start_likes_database():
         "http://api_market_02:8082/products"
     ).json()
 
-    # TODO: market_03
+    response_products_market_03_json_list = requests.get(
+        "http://api_market_03:8083/products"
+    ).json()
 
+    # Directly delete all products in the current month to reset
     product_service.delete_all_products_by_actual_month()
 
     product_service.insert_products_json_list(response_products_market_01_json_list)
     product_service.insert_products_json_list(response_products_market_02_json_list)
+    product_service.insert_products_json_list(response_products_market_03_json_list)
 
     return {"message": "Database likes updated"}
