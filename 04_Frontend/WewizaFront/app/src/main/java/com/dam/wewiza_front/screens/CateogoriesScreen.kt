@@ -80,7 +80,7 @@ fun CategoriesScreenBodyContent(
 
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize().padding(bottom = 70.dp),
         contentPadding = PaddingValues(8.dp),
         content = {
             items(filteredCategories.size) { index ->

@@ -48,22 +48,22 @@ object Constants {
             ) {
                 BottomMenuItem(
                     icon = R.drawable.google,
-                    text = "Inicio",
+                    text = "Destacado",
                     onClick = { navController.navigate(AppScreens.HomeScreen.route) }
                 )
                 BottomMenuItem(
                     icon = R.drawable.google,
-                    text = "Categorias",
+                    text = "Buscador",
                     onClick = { navController.navigate(AppScreens.CategoriesScreen.route) }
                 )
                 BottomMenuItem(
                     icon = R.drawable.google,
-                    text = "Sugerencias",
+                    text = "Mis listas",
                     onClick = { navController.navigate(AppScreens.MyListScreen.route) }
                 )
                 BottomMenuItem(
                     icon = R.drawable.google,
-                    text = "Perfil",
+                    text = "Mi perfil",
                     onClick = { navController.navigate(AppScreens.ProfileScreen.route) }
                 )
             }
