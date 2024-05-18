@@ -330,6 +330,7 @@ def get_product_by_id(product_id: str):
     return {"name": "Product not found"}
 
 
+"""
 @app.get(
     "/product/details/id/{product_id}/market/{market_name}",
     description="List of same product with different date_created, the latest one will be the main product, if not found returns empty list",
@@ -400,6 +401,7 @@ def get_product_details_by_id_and_market(product_id: str, market_name: str):
         return response_list_products_market_03_json_list
 
     return []
+"""
 
 
 @app.get(

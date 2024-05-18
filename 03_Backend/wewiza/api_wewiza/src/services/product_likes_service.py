@@ -16,11 +16,14 @@ class ProductLikesService:
         ).value
 
         if not product_data:
-            print("PRODUCT_LIKES_SERVICE: Product not found")
+            print("PRODUCT_LIKES_SERVICE: (Like) Product not found")
             return False
 
         if email_user in product_data.get("likes_email", []):
-            print("PRODUCT_LIKES_SERVICE: Product was liked before by " + email_user)
+            print(
+                "PRODUCT_LIKES_SERVICE: (Like) Product was liked before by "
+                + email_user
+            )
             return False
 
         new_num_likes = product_data.get("num_likes", 0) + 1
@@ -48,11 +51,14 @@ class ProductLikesService:
         ).value
 
         if not product_data:
-            print("PRODUCT_LIKES_SERVICE: Product not found")
+            print("PRODUCT_LIKES_SERVICE: (Unlike) Product not found")
             return False
 
         if email_user in product_data.get("unlikes_email", []):
-            print("PRODUCT_LIKES_SERVICE: Product was unliked before by " + email_user)
+            print(
+                "PRODUCT_LIKES_SERVICE: (Unlike) Product was unliked before by "
+                + email_user
+            )
             return False
 
         new_num_likes = product_data.get("num_likes", 0) - 1
