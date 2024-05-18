@@ -46,6 +46,16 @@ class ProductLikesRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def get_all_products_by_query(self, query):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find(query))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def get_all_products(self):
         try:
             database = self.db_manager.connect_database()

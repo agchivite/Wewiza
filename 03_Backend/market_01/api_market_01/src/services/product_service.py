@@ -1,11 +1,18 @@
 from api_market_01.src.models.product import Product
 from api_market_01.src.repositories.product_repository import ProductRepository
 import json
+import datetime
 
 
 class ProductService:
     def __init__(self, product_repository: ProductRepository):
         self.product_repository = product_repository
+
+    ##################### TODO: CLASS UTILS... #####################
+    def parse_date(self, date_str):
+        return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+
+    #####################----------------#####################
 
     def get_size(self):
         result = self.product_repository.get_size()
@@ -15,6 +22,57 @@ class ProductService:
             return []
 
         return result.value
+
+    def get_products_with_good_profit(self):
+        actual_month = datetime.datetime.now().strftime("%Y-%m")
+        result_actual_products = self.product_repository.get_products_by_date(
+            actual_month
+        )
+
+        if result_actual_products.is_failure():
+            print(
+                "[ProductService] (Good profit) Failed to get products actual month:",
+                result_actual_products.error,
+            )
+            return []
+
+        last_month = (datetime.datetime.now() - datetime.timedelta(days=30)).strftime(
+            "%Y-%m"
+        )
+        result_last_products = self.product_repository.get_products_by_date(last_month)
+
+        if result_last_products.is_failure():
+            print(
+                "[ProductService] (Good profit) Failed to get products last month:",
+                result_last_products.error,
+            )
+            return []
+
+        ############### Get the difference  key ["price_by_standard_measure"] and calculate the profit ##################
+        last_products_list_json = result_last_products.value
+        actual_products_list_json = result_actual_products.value
+
+        for last_product in last_products_list_json:
+            for actual_product in actual_products_list_json:
+                if (
+                    last_product["uuid"] == actual_product["uuid"]
+                    and last_product["price_by_standard_measure"]
+                    != actual_product["price_by_standard_measure"]
+                ):
+                    actual_product["profit"] = (
+                        actual_product["price_by_standard_measure"]
+                        - last_product["price_by_standard_measure"]
+                    )
+                    actual_product["profit_percentage"] = (
+                        actual_product["profit"]
+                        / last_product["price_by_standard_measure"]
+                    ) * 100
+
+        # Removing _id key, we don't want it
+        for product in actual_products_list_json:
+            del product["_id"]
+
+        return actual_products_list_json
 
     def get_all_products(self):
         result = self.product_repository.get_all_products()

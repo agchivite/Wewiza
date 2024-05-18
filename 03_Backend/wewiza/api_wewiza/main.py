@@ -19,8 +19,11 @@ product_service = ProductLikesService(product_repository)
 
 # https://127.0.0.1 -> To call API
 
+# GLOBAL STATEMETS TO CALCULATE TOPICS # TODO:
+TOP_LIKES_AVERAGE = 0
 
-# TODO: CLASS UTILS...
+
+##################### TODO: CLASS UTILS... #####################
 def filter_current_month_elements(elements):
     current_date_time = datetime.datetime.now()
     current_month = current_date_time.month  # Obtener el mes actual
@@ -38,7 +41,7 @@ def parse_date(date_str):
     return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
 
-#### ----------------------------------------------------- ######
+#####################----------------#####################
 
 
 @app.get("/")
@@ -52,6 +55,81 @@ def read_root():
             }
         ]
     }
+
+
+@app.get("/categories/top", description="Get 6 top categories")
+def get_top_categories():
+    # TODO: get top categories
+
+    # TODO: if there are not top categories return random 6 categories
+    return []
+
+
+@app.get(
+    "/products/top",
+    description="Get top products with benefits comparing the past or good likes",
+)
+def get_top_products():
+    # We get the list with uuid´s
+    top_likes_products_uuid_list = product_service.get_top_products(TOP_LIKES_AVERAGE)
+    top_likes_product = []
+
+    for product_uuid in top_likes_products_uuid_list:
+        respond_market_01 = requests.get(
+            "http://api_market_01:8081/product/id/" + product_uuid
+        )
+        if respond_market_01.status_code == 200:
+            top_likes_product.append(respond_market_01.json())
+
+        respond_market_02 = requests.get(
+            "http://api_market_02:8082/product/id/" + product_uuid
+        )
+        if respond_market_02.status_code == 200:
+            top_likes_product.append(respond_market_02.json())
+
+        respond_market_03 = requests.get(
+            "http://api_market_03:8083/product/id/" + product_uuid
+        )
+        if respond_market_03.status_code == 200:
+            top_likes_product.append(respond_market_03.json())
+
+    # This list has the product data with the profit associate
+    response_products_profit_market_01_json_list = requests.get(
+        "http://api_market_01:8081/products/past/profit"
+    ).json()
+
+    response_products_profit_market_02_json_list = requests.get(
+        "http://api_market_02:8082/products/past/profit"
+    ).json()
+
+    response_products_profit_market_03_json_list = requests.get(
+        "http://api_market_03:8083/products/past/profit"
+    ).json()
+
+    top_profit_products_uuid_list = (
+        response_products_profit_market_01_json_list
+        + response_products_profit_market_02_json_list
+        + response_products_profit_market_03_json_list
+    )
+    # Sort by key "profit" and get the first 10
+    top_profit_products_uuid_list.sort(
+        key=lambda x: x["profit_percentage"], reverse=True
+    )
+
+    # TODO: Maybe not needed
+    top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
+
+    # Delete key "profit"
+    for product in top_profit_products_uuid_list:
+        del product["profit"]
+        del product["profit_percentage"]
+
+    top_final_products = top_likes_product + top_profit_products_uuid_list
+    map_products = product_service.map_products_json_list(top_final_products)
+
+    # TODO: if there are not top products return random 10 products
+
+    return filter_current_month_elements(map_products)
 
 
 @app.get("/categories", description="Get all categories")
@@ -181,7 +259,7 @@ def get_categories():
 
 @app.get(
     "/products",
-    description="Get all products",
+    description="Get all products in the current month",
 )
 def get_all_products():
     response_products_market_01_json_list = requests.get(
@@ -216,7 +294,7 @@ def get_all_products():
 
 @app.get(
     "/products/category/id/{category_id}",
-    description="Get all products by category",
+    description="Get all products by category in the current month",
 )
 def get_products_by_category(category_id: str):
     response_products_market_01_json_list = requests.get(
@@ -242,18 +320,16 @@ def get_products_by_category(category_id: str):
         response_products_market_03_json_list
     )
 
-    # TODO: Filter products that are in the same month that today
-
     return {
-        "mercadona": map_list_market_01,
-        "ahorramas": map_list_market_02,
-        "carrefour": map_list_market_03,
+        "mercadona": filter_current_month_elements(map_list_market_01),
+        "ahorramas": filter_current_month_elements(map_list_market_02),
+        "carrefour": filter_current_month_elements(map_list_market_03),
     }
 
 
 @app.get(
     "/products/market/{market_name}",
-    description="Get all products by market name (no case sensitive), if not found returns empty list",
+    description="Get all products by market name (no case sensitive) in the current month, if not found returns empty list",
 )
 def get_all_products_by_market(market_name: str):
     if market_name.lower().strip() == "mercadona":
@@ -370,7 +446,6 @@ def get_product_details_by_id(product_id: str):
     if response_list_products_market_02_json_list != []:
         return response_list_products_market_02_json_list
 
-    # TODO: response_product_market_03_json
     # MARKET 03
     response_product_market_03_json = requests.get(
         "http://api_market_03:8083/product/id/" + product_id
@@ -407,9 +482,10 @@ def get_products_by_range(market_name: str, init_num: int, end_num: int):
             + "/"
             + str(end_num)
         ).json()
-        return product_service.map_products_json_list(
+        map_list_market_01 = product_service.map_products_json_list(
             response_products_market_01_json_list
         )
+        return filter_current_month_elements(map_list_market_01)
 
     if market_name.lower().strip() == "ahorramas":
         response_products_market_02_json_list = requests.get(
@@ -418,9 +494,10 @@ def get_products_by_range(market_name: str, init_num: int, end_num: int):
             + "/"
             + str(end_num)
         ).json()
-        return product_service.map_products_json_list(
+        map_list_market_02 = product_service.map_products_json_list(
             response_products_market_02_json_list
         )
+        return filter_current_month_elements(map_list_market_02)
 
     if market_name.lower().strip() == "carrefour":
         response_products_market_03_json_list = requests.get(
@@ -429,9 +506,10 @@ def get_products_by_range(market_name: str, init_num: int, end_num: int):
             + "/"
             + str(end_num)
         ).json()
-        return product_service.map_products_json_list(
+        map_list_market_03 = product_service.map_products_json_list(
             response_products_market_03_json_list
         )
+        return filter_current_month_elements(map_list_market_03)
 
     return []
 
@@ -440,7 +518,7 @@ def get_products_by_range(market_name: str, init_num: int, end_num: int):
     "/size/market/{market_name}",
     description="Get the size of products by market, return number",
 )
-def get_products_by_category(market_name: str):
+def get_size_by_market(market_name: str):
     if market_name.lower().strip() == "mercadona":
         response_products_market_01_json_list = requests.get(
             "http://api_market_01:8081/size"

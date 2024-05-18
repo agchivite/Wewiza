@@ -1,42 +1,42 @@
 version: "3"
 services:
-  api_wewiza:
-    build: ./
-    restart: always
-    ports:
-      - "443:443"
-      - "587:587" # SMTP for email
-    environment:
-      - PORT=443
-    volumes:
-      - ./certs/ssl:/certs/ssl
-    networks:
-      - public-wewiza-network
-      - private-wewiza-network
-    command: uvicorn api_wewiza.main:app --host 0.0.0.0 --port 443 --ssl-keyfile=/certs/ssl/server.key --ssl-certfile=/certs/ssl/server.cer --reload
-    depends_on:
-      - mongo_wewiza
+    api_wewiza:
+        build: ./
+        restart: always
+        ports:
+            - "443:443"
+            - "587:587" # SMTP for email
+        environment:
+            - PORT=443
+        volumes:
+            - ./certs/ssl:/certs/ssl
+        networks:
+            - public-wewiza-network
+            - private-wewiza-network
+        command: uvicorn api_wewiza.main:app --host 0.0.0.0 --port 443 --ssl-keyfile=/certs/ssl/server.key --ssl-certfile=/certs/ssl/server.cer --reload
+        depends_on:
+            - mongo_wewiza
 
-  mongo_wewiza:
-    # apcheamitru/arm32v7-mongo:3.2.20 # mongo:6.0.13
-    image: apcheamitru/arm32v7-mongo:3.2.20
-    restart: always
-    ports:
-      - "27020:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_DATABASE: wewiza_db
-    volumes:
-      - mongo_database:/data/db # Directorio de datos de MongoDB
-    networks:
-      - private-wewiza-network
+    mongo_wewiza:
+        # apcheamitru/arm32v7-mongo:3.2.20 # mongo:6.0.13
+        image: mongo:6.0.13
+        restart: always
+        ports:
+            - "27020:27017"
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: root
+            MONGO_INITDB_DATABASE: wewiza_db
+        volumes:
+            - mongo_database:/data/db # Directorio de datos de MongoDB
+        networks:
+            - private-wewiza-network
 
 volumes:
-  mongo_database:
+    mongo_database:
 
 networks:
-  public-wewiza-network:
-    external: true
-  private-wewiza-network:
-    driver: bridge
+    public-wewiza-network:
+        external: true
+    private-wewiza-network:
+        driver: bridge

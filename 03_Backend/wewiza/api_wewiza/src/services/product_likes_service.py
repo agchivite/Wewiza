@@ -6,8 +6,18 @@ class ProductLikesService:
     def __init__(self, product_likes_repository: ProductLikesRepository):
         self.product_likes_repository = product_likes_repository
 
-    def get_all_products(self):
-        return self.product_likes_repository.get_all_products()
+    def get_top_products(self, TOP_LIKES_AVERAGE):
+        query = {"num_likes": {"$gt": TOP_LIKES_AVERAGE}}
+        result = self.product_likes_repository.get_all_products_by_query(query)
+
+        if result.is_failure():
+            print("Failed to get top categories:", result.error)
+            return []
+
+        products_list_json = result.value
+        uuid_list = [product["uuid"] for product in products_list_json]
+
+        return uuid_list
 
     def like_product(self, product_id, email_user):
         uuid_query = {"uuid": product_id}
