@@ -111,19 +111,19 @@ def get_top_products():
         + response_products_profit_market_02_json_list
         + response_products_profit_market_03_json_list
     )
+
     # Sort by key "profit" and get the first 10
     top_profit_products_uuid_list.sort(
         key=lambda x: x["profit_percentage"], reverse=True
     )
-
     # TODO: Maybe not needed
     top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
-
+    """
     # Delete key "profit"
     for product in top_profit_products_uuid_list:
         del product["profit"]
         del product["profit_percentage"]
-
+    """
     top_final_products = top_likes_product + top_profit_products_uuid_list
     map_products = product_service.map_products_json_list(top_final_products)
 

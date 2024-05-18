@@ -71,6 +71,16 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def get_products_by_date(self, date):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            products = list(collection.find({"date_created": {"$regex": f"^{date}"}}))
+            self.db_manager.close_database()
+            return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
     def get_size(self):
         try:
             database = self.db_manager.connect_database()

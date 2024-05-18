@@ -60,13 +60,18 @@ class ProductService:
                     != actual_product["price_by_standard_measure"]
                 ):
                     actual_product["profit"] = (
-                        actual_product["price_by_standard_measure"]
-                        - last_product["price_by_standard_measure"]
+                        last_product["price_by_standard_measure"]
+                        - actual_product["price_by_standard_measure"]
                     )
                     actual_product["profit_percentage"] = (
                         actual_product["profit"]
                         / last_product["price_by_standard_measure"]
                     ) * 100
+
+        # Only get the actual products that has key profit
+        actual_products_list_json = [
+            product for product in actual_products_list_json if "profit" in product
+        ]
 
         # Removing _id key, we don't want it
         for product in actual_products_list_json:
@@ -151,6 +156,9 @@ class ProductService:
             return []
 
         product_json = result.value
+
+        if product_json is None:
+            return result.value
 
         # Removing _id key, we don't want it
         del product_json["_id"]

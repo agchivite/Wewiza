@@ -131,6 +131,7 @@ class ProductLikesService:
         return product_json
 
     def map_products_json_list(self, products_json_list):
+        products_json_list = [item for item in products_json_list if item is not None]
         uuids = [product_json["uuid"] for product_json in products_json_list]
 
         products_data = self.product_likes_repository.get_products_by_uuids(uuids).value

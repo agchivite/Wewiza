@@ -23,8 +23,10 @@ product_service = ProductService(product_repository)
 def get_products_with_good_profit():
     # Has the product data with the ["profit_percentage"] and ["profit"] key associate
     top_profit_products_list = product_service.get_products_with_good_profit()
-    top_profit_products_list.sort(key=lambda x: x["profit_percentage"], reverse=True)
-    return top_profit_products_list[:10]
+    sorted_products = sorted(
+        top_profit_products_list, key=lambda x: x["profit_percentage"], reverse=True
+    )
+    return sorted_products[:10]
 
 
 @app.get("/products")

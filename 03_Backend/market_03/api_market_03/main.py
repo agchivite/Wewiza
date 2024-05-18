@@ -26,6 +26,16 @@ def update_all_date():
     return {"result": "All products updated"}
 
 
+@app.get("/products/past/profit")
+def get_products_with_good_profit():
+    # Has the product data with the ["profit_percentage"] and ["profit"] key associate
+    top_profit_products_list = product_service.get_products_with_good_profit()
+    sorted_products = sorted(
+        top_profit_products_list, key=lambda x: x["profit_percentage"], reverse=True
+    )
+    return sorted_products[:10]
+
+
 @app.get("/products")
 def get_all_products():
     return product_service.get_all_products()
