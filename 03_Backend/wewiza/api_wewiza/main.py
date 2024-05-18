@@ -38,6 +38,9 @@ def parse_date(date_str):
     return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
 
+#### ----------------------------------------------------- ######
+
+
 @app.get("/")
 def read_root():
     # Set all the endpoints
@@ -49,15 +52,6 @@ def read_root():
             }
         ]
     }
-
-
-@app.get(
-    "/reaction/email/{email_user}/product/id/{product_id}",
-    description="Check if a user has liked a product",
-)
-def get_reaction(email_user: str, product_id: str):
-    reaction = product_service.get_reaction(email_user, product_id)
-    return {"reaction": reaction}
 
 
 @app.get("/categories", description="Get all categories")
@@ -186,6 +180,41 @@ def get_categories():
 
 
 @app.get(
+    "/products",
+    description="Get all products",
+)
+def get_all_products():
+    response_products_market_01_json_list = requests.get(
+        "http://api_market_01:8081/products"
+    ).json()
+
+    response_products_market_02_json_list = requests.get(
+        "http://api_market_02:8082/products"
+    ).json()
+
+    response_products_market_03_json_list = requests.get(
+        "http://api_market_03:8083/products"
+    ).json()
+
+    # Map objetcs with LIKES data
+    map_list_market_01 = product_service.map_products_json_list(
+        response_products_market_01_json_list
+    )
+    map_list_market_02 = product_service.map_products_json_list(
+        response_products_market_02_json_list
+    )
+    map_list_market_03 = product_service.map_products_json_list(
+        response_products_market_03_json_list
+    )
+
+    return {
+        "mercadona": filter_current_month_elements(map_list_market_01),
+        "ahorramas": filter_current_month_elements(map_list_market_02),
+        "carrefour": filter_current_month_elements(map_list_market_03),
+    }
+
+
+@app.get(
     "/products/category/id/{category_id}",
     description="Get all products by category",
 )
@@ -219,41 +248,6 @@ def get_products_by_category(category_id: str):
         "mercadona": map_list_market_01,
         "ahorramas": map_list_market_02,
         "carrefour": map_list_market_03,
-    }
-
-
-@app.get(
-    "/products",
-    description="Get all products",
-)
-def get_all_products():
-    response_products_market_01_json_list = requests.get(
-        "http://api_market_01:8081/products"
-    ).json()
-
-    response_products_market_02_json_list = requests.get(
-        "http://api_market_02:8082/products"
-    ).json()
-
-    response_products_market_03_json_list = requests.get(
-        "http://api_market_03:8083/products"
-    ).json()
-
-    # Map objetcs with LIKES data
-    map_list_market_01 = product_service.map_products_json_list(
-        response_products_market_01_json_list
-    )
-    map_list_market_02 = product_service.map_products_json_list(
-        response_products_market_02_json_list
-    )
-    map_list_market_03 = product_service.map_products_json_list(
-        response_products_market_03_json_list
-    )
-
-    return {
-        "mercadona": filter_current_month_elements(map_list_market_01),
-        "ahorramas": filter_current_month_elements(map_list_market_02),
-        "carrefour": filter_current_month_elements(map_list_market_03),
     }
 
 
@@ -328,80 +322,6 @@ def get_product_by_id(product_id: str):
         return mapped_product
 
     return {"name": "Product not found"}
-
-
-"""
-@app.get(
-    "/product/details/id/{product_id}/market/{market_name}",
-    description="List of same product with different date_created, the latest one will be the main product, if not found returns empty list",
-)
-def get_product_details_by_id_and_market(product_id: str, market_name: str):
-
-    if market_name.lower().strip() == "mercadona":
-        response_product_market_01_json = requests.get(
-            "http://api_market_01:8081/product/id/" + product_id
-        ).json()
-        mapped_product = product_service.map_product_json(
-            response_product_market_01_json
-        )
-        response_list_products_market_01_json_list = requests.get(
-            "http://api_market_01:8081/product/name/" + mapped_product["name"]
-        ).json()
-
-        product_uuid = mapped_product["uuid"]
-        response_list_products_market_01_json_list = [
-            product
-            for product in response_list_products_market_01_json_list
-            if product.get("uuid") != product_uuid
-        ]
-
-        response_list_products_market_01_json_list.append(mapped_product)
-        return response_list_products_market_01_json_list
-
-    if market_name.lower().strip() == "ahorramas":
-        response_product_market_02_json = requests.get(
-            "http://api_market_02:8082/product/id/" + product_id
-        ).json()
-        mapped_product = product_service.map_product_json(
-            response_product_market_02_json
-        )
-        response_list_products_market_02_json_list = requests.get(
-            "http://api_market_02:8082/product/name/" + mapped_product["name"]
-        ).json()
-
-        product_uuid = mapped_product["uuid"]
-        response_list_products_market_02_json_list = [
-            product
-            for product in response_list_products_market_02_json_list
-            if product.get("uuid") != product_uuid
-        ]
-
-        response_list_products_market_02_json_list.append(mapped_product)
-        return response_list_products_market_02_json_list
-
-    if market_name.lower().strip() == "carrefour":
-        response_product_market_03_json = requests.get(
-            "http://api_market_03:8083/product/id/" + product_id
-        ).json()
-        mapped_product = product_service.map_product_json(
-            response_product_market_03_json
-        )
-        response_list_products_market_03_json_list = requests.get(
-            "http://api_market_03:8083/product/name/" + mapped_product["name"]
-        ).json()
-
-        product_uuid = mapped_product["uuid"]
-        response_list_products_market_03_json_list = [
-            product
-            for product in response_list_products_market_03_json_list
-            if product.get("uuid") != product_uuid
-        ]
-
-        response_list_products_market_03_json_list.append(mapped_product)
-        return response_list_products_market_03_json_list
-
-    return []
-"""
 
 
 @app.get(
@@ -560,7 +480,13 @@ def unlike_product(product_id: str, email_user: str):
     return {"result": boolean_result}
 
 
-# TODO: endpoint to check if a user has liked a product and unliked
+@app.get(
+    "/reaction/email/{email_user}/product/id/{product_id}",
+    description="Check if a user has liked a product, returns 'liked', 'unliked' or 'none'",
+)
+def get_reaction(email_user: str, product_id: str):
+    reaction = product_service.get_reaction(email_user, product_id)
+    return {"reaction": reaction}
 
 
 @app.get(
