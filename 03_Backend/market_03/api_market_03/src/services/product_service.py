@@ -166,6 +166,9 @@ class ProductService:
 
         product_json = result.value
 
+        if product_json is None:
+            return result.value
+
         # Removing _id key, we don't want it
         del product_json["_id"]
 

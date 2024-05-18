@@ -57,17 +57,19 @@ def read_root():
     }
 
 
-@app.get("/categories/top", description="Get 6 top categories")
+@app.get(
+    "/categories/top",
+    description="Get maximum 6 top categories, it depends on top products",
+)
 def get_top_categories():
-    # TODO: get top categories
-
+    list_top_products = get_top_products()
     # TODO: if there are not top categories return random 6 categories
-    return []
+    return [product["category_id"] for product in list_top_products]
 
 
 @app.get(
     "/products/top",
-    description="Get top products with benefits comparing the past or good likes",
+    description="Get top products with benefits comparing the past or good likes, if the key ['profit'] and ['profit_percentage'] are 0 it means that the product is TOP because it has A LOT LIKES",
 )
 def get_top_products():
     # We get the list with uuid´s
@@ -93,6 +95,14 @@ def get_top_products():
         if respond_market_03.status_code == 200:
             top_likes_product.append(respond_market_03.json())
 
+    # Delete None items
+    top_likes_product = [product for product in top_likes_product if product]
+
+    # Adding 0 to know this product is TOP because it has A LOT LIKES
+    for product in top_likes_product:
+        product["profit"] = 0
+        product["profit_percentage"] = 0
+
     # This list has the product data with the profit associate
     response_products_profit_market_01_json_list = requests.get(
         "http://api_market_01:8081/products/past/profit"
@@ -116,17 +126,10 @@ def get_top_products():
     top_profit_products_uuid_list.sort(
         key=lambda x: x["profit_percentage"], reverse=True
     )
-    # TODO: Maybe not needed
     top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
-    """
-    # Delete key "profit"
-    for product in top_profit_products_uuid_list:
-        del product["profit"]
-        del product["profit_percentage"]
-    """
+
     top_final_products = top_likes_product + top_profit_products_uuid_list
     map_products = product_service.map_products_json_list(top_final_products)
-
     # TODO: if there are not top products return random 10 products
 
     return filter_current_month_elements(map_products)

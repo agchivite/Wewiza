@@ -33,6 +33,10 @@ def get_products_with_good_profit():
     sorted_products = sorted(
         top_profit_products_list, key=lambda x: x["profit_percentage"], reverse=True
     )
+    for product in sorted_products:
+        if product["profit_percentage"] <= 0:
+            sorted_products.remove(product)
+
     return sorted_products[:10]
 
 
