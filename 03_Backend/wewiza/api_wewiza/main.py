@@ -413,62 +413,68 @@ def get_product_details_by_id(product_id: str):
         "http://api_market_01:8081/product/id/" + product_id
     ).json()
     mapped_product = product_service.map_product_json(response_product_market_01_json)
-    response_list_products_market_01_json_list = requests.get(
-        "http://api_market_01:8081/product/name/" + mapped_product["name"]
-    ).json()
 
-    product_uuid = mapped_product["uuid"]
-    response_list_products_market_01_json_list = [
-        product
-        for product in response_list_products_market_01_json_list
-        if product.get("uuid") != product_uuid
-    ]
+    if mapped_product:
+        response_list_products_market_01_json_list = requests.get(
+            "http://api_market_01:8081/product/name/" + mapped_product["name"]
+        ).json()
 
-    response_list_products_market_01_json_list.append(mapped_product)
-    if response_list_products_market_01_json_list != []:
-        return response_list_products_market_01_json_list
+        product_uuid = mapped_product["uuid"]
+        response_list_products_market_01_json_list = [
+            product
+            for product in response_list_products_market_01_json_list
+            if product.get("uuid") != product_uuid
+        ]
+
+        response_list_products_market_01_json_list.append(mapped_product)
+        if response_list_products_market_01_json_list != []:
+            return response_list_products_market_01_json_list
 
     # MARKET 02
     response_product_market_02_json = requests.get(
         "http://api_market_02:8082/product/id/" + product_id
     ).json()
     mapped_product = product_service.map_product_json(response_product_market_02_json)
-    response_list_products_market_02_json_list = requests.get(
-        "http://api_market_02:8082/product/name/" + mapped_product["name"]
-    ).json()
 
-    product_uuid = mapped_product["uuid"]
-    response_list_products_market_02_json_list = [
-        product
-        for product in response_list_products_market_02_json_list
-        if product.get("uuid") != product_uuid
-    ]
+    if mapped_product:
+        response_list_products_market_02_json_list = requests.get(
+            "http://api_market_02:8082/product/name/" + mapped_product["name"]
+        ).json()
 
-    response_list_products_market_02_json_list.append(mapped_product)
+        product_uuid = mapped_product["uuid"]
+        response_list_products_market_02_json_list = [
+            product
+            for product in response_list_products_market_02_json_list
+            if product.get("uuid") != product_uuid
+        ]
 
-    if response_list_products_market_02_json_list != []:
-        return response_list_products_market_02_json_list
+        response_list_products_market_02_json_list.append(mapped_product)
+
+        if response_list_products_market_02_json_list != []:
+            return response_list_products_market_02_json_list
 
     # MARKET 03
     response_product_market_03_json = requests.get(
         "http://api_market_03:8083/product/id/" + product_id
     )
     mapped_product = product_service.map_product_json(response_product_market_03_json)
-    response_list_products_market_03_json_list = requests.get(
-        "http://api_market_03:8083/product/name/" + mapped_product["name"]
-    )
 
-    product_uuid = mapped_product["uuid"]
-    response_list_products_market_03_json_list = [
-        product
-        for product in response_list_products_market_03_json_list
-        if product.get("uuid") != product_uuid
-    ]
+    if mapped_product:
+        response_list_products_market_03_json_list = requests.get(
+            "http://api_market_03:8083/product/name/" + mapped_product["name"]
+        )
 
-    response_list_products_market_03_json_list.append(mapped_product)
+        product_uuid = mapped_product["uuid"]
+        response_list_products_market_03_json_list = [
+            product
+            for product in response_list_products_market_03_json_list
+            if product.get("uuid") != product_uuid
+        ]
 
-    if response_list_products_market_03_json_list != []:
-        return response_list_products_market_03_json_list
+        response_list_products_market_03_json_list.append(mapped_product)
+
+        if response_list_products_market_03_json_list != []:
+            return response_list_products_market_03_json_list
 
     return []
 
