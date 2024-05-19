@@ -7,6 +7,20 @@ class ProductLikesService:
     def __init__(self, product_likes_repository: ProductLikesRepository):
         self.product_likes_repository = product_likes_repository
 
+    def calculate_like_average(self):
+        result = self.product_likes_repository.get_all_products()
+
+        if result.is_failure():
+            print("Failed to get all products:", result.error)
+            return 0
+
+        products_list_json = result.value
+        likes_sum = sum(product["num_likes"] for product in products_list_json)
+        likes_count = len(products_list_json)
+        average = likes_sum / likes_count
+        print("AVERAGE_LIKES: ", average)
+        return average
+
     def get_top_products(self, TOP_LIKES_AVERAGE):
         query = {"num_likes": {"$gt": TOP_LIKES_AVERAGE}}
         result = self.product_likes_repository.get_all_products_by_query(query)

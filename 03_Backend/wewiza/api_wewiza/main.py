@@ -19,8 +19,13 @@ product_service = ProductLikesService(product_repository)
 
 # https://127.0.0.1 -> To call API
 
-# GLOBAL STATEMETS TO CALCULATE TOPICS # TODO:
+# GLOBAL STATEMETS TO CALCULATE TOPICS
+# 1. Server start
+# 2. like/unlike product
+# 3. Start new month with start likes
 TOP_LIKES_AVERAGE = 0
+CATEGORIES_TOP = []
+PRODUCTS_TOP = []
 
 
 ##################### TODO: CLASS UTILS... #####################
@@ -62,9 +67,7 @@ def read_root():
     description="Get maximum 6 top categories, it depends on top products",
 )
 def get_top_categories():
-    list_top_products = get_top_products()
-    # TODO: if there are not top categories return random 6 categories
-    return [product["category_id"] for product in list_top_products]
+    return CATEGORIES_TOP
 
 
 @app.get(
@@ -72,67 +75,7 @@ def get_top_categories():
     description="Get top products with benefits comparing the past or good likes, if the key ['profit'] and ['profit_percentage'] are 0 it means that the product is TOP because it has A LOT LIKES",
 )
 def get_top_products():
-    # We get the list with uuid´s
-    top_likes_products_uuid_list = product_service.get_top_products(TOP_LIKES_AVERAGE)
-    top_likes_product = []
-
-    for product_uuid in top_likes_products_uuid_list:
-        respond_market_01 = requests.get(
-            "http://api_market_01:8081/product/id/" + product_uuid
-        )
-        if respond_market_01.status_code == 200:
-            top_likes_product.append(respond_market_01.json())
-
-        respond_market_02 = requests.get(
-            "http://api_market_02:8082/product/id/" + product_uuid
-        )
-        if respond_market_02.status_code == 200:
-            top_likes_product.append(respond_market_02.json())
-
-        respond_market_03 = requests.get(
-            "http://api_market_03:8083/product/id/" + product_uuid
-        )
-        if respond_market_03.status_code == 200:
-            top_likes_product.append(respond_market_03.json())
-
-    # Delete None items
-    top_likes_product = [product for product in top_likes_product if product]
-
-    # Adding 0 to know this product is TOP because it has A LOT LIKES
-    for product in top_likes_product:
-        product["profit"] = 0
-        product["profit_percentage"] = 0
-
-    # This list has the product data with the profit associate
-    response_products_profit_market_01_json_list = requests.get(
-        "http://api_market_01:8081/products/past/profit"
-    ).json()
-
-    response_products_profit_market_02_json_list = requests.get(
-        "http://api_market_02:8082/products/past/profit"
-    ).json()
-
-    response_products_profit_market_03_json_list = requests.get(
-        "http://api_market_03:8083/products/past/profit"
-    ).json()
-
-    top_profit_products_uuid_list = (
-        response_products_profit_market_01_json_list
-        + response_products_profit_market_02_json_list
-        + response_products_profit_market_03_json_list
-    )
-
-    # Sort by key "profit" and get the first 10
-    top_profit_products_uuid_list.sort(
-        key=lambda x: x["profit_percentage"], reverse=True
-    )
-    top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
-
-    top_final_products = top_likes_product + top_profit_products_uuid_list
-    map_products = product_service.map_products_json_list(top_final_products)
-    # TODO: if there are not top products return random 10 products
-
-    return filter_current_month_elements(map_products)
+    return PRODUCTS_TOP
 
 
 @app.get("/categories", description="Get all categories")
@@ -558,12 +501,100 @@ def get_size_by_market(market_name: str):
     return 0
 
 
+##################### TODO: WHHAT CLASS MUST IMPLEMENT THIS... #####################
+# THIS MUST BE HERE BECAUSE WE NEED TO LOAD FUCNTIONS EARLIER THAT like / unlike and start_likes endpoints
+def calculate_like_average():
+    return product_service.calculate_like_average()
+
+
+def calculate_top_products():
+    # We get the list with uuid´s
+    top_likes_products_uuid_list = product_service.get_top_products(TOP_LIKES_AVERAGE)
+    top_likes_product = []
+
+    for product_uuid in top_likes_products_uuid_list:
+        respond_market_01 = requests.get(
+            "http://api_market_01:8081/product/id/" + product_uuid
+        )
+        if respond_market_01.status_code == 200:
+            top_likes_product.append(respond_market_01.json())
+
+        respond_market_02 = requests.get(
+            "http://api_market_02:8082/product/id/" + product_uuid
+        )
+        if respond_market_02.status_code == 200:
+            top_likes_product.append(respond_market_02.json())
+
+        respond_market_03 = requests.get(
+            "http://api_market_03:8083/product/id/" + product_uuid
+        )
+        if respond_market_03.status_code == 200:
+            top_likes_product.append(respond_market_03.json())
+
+    # Delete None items
+    top_likes_product = [product for product in top_likes_product if product]
+
+    # Adding 0 to know this product is TOP because it has A LOT LIKES
+    for product in top_likes_product:
+        product["profit"] = 0
+        product["profit_percentage"] = 0
+
+    # This list has the product data with the profit associate
+    response_products_profit_market_01_json_list = requests.get(
+        "http://api_market_01:8081/products/past/profit"
+    ).json()
+
+    response_products_profit_market_02_json_list = requests.get(
+        "http://api_market_02:8082/products/past/profit"
+    ).json()
+
+    response_products_profit_market_03_json_list = requests.get(
+        "http://api_market_03:8083/products/past/profit"
+    ).json()
+
+    top_profit_products_uuid_list = (
+        response_products_profit_market_01_json_list
+        + response_products_profit_market_02_json_list
+        + response_products_profit_market_03_json_list
+    )
+
+    # Sort by key "profit" and get the first 10
+    top_profit_products_uuid_list.sort(
+        key=lambda x: x["profit_percentage"], reverse=True
+    )
+    top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
+
+    top_final_products = top_likes_product + top_profit_products_uuid_list
+    map_products = product_service.map_products_json_list(top_final_products)
+
+    return filter_current_month_elements(map_products)
+
+
+def calculate_top_categories():
+    list_top_products = calculate_top_products()
+    return [product["category_id"] for product in list_top_products]
+
+
+# CASE 1: start server
+TOP_LIKES_AVERAGE = calculate_like_average()
+CATEGORIES_TOP = calculate_top_categories()
+PRODUCTS_TOP = calculate_top_products()
+#####################----------------#####################
+
+
 @app.get(
     "/like/{product_id}/email/{email_user}",
     description="Like a product only one time per user, return true if liked or false if was liked before",
 )
 def like_product(product_id: str, email_user: str):
     boolean_result = product_service.like_product(product_id, email_user)
+
+    # CASE 2: like/unlike
+    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
+    TOP_LIKES_AVERAGE = calculate_like_average()
+    CATEGORIES_TOP = calculate_top_categories()
+    PRODUCTS_TOP = calculate_top_products()
+
     return {"result": boolean_result}
 
 
@@ -573,6 +604,13 @@ def like_product(product_id: str, email_user: str):
 )
 def unlike_product(product_id: str, email_user: str):
     boolean_result = product_service.unlike_product(product_id, email_user)
+
+    # CASE 2: like/unlike
+    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
+    TOP_LIKES_AVERAGE = calculate_like_average()
+    CATEGORIES_TOP = calculate_top_categories()
+    PRODUCTS_TOP = calculate_top_products()
+
     return {"result": boolean_result}
 
 
@@ -608,5 +646,11 @@ def start_likes_database():
     product_service.insert_products_json_list(response_products_market_01_json_list)
     product_service.insert_products_json_list(response_products_market_02_json_list)
     product_service.insert_products_json_list(response_products_market_03_json_list)
+
+    # CASE 3: start new month
+    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
+    TOP_LIKES_AVERAGE = calculate_like_average()
+    CATEGORIES_TOP = calculate_top_categories()
+    PRODUCTS_TOP = calculate_top_products()
 
     return {"message": "Database likes updated"}
