@@ -134,9 +134,7 @@ class ProductLikesService:
                 product_json["num_likes"] = product_data["num_likes"]
                 return product_json
 
-        return {
-            "name": "Product error",
-        }
+        return product_json
 
     def map_products_json_list(self, products_json_list):
         products_json_list = [item for item in products_json_list if item is not None]

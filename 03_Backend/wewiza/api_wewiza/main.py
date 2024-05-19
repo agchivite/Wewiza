@@ -414,8 +414,6 @@ def get_product_details_by_id(product_id: str):
     ).json()
     mapped_product = product_service.map_product_json(response_product_market_01_json)
 
-    print("mapped_product", mapped_product)
-
     if isinstance(mapped_product, requests.Response):
         mapped_product = mapped_product.json()
 
@@ -440,8 +438,6 @@ def get_product_details_by_id(product_id: str):
         "http://api_market_02:8082/product/id/" + product_id
     ).json()
     mapped_product = product_service.map_product_json(response_product_market_02_json)
-
-    print("mapped_product", mapped_product)
 
     if isinstance(mapped_product, requests.Response):
         mapped_product = mapped_product.json()
@@ -469,8 +465,6 @@ def get_product_details_by_id(product_id: str):
     )
     mapped_product = product_service.map_product_json(response_product_market_03_json)
 
-    print("mapped_product", mapped_product)
-
     if isinstance(mapped_product, requests.Response):
         mapped_product = mapped_product.json()
 
@@ -480,11 +474,12 @@ def get_product_details_by_id(product_id: str):
         )
 
         product_uuid = mapped_product["uuid"]
-        response_list_products_market_03_json_list = [
-            product
-            for product in response_list_products_market_03_json_list
-            if product.get("uuid") != product_uuid
-        ]
+        filtered_products = []
+        for product in response_list_products_market_03_json_list:
+            if product is not None and product["uuid"] != product_uuid:
+                print("product:", product)
+                filtered_products.append(product)
+        response_list_products_market_03_json_list = filtered_products
 
         response_list_products_market_03_json_list.append(mapped_product)
 
