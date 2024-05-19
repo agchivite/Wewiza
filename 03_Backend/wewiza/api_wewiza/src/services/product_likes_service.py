@@ -122,9 +122,6 @@ class ProductLikesService:
         self.product_likes_repository.insert_products_json(products_data)
 
     def map_product_json(self, product_json):
-        if isinstance(product_json, requests.Response):
-            product_json = product_json.json()
-
         if isinstance(product_json, dict):
             uuid = product_json["uuid"]
             product_data = self.product_likes_repository.get_product_by_query(
