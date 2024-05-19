@@ -121,6 +121,9 @@ class ProductLikesService:
         self.product_likes_repository.insert_products_json(products_data)
 
     def map_product_json(self, product_json):
+        if product_json is None:
+            return product_json
+
         uuid = product_json["uuid"]
         product_data = self.product_likes_repository.get_product_by_query(
             {"uuid": uuid}

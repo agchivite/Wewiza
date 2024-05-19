@@ -16,3 +16,37 @@ Error to obtain data from product: 'NoneType' object has no attribute 'text'
 Error to obtain data from product: 'NoneType' object has no attribute 'text'
 Error to obtain data from product: 'NoneType' object has no attribute 'text'
 Error to obtain data from product: 'NoneType' object has no attribute 'text'
+Error to obtain data from product: 'NoneType' object has no attribute 'find'
+Error to obtain data from product: 'NoneType' object has no attribute 'find'
+Error to obtain data from product: 'NoneType' object has no attribute 'text'
+Error to obtain data from product: 'NoneType' object has no attribute 'find'
+Error to obtain data from product: 'NoneType' object has no attribute 'find'
+Error to obtain data from product: 'NoneType' object has no attribute 'find'
+Error to obtain data from product: 'NoneType' object has no attribute 'text'
+Error to obtain data from product: 'NoneType' object has no attribute 'text'
+Error to obtain data from product: 'NoneType' object has no attribute 'text'
+Error to obtain data from product: 'NoneType' object has no attribute 'find'
+Error to process page: Message: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=125.0.6422.60)
+Stacktrace:
+	GetHandleVerifier [0x00007FF6CC0E22C2+60002]
+	(No symbol) [0x00007FF6CC05CA59]
+	(No symbol) [0x00007FF6CBF17EDA]
+	(No symbol) [0x00007FF6CBEED5B5]
+	(No symbol) [0x00007FF6CBF93727]
+	(No symbol) [0x00007FF6CBFAB3A1]
+	(No symbol) [0x00007FF6CBF8C033]
+	(No symbol) [0x00007FF6CBF59657]
+	(No symbol) [0x00007FF6CBF5A251]
+	GetHandleVerifier [0x00007FF6CC3F3E2D+3278285]
+	GetHandleVerifier [0x00007FF6CC440190+3590448]
+	GetHandleVerifier [0x00007FF6CC4361D0+3549552]
+	GetHandleVerifier [0x00007FF6CC191DE6+779654]
+	(No symbol) [0x00007FF6CC067ACF]
+	(No symbol) [0x00007FF6CC062EE4]
+	(No symbol) [0x00007FF6CC063072]
+	(No symbol) [0x00007FF6CC052C4F]
+	BaseThreadInitThunk [0x00007FFB0D90257D+29]
+	RtlUserThreadStart [0x00007FFB0E3AAA48+40]
+
