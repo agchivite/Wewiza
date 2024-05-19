@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from api_wewiza.src.database.database_manager import DatabaseManager
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
 from api_wewiza.src.services.product_likes_service import ProductLikesService
@@ -575,6 +575,13 @@ def calculate_top_categories():
     return [product["category_id"] for product in list_top_products]
 
 
+def update_global_variables():
+    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
+    TOP_LIKES_AVERAGE = calculate_like_average()
+    CATEGORIES_TOP = calculate_top_categories()
+    PRODUCTS_TOP = calculate_top_products()
+
+
 # CASE 1: start server
 TOP_LIKES_AVERAGE = calculate_like_average()
 CATEGORIES_TOP = calculate_top_categories()
@@ -586,15 +593,10 @@ PRODUCTS_TOP = calculate_top_products()
     "/like/{product_id}/email/{email_user}",
     description="Like a product only one time per user, return true if liked or false if was liked before",
 )
-def like_product(product_id: str, email_user: str):
+def like_product(product_id: str, email_user: str, background_tasks: BackgroundTasks):
     boolean_result = product_service.like_product(product_id, email_user)
-
     # CASE 2: like/unlike
-    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
-    TOP_LIKES_AVERAGE = calculate_like_average()
-    CATEGORIES_TOP = calculate_top_categories()
-    PRODUCTS_TOP = calculate_top_products()
-
+    background_tasks.add_task(update_global_variables)
     return {"result": boolean_result}
 
 
@@ -602,15 +604,10 @@ def like_product(product_id: str, email_user: str):
     "/unlike/{product_id}/email/{email_user}",
     description="Unlike a product only one time per user, true if unliked or false if was unliked before",
 )
-def unlike_product(product_id: str, email_user: str):
+def unlike_product(product_id: str, email_user: str, background_tasks: BackgroundTasks):
     boolean_result = product_service.unlike_product(product_id, email_user)
-
     # CASE 2: like/unlike
-    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
-    TOP_LIKES_AVERAGE = calculate_like_average()
-    CATEGORIES_TOP = calculate_top_categories()
-    PRODUCTS_TOP = calculate_top_products()
-
+    background_tasks.add_task(update_global_variables)
     return {"result": boolean_result}
 
 
