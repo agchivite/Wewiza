@@ -476,8 +476,8 @@ def get_product_details_by_id(product_id: str):
         product_uuid = mapped_product["uuid"]
         filtered_products = []
         for product in response_list_products_market_03_json_list:
+            print("product:", product)
             if product is not None and product["uuid"] != product_uuid:
-                print("product:", product)
                 filtered_products.append(product)
         response_list_products_market_03_json_list = filtered_products
 
