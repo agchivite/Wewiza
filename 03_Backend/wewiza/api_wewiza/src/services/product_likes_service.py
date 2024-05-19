@@ -1,5 +1,6 @@
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
 import json
+import requests
 
 
 class ProductLikesService:
@@ -124,17 +125,21 @@ class ProductLikesService:
 
         print("product_json", product_json)
 
-        if product_json is None:
-            return product_json
+        if isinstance(product_json, requests.Response):
+            product_json = product_json.json()
 
-        uuid = product_json["uuid"]
-        product_data = self.product_likes_repository.get_product_by_query(
-            {"uuid": uuid}
-        ).value
-        if product_data:
-            product_json["num_likes"] = product_data["num_likes"]
+        if isinstance(product_json, dict):
+            uuid = product_json["uuid"]
+            product_data = self.product_likes_repository.get_product_by_query(
+                {"uuid": uuid}
+            ).value
+            if product_data:
+                product_json["num_likes"] = product_data["num_likes"]
+                return product_json
 
-        return product_json
+        return {
+            "name": "Product error",
+        }
 
     def map_products_json_list(self, products_json_list):
         products_json_list = [item for item in products_json_list if item is not None]
