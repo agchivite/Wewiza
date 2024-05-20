@@ -8,21 +8,6 @@ class ProductService:
     def __init__(self, product_repository: ProductRepository):
         self.product_repository = product_repository
 
-    ##################### TODO: CLASS UTILS... #####################
-    def parse_date(self, date_str):
-        return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
-
-    #####################----------------#####################
-
-    def get_size(self):
-        result = self.product_repository.get_size()
-
-        if result.is_failure():
-            print("Failed to get size:", result.error)
-            return []
-
-        return result.value
-
     def get_products_with_good_profit(self):
         actual_month = datetime.datetime.now().strftime("%Y-%m")
         result_actual_products = self.product_repository.get_products_by_date(
@@ -48,7 +33,7 @@ class ProductService:
             )
             return []
 
-        ############### Get the difference  key ["price_by_standard_measure"] and calculate the profit ##################
+        ######## Difference key ["price_by_standard_measure"] and calculate the profit #########
         last_products_list_json = result_last_products.value
         actual_products_list_json = result_actual_products.value
 
@@ -78,6 +63,21 @@ class ProductService:
             del product["_id"]
 
         return actual_products_list_json
+
+    ##################### TODO: CLASS UTILS... #####################
+    def parse_date(self, date_str):
+        return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+
+    #####################----------------#####################
+
+    def get_size(self):
+        result = self.product_repository.get_size()
+
+        if result.is_failure():
+            print("Failed to get size:", result.error)
+            return []
+
+        return result.value
 
     def get_all_products(self):
         result = self.product_repository.get_all_products()

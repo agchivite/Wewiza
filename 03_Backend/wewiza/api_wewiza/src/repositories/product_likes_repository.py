@@ -66,26 +66,6 @@ class ProductLikesRepository:
         except Exception as e:
             return Result.failure(str(e))
 
-    def delete_product(self, query):
-        try:
-            database = self.db_manager.connect_database()
-            collection = database[self.collection_name]
-            result = collection.delete_one(query)
-            self.db_manager.close_database()
-            return Result.success(result.deleted_count)
-        except Exception as e:
-            return Result.failure(str(e))
-
-    def update_product(self, query, new_data):
-        try:
-            database = self.db_manager.connect_database()
-            collection = database[self.collection_name]
-            result = collection.update_one(query, new_data)
-            self.db_manager.close_database()
-            return Result.success(result.modified_count)
-        except Exception as e:
-            return Result.failure(str(e))
-
     def get_product_by_query(self, query):
         try:
             database = self.db_manager.connect_database()
@@ -103,6 +83,26 @@ class ProductLikesRepository:
             products = list(collection.find({"uuid": {"$in": uuids}}))
             self.db_manager.close_database()
             return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def update_product(self, query, new_data):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            result = collection.update_one(query, new_data)
+            self.db_manager.close_database()
+            return Result.success(result.modified_count)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def delete_product(self, query):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            result = collection.delete_one(query)
+            self.db_manager.close_database()
+            return Result.success(result.deleted_count)
         except Exception as e:
             return Result.failure(str(e))
 
