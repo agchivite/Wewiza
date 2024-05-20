@@ -180,21 +180,14 @@ class ProductRepository:
             return Result.failure(str(e))
 
     def update_price_by_standard_measure(self):
-        # Update all products that has in key: price_by_standard_measure == "Measure is not valid"
-        # Recalculate the price by standard measure wiht key: price/quantity_measure and update the key: price_by_standard_measure
+        # Update all products that have huevo o huevos in their name to measure -> ud.
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
-            query = {"price_by_standard_measure": "Measure is not valid"}
-            products = list(collection.find(query))
-            for product in products:
-                price = product["price"]
-                quantity_measure = product["quantity_measure"]
-                price_by_standard_measure = price / quantity_measure
-                result = collection.update_one(
-                    {"uuid": product["uuid"]},
-                    {"$set": {"price_by_standard_measure": price_by_standard_measure}},
-                )
+            result = collection.update_many(
+                {"name": {"$regex": "huevo|Huevo|huevos|Huevos"}},
+                {"$set": {"measure": "ud."}},
+            )
             self.db_manager.close_database()
             return Result.success(result.modified_count)
         except Exception as e:

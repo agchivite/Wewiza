@@ -654,11 +654,8 @@ def start_likes_database():
 
 
 @app.get(
-    "/update/price_by_standard_measure",
+    "/update/measure_carrefour",
 )
 def update():
-    # /update/price_by_standard_measure
-    response = requests.get(
-        "http://api_market_01:8081/update/price_by_standard_measure"
-    )
+    response = requests.get("http://api_market_03:8083/update/measure_carrefour")
     return response.json()

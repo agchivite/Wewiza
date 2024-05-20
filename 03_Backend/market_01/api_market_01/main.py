@@ -83,6 +83,6 @@ def delete_products_by_date(date: str):
     return product_service.delete_products_by_date(date)
 
 
-@app.get("/update/price_by_standard_measure")
+@app.get("/update/measure_carrefour")
 def update_price_by_standard_measure():
     return product_service.update_price_by_standard_measure()
