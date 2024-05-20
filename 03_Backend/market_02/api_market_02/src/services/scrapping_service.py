@@ -244,6 +244,7 @@ class ScrappingService:
                 quantity_measure = 1
 
             current_date = datetime.now()
+            # TODO: change to actual date
             current_date_str = (
                 "2024-04-05 00:00:00"  # current_date.strftime("%Y-%m-%d %H:%M:%S")
             )
