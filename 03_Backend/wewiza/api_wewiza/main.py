@@ -653,7 +653,9 @@ def start_likes_database():
     return {"message": "Database likes updated"}
 
 
-@app.get()
+@app.get(
+    "/update/price_by_standard_measure",
+)
 def update():
     # /update/price_by_standard_measure
     response = requests.get(
