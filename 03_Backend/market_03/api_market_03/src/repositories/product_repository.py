@@ -185,3 +185,17 @@ class ProductRepository:
             return Result.success(result.modified_count)
         except Exception as e:
             return Result.failure(str(e))
+
+    def update_price_by_standard_measure(self):
+        # Update all products that have huevo o huevos in their name to measure -> ud.
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            result = collection.update_many(
+                {"name": {"$regex": "huevo|Huevo|huevos|Huevos"}},
+                {"$set": {"measure": "ud."}},
+            )
+            self.db_manager.close_database()
+            return Result.success(result.modified_count)
+        except Exception as e:
+            return Result.failure(str(e))

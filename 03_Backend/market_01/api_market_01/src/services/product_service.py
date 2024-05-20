@@ -188,6 +188,3 @@ class ProductService:
             return []
 
         return result.value
-
-    def update_price_by_standard_measure(self):
-        self.product_repository.update_price_by_standard_measure()
