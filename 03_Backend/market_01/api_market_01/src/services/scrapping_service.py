@@ -289,11 +289,11 @@ class ScrappingService:
         ):  # In Mercadona ud. is same as dozens eggs.
             quantity_in_dozen = quantity / 12
             return price / quantity_in_dozen
-        elif measure == "ud.":
+        elif measure == "ud." or measure == "ud":
             # Other cases with ud., it going to calculate with standard ud. as 1
             return price / quantity
         else:
-            return "Measure is not valid"
+            return 0.0
 
     def write_error_to_file(self, error, output_file):
         with open(output_file, "a", encoding="utf-8") as file:
