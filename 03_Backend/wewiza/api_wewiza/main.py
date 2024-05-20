@@ -651,3 +651,12 @@ def start_likes_database():
     PRODUCTS_TOP = calculate_top_products()
 
     return {"message": "Database likes updated"}
+
+
+@app.get()
+def update():
+    # /update/price_by_standard_measure
+    response = requests.get(
+        "http://api_market_01:8081/update/price_by_standard_measure"
+    )
+    return response.json()
