@@ -96,10 +96,11 @@ fun ProductDetailsScreenBodyContent(
 fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
     val productHistoryDetails = viewModel.getProductHistoryDetails().sortedBy { it.date_created }
     Log.d("ProductDetailsScreen", "ProductHistoryDetails: $productHistoryDetails")
+    Log.d("ProductDetailsScreen", "CurrentProduct: ${sharedViewModel.getCurrentProduct()}")
 
     if (
         productHistoryDetails.isNotEmpty() &&
-        productHistoryDetails[0].uuid == sharedViewModel.getCurrentProduct().uuid
+        productHistoryDetails.last().uuid == sharedViewModel.getCurrentProduct().uuid
     ) {
         val entries = viewModel.prepareChartData(productHistoryDetails)
         Log.d("ProductDetailsScreen", "Entries: $entries")

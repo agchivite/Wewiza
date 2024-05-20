@@ -111,7 +111,7 @@ class SharedViewModel : ViewModel() {
 
     fun setProductHistoryDetails() {
         if (currentProduct.value != null) {
-            getProductHistoryDetails(currentProduct.value!!.uuid, currentProduct.value!!.store_name)
+            getProductHistoryDetails(currentProduct.value!!.uuid)
         }
     }
 
@@ -120,11 +120,11 @@ class SharedViewModel : ViewModel() {
     }
 
 
-    private fun getProductHistoryDetails(product_id: String, market_id: String) {
+    private fun getProductHistoryDetails(product_id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val products = withContext(Dispatchers.IO) {
-                    service.getProductHistoryDetails(product_id, market_id)
+                    service.getProductHistoryDetails(product_id)
                 }
                 withContext(Dispatchers.Main) {
                     productHistoryDetails.clear()

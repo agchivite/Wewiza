@@ -23,13 +23,12 @@ class ProductScreenViewModel : ViewModel() {
         if (sharedViewModel.getProducts().isEmpty()) {
             getMercadonaProducts()
             getAhorramasProducts()
-            //  getCarrefourProducts()
+            getCarrefourProducts()
             sharedViewModel.setProducts(allProductsList.value)
-        }else{
+        } else {
             allProductsList.value.addAll(sharedViewModel.getProducts())
         }
     }
-
 
 
     private fun getMercadonaProducts() {

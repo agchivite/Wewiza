@@ -5,10 +5,12 @@ package com.dam.wewiza_front.screens
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +36,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +54,7 @@ import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Category
 import com.dam.wewiza_front.models.Product
+import com.dam.wewiza_front.models.TopProduct
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
 import kotlinx.coroutines.delay
@@ -65,9 +70,8 @@ fun HomeScreen(
     Scaffold(
         bottomBar = {
             Constants.BottomMenu(navController)
-        }
+        },
     ) {
-
         MyLightTheme {
             HomeBodyContent(navController, viewModel)
         }
@@ -79,20 +83,23 @@ fun HomeBodyContent(
     navController: NavController,
     viewModel: HomeScreenViewModel,
 ) {
-    Column() {
+    val topProducts = viewModel.topProductsList.value
+
+    // Observa los cambios en topProductsList y fuerza una recomposición
+    LaunchedEffect(topProducts) {
+        delay(100)
+    }
+
+    Column {
         WewizaLogoSection()
         FeaturedCategoriesSection(navController, viewModel)
         FeaturedProductsSection(navController, viewModel)
-
-
     }
-
-
 }
 
 @Composable
 fun FeaturedProductsSection(navController: NavController, viewModel: HomeScreenViewModel) {
-    Column() {
+    Column {
         ProductsTextSubSection(viewModel, navController)
         ProductsSection(viewModel, navController)
     }
@@ -100,36 +107,23 @@ fun FeaturedProductsSection(navController: NavController, viewModel: HomeScreenV
 
 @Composable
 fun ProductsSection(viewModel: HomeScreenViewModel, navController: NavController) {
+    val products = viewModel.topProductsList
 
-    val products = viewModel.allProductsList
-    val firstSixProducts = products.shuffled().take(20)
-    val productsLoaded = firstSixProducts.isNotEmpty()
-
-
-    LaunchedEffect(productsLoaded) {
-        if (productsLoaded) {
-            delay(100) // Añade un pequeño retraso opcional si es necesario
-
-        }
-    }
-
-    if (!productsLoaded) {
+    if (products.value.isEmpty()) {
         LoadingIndicator()
     } else {
         Box {
             LazyRow(
                 modifier = Modifier.padding(16.dp),
                 content = {
-                    items(firstSixProducts!!.size) { index ->
-                        HomeProductItem(product = firstSixProducts[index], viewModel, navController)
+                    items(products.value.size) { index ->
+                        HomeProductItem(product = products.value[index], viewModel, navController)
                     }
                 }
             )
         }
     }
-
 }
-
 
 @Composable
 fun ProductsTextSubSection(viewModel: HomeScreenViewModel, navController: NavController) {
@@ -164,21 +158,18 @@ fun ProductsTextSubSection(viewModel: HomeScreenViewModel, navController: NavCon
             )
         }
     }
-
 }
 
 @Composable
 fun FeaturedCategoriesSection(navController: NavController, viewModel: HomeScreenViewModel) {
-    Column() {
+    Column {
         CategoryTextsSubSection(viewModel, navController)
         CategoriesSection(viewModel, navController)
     }
-
 }
 
 @Composable
 fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavController) {
-
     val categories = viewModel.allCategoriesList
     val firstSixCategories = categories.take(6)
     val categoriesLoaded = firstSixCategories.isNotEmpty()
@@ -186,7 +177,6 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
     LaunchedEffect(categoriesLoaded) {
         delay(100) // Añade un pequeño retraso opcional si es necesario
     }
-
 
     if (!categoriesLoaded) {
         LoadingIndicator()
@@ -209,35 +199,77 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
     }
 }
 
-
 @Composable
-fun HomeProductItem(product: Product, viewModel: HomeScreenViewModel, navController: NavController) {
+fun HomeProductItem(
+    product: TopProduct,
+    viewModel: HomeScreenViewModel,
+    navController: NavController
+) {
     val painter: Painter = rememberImagePainter(data = product.image_url)
 
     Card(
         modifier = Modifier
+            .width(140.dp)
             .padding(20.dp)
-            .size(80.dp)
-            .clip(CircleShape), // Hace que el Card tenga una forma circular
-        shape = CircleShape, // Asegura que el Card mantenga su forma circular incluso si tiene un elevación
+            .fillMaxWidth()
+            .height(130.dp), // Ajusta la altura según sea necesario
+        shape = RoundedCornerShape(10.dp), // Esquinas redondeadas
         onClick = {
             sharedViewModel.clearCurrentProduct()
-            sharedViewModel.setCurrentProduct(product)
+            val parsedProduct = Product(
+                product.category_id,
+                product.date_created,
+                product.image_url,
+                product.measure,
+                product.name,
+                product.price,
+                product.price_by_standard_measure,
+                product.quantity_measure,
+                product.store_image_url,
+                product.store_name,
+                product.url,
+                product.uuid,
+                product.num_likes
+            )
+            sharedViewModel.setCurrentProduct(parsedProduct)
             sharedViewModel.setProductHistoryDetails()
             viewModel.navigateToProductDetailsScreen(navController)
         }
-
     ) {
-        Image(
-            painter = painter,
-            contentDescription = product.name,
-            modifier = Modifier
-                .padding(10.dp)
-                .align(Alignment.CenterHorizontally)
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Image(
+                painter = painter,
+                contentDescription = product.name,
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(bottom = 10.dp)
+
+            )
+            if (product.profit == 0 && product.profit_percentage == 0) {
+                Text(
+                    text = "MÁS GUSTADO!", style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+
+                )
+            } else {
+                Text(
+                    text = "Ahorro: ${product.profit}€ (${product.profit_percentage}%)",
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                )
+            }
+
+        }
     }
 }
-
 
 @Composable
 fun HomeCategoryItem(
@@ -262,8 +294,6 @@ fun HomeCategoryItem(
                 .clip(CircleShape), // Hace que el Card tenga una forma circular
             shape = CircleShape, // Asegura que el Card mantenga su forma circular incluso si tiene un elevación,
             onClick = { viewModel.navigateToProductsScreen(category.id, navController) }
-
-
         ) {
             Image(
                 painter = painter,
@@ -285,7 +315,6 @@ fun HomeCategoryItem(
             overflow = TextOverflow.Ellipsis
         )
     }
-
 }
 
 @Composable
@@ -325,7 +354,6 @@ private fun CategoryTextsSubSection(
 
 @Composable
 fun WewizaLogoSection() {
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -340,9 +368,7 @@ fun WewizaLogoSection() {
                 .width(200.dp)
         )
     }
-
 }
-
 
 @Composable
 fun LoadingIndicator() {

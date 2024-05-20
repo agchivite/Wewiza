@@ -1,11 +1,13 @@
 package com.dam.wewiza_front.viewModels
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.dam.wewiza_front.models.Category
 import com.dam.wewiza_front.models.Product
+import com.dam.wewiza_front.models.TopProduct
 import com.dam.wewiza_front.navigation.AppScreens
 import com.dam.wewiza_front.screens.sharedViewModel
 import com.dam.wewiza_front.services.RetrofitServiceFactory
@@ -18,14 +20,47 @@ class HomeScreenViewModel : ViewModel() {
 
     var allCategoriesList = mutableListOf<Category>()
     val allProductsList = mutableListOf<Product>()
+    var topCategoriesList = mutableStateOf(mutableListOf<Category>())
+    var topProductsList = mutableStateOf(mutableListOf<TopProduct>())
 
     init {
         getAllCategories()
-        getMercadonaProducts()
-        getAhorramasProducts()
-      //  getCarrefourProducts()
+     //   getTopCategories()
+        getTopProducts()
         sharedViewModel.setProducts(allProductsList)
 
+    }
+
+    private fun getTopProducts() {
+        viewModelScope.launch {
+            try {
+                val products = withContext(Dispatchers.IO) {
+                    service.getTopProducts()
+                }
+                withContext(Dispatchers.Main) {
+                    topProductsList.value.addAll(products)
+                }
+                Log.d("HomeScreenViewModel", "getTopProducts: ${products.size}")
+            } catch (e: Exception) {
+                Log.d("HomeScreenViewModel", "getTopProducts: ${e.message}")
+            }
+        }
+    }
+
+    private fun getTopCategories() {
+        viewModelScope.launch {
+            try {
+                val categories = withContext(Dispatchers.IO) {
+                    service.getTopCategories()
+                }
+                withContext(Dispatchers.Main) {
+                    topCategoriesList.value.addAll(categories)
+                }
+                Log.d("HomeScreenViewModel", "getTopCategories: ${categories.size}")
+            } catch (e: Exception) {
+                Log.d("HomeScreenViewModel", "getTopCategories: ${e.message}")
+            }
+        }
     }
 
 
