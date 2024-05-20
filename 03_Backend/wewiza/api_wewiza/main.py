@@ -46,40 +46,7 @@ def parse_date(date_str):
     return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
 
-#####################----------------#####################
-
-
-@app.get("/")
-def read_root():
-    # Set all the endpoints
-    return {
-        "docs": [
-            {
-                "endpoint": "/docs",
-                "description": "To see all endpoints allowed and documentation",
-            }
-        ]
-    }
-
-
-@app.get(
-    "/categories/top",
-    description="Get maximum 6 top categories, it depends on top products",
-)
-def get_top_categories():
-    return CATEGORIES_TOP
-
-
-@app.get(
-    "/products/top",
-    description="Get top products with benefits comparing the past or good likes, if the key ['profit'] and ['profit_percentage'] are 0 it means that the product is TOP because it has A LOT LIKES",
-)
-def get_top_products():
-    return PRODUCTS_TOP
-
-
-@app.get("/categories", description="Get all categories")
-def get_categories():
+def get_all_categories():
     """
     {"id": "cuidado_del_cabello", "name": "Cuidado del cabello"},
     {"id": "cuidado_facial_y_corporal", "name": "Cuidado facial y corporal"},
@@ -201,6 +168,49 @@ def get_categories():
             },
         ]
     }
+
+
+#####################----------------#####################
+
+
+@app.get("/")
+def read_root():
+    # Set all the endpoints
+    return {
+        "docs": [
+            {
+                "endpoint": "/docs",
+                "description": "To see all endpoints allowed and documentation",
+            }
+        ]
+    }
+
+
+@app.get(
+    "/categories/top",
+    description="Get maximum 6 top categories, it depends on top products",
+)
+def get_top_categories():
+    all_categories = get_all_categories()
+    top_categories = []
+    for category in all_categories["categories"]:
+        if category["id"] in CATEGORIES_TOP:
+            top_categories.append(category)
+
+    return top_categories[:6]
+
+
+@app.get(
+    "/products/top",
+    description="Get top products with benefits comparing the past or good likes, if the key ['profit'] and ['profit_percentage'] are 0 it means that the product is TOP because it has A LOT LIKES",
+)
+def get_top_products():
+    return PRODUCTS_TOP
+
+
+@app.get("/categories", description="Get all categories")
+def get_categories():
+    return get_all_categories()
 
 
 @app.get(
