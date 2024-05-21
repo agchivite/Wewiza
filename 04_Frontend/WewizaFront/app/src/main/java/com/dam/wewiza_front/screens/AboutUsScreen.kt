@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,9 +16,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +37,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.dam.wewiza_front.R
+import com.dam.wewiza_front.constants.Constants
+import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,8 +49,15 @@ fun AboutUsScreen(
     navController: NavHostController,
 ) {
     val context = LocalContext.current
-    Scaffold() {
-        AboutUsBodyContent(context, viewModel, navController)
+    Scaffold(
+        topBar = {
+            Constants.TopBarWithLogo(navController)
+        }
+    ) {
+        MyLightTheme {
+            AboutUsBodyContent(context, viewModel, navController)
+        }
+
     }
 }
 
@@ -57,17 +70,49 @@ fun AboutUsBodyContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 80.dp),
+            .padding(top = 90.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painterResource(id = R.drawable.provisional_logo),
-            contentDescription = "Logo",
-            modifier = Modifier.size(200.dp)
-        )
-        Text(text = "Wewiza", style = TextStyle(fontSize = 40.sp))
 
+    ) {
         ImageFields(context, viewModel)
+
+        Column (horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "Sobre nosotros",
+                style = TextStyle(fontSize = 30.sp),
+                modifier = Modifier.padding(20.dp)
+            )
+            Text(
+                text = "Wewiza es una aplicación innovadora desarrollada por dos estudiantes apasionados del Desarrollo de Aplicaciones Multiplataforma (DAM). Nuestro objetivo es simplificar y mejorar la experiencia de compra de alimentos para los usuarios. Como comparador de precios, Wewiza busca y compara precios de múltiples tiendas de alimentos para ayudarte a encontrar las mejores ofertas. Ya sea que estés buscando ingredientes para tu próxima receta o tu snack favorito, Wewiza te ayuda a ahorrar tiempo y dinero. Únete a nosotros en este viaje para hacer de las compras de alimentos una experiencia más eficiente y agradable.",
+                style = TextStyle(fontSize = 15.sp),
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+        }
+
+        Column(modifier = Modifier.padding(top = 30.dp)) {
+            Image(
+                painterResource(id = R.drawable.logo_simple),
+                contentDescription = "Logo",
+                modifier = Modifier.size(200.dp)
+            )
+            Image(
+                painterResource(id = R.drawable.logo_letras),
+                contentDescription = "Logo",
+                modifier = Modifier.size(200.dp)
+            )
+        }
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Text(
+                text = "\u00A9 2024 Wewiza",
+                style = TextStyle(fontSize = 12.sp),
+                modifier = Modifier.padding(16.dp)
+            )
+        }
     }
 }
 
@@ -77,7 +122,7 @@ private fun ImageFields(context: Context, viewModel: AboutUsScreenViewModel) {
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(8.dp))
-            .background(Color(0xFFFFE797))
+            .background(MaterialTheme.colorScheme.tertiary)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 20.dp)) {
             Row(

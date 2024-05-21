@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -38,6 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
@@ -101,29 +105,37 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
     Box(modifier = Modifier.run {
         background(MaterialTheme.colorScheme.surface)
     }) {
+
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 40.dp),
+                .padding(top = 70.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Image(
-                painter = painterResource(id = R.drawable.provisional_logo),
+                painter = painterResource(id =R.drawable.loading),
                 contentDescription = "Logo",
-                modifier = Modifier.size(300.dp)
-            )
-            Text(
-                "¡Bienvenido a Wewiza!", style = TextStyle(
-                    fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, fontFamily = Butler, color = MaterialTheme.colorScheme.onSurface
-                )
+                modifier = Modifier
+                    .size(280.dp)
+                    .padding(bottom = 30.dp)
             )
 
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 100.dp)
+                    .padding(top = 70.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Text(
+                    "¡Bienvenido a Wewiza!", style = TextStyle(
+                        fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, fontFamily = Butler, color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                    modifier = Modifier.padding(bottom = 50.dp)
+                )
+
                 Button(
                     onClick = {viewModel.navigateToLoginScreen(navController)},
                     modifier = Modifier
@@ -133,7 +145,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
                         .fillMaxWidth()
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFBB84E8), // Color hexadecimal convertido a Color
+                        containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = Color.White // Color del texto en el botón
                     ),
                     shape = MaterialTheme.shapes.medium
@@ -153,9 +165,9 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
                         .padding(bottom = 20.dp)
                         .fillMaxWidth()
                         .height(50.dp)
-                        .border(3.dp, Color(0xFFBB84E8), RoundedCornerShape(10.dp)),
+                        .border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(10.dp)),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD0C2DC), contentColor = Color(0xFFBB84E8)
+                        containerColor = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.primary
                     ),
                     shape = MaterialTheme.shapes.medium,
 
@@ -188,7 +200,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
                 ) {
                     Spacer(modifier = Modifier.width(16.dp))
                     Divider(
-                        color = Color(0xFFBB84E8), thickness = 3.dp, modifier = Modifier.weight(1f)
+                        color = MaterialTheme.colorScheme.primary, thickness = 3.dp, modifier = Modifier.weight(1f)
                     )
                     Text(
                         text = "O inicia con",
@@ -197,7 +209,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
                         fontFamily = FirsNeue
                     )
                     Divider(
-                        color = Color(0xFFBB84E8), thickness = 3.dp, modifier = Modifier.weight(1f)
+                        color = MaterialTheme.colorScheme.primary, thickness = 3.dp, modifier = Modifier.weight(1f)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }

@@ -1,6 +1,7 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
@@ -95,6 +98,7 @@ private fun MyListItem(
     viewModel: MyListsScreenViewModel,
     navController: NavHostController
 ) {
+    val context = LocalContext.current
 
     Card(
         modifier = Modifier
@@ -117,6 +121,16 @@ private fun MyListItem(
                 Text(text = shoppingList.name)
             }
 
+            Column(modifier = Modifier.width(140.dp), horizontalAlignment = Alignment.End) {
+                Button(
+                    onClick = {
+                        Toast.makeText(context, "Por implementar...", Toast.LENGTH_SHORT).show()
+                    }
+                ) {
+                    Text(text = "Sugerir", fontSize = 10.sp)
+                }
+
+            }
 
             // Delete button
             Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.End) {

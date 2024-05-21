@@ -15,10 +15,13 @@ fun MyLightTheme(
 
     fun colors(): ColorScheme {
         return lightColorScheme(
-            surface = Color(0xFFD0C2DC),
+            surface = Color(0xFFF2F2F2), // light grey
             onSurface = Color(0xFF2E2C31),
-            primary = Color(0xFFBB84E8),
-            background = Color(0xFF7386C0)
+            primary = Color(0xFF8538A6), // light purple
+            background = Color(0xFF7386C0),
+            onBackground = Color(0xFF7386BF), // light blue
+            tertiary = Color(0xFFF2CB57), // light yellow,
+            onTertiary = Color(0xFF490459), // dark purple
         )
     }
 
