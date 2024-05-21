@@ -244,11 +244,13 @@ class ScrappingService:
                 quantity_measure = 1
 
             current_date = datetime.now()
-            # TODO: change to actual date
+            current_date_str = current_date.strftime("%Y-%m-%d %H:%M:%S")
+            # TODO: scrap one time with april and less price per standard measure
+            """ 
             current_date_str = (
-                "2024-04-05 00:00:00"  # current_date.strftime("%Y-%m-%d %H:%M:%S")
+                "2024-04-05 00:00:00"
             )
-
+            """
             product = Product(
                 str(uuid.uuid4()),
                 id_category,
