@@ -71,9 +71,6 @@ fun SettingsScreenBodyContent(
     ) {
         val context = LocalContext.current
 
-
-        Spacer(modifier = Modifier.height(20.dp))
-        ThemeSelector()
         Spacer(modifier = Modifier.height(20.dp))
 
 
@@ -97,55 +94,6 @@ fun SettingsScreenBodyContent(
         Spacer(modifier = Modifier.height(20.dp))
         DeleteAccountSection(viewModel, navController, context, mainActivity)
         Spacer(modifier = Modifier.height(20.dp))
-    }
-}
-
-@Composable
-fun ThemeSelector() {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedTheme by remember { mutableStateOf("Claro") } // Estado para almacenar el tema seleccionado
-
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Tema: $selectedTheme") // Mostrar el tema seleccionado al lado del texto "Tema:"
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Box {
-                IconButton(
-                    onClick = { expanded = !expanded },
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Icon(Icons.Outlined.ArrowDropDown, contentDescription = "")
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    DropdownMenuItem(
-                        text = {
-                            Text("Claro")
-                        },
-                        onClick = {
-                            selectedTheme = "Claro" // Actualizar el tema seleccionado
-                            expanded = !expanded
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = {
-                            Text("Oscuro")
-                        },
-                        onClick = {
-                            selectedTheme = "Oscuro" // Actualizar el tema seleccionado
-                            expanded = !expanded
-                        }
-                    )
-                }
-            }
-        }
     }
 }
 

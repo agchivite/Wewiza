@@ -111,7 +111,7 @@ fun ProfileScreenBodyContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -220,25 +220,30 @@ fun EditProfileDialog(
 
 @Composable
 fun ProfileTopBar(navController: NavController) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(70.dp)
-            .background(MaterialTheme.colorScheme.surface) // Color de fondo
-    ) {
-        Text(text = "Wewiza") //Insertar logo de letras
-
-        // Icono de ajustes
-        Icon(
-            painter = painterResource(id = R.drawable.settings),
-            contentDescription = "Settings",
+    MyLightTheme {
+        Box(
             modifier = Modifier
-                .clickable { navController.navigate(AppScreens.SettingsScreen.route) }
-                .align(Alignment.TopEnd)
-                .padding(end = 16.dp, top = 16.dp) // Margen desde el borde superior y derecho
-                .size(40.dp) // Tamaño del icono
-        )
+                .fillMaxWidth()
+                .height(70.dp)
+                .background(MaterialTheme.colorScheme.onBackground) // Color de fondo
+        ) {
+            Image(painter = painterResource(id = R.drawable.logo_letras), contentDescription = "Logo", modifier = Modifier
+                .size(150.dp)
+                .padding(start = 10.dp))
+
+            // Icono de ajustes
+            Icon(
+                painter = painterResource(id = R.drawable.settings),
+                contentDescription = "Settings",
+                modifier = Modifier
+                    .clickable { navController.navigate(AppScreens.SettingsScreen.route) }
+                    .align(Alignment.TopEnd)
+                    .padding(end = 16.dp, top = 16.dp) // Margen desde el borde superior y derecho
+                    .size(40.dp) // Tamaño del icono
+            )
+        }
     }
+
 }
 
 @Composable
@@ -296,8 +301,8 @@ fun ProfilePicture(
 fun ProfileButton(text: String, icon: Int, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-        modifier = Modifier.fillMaxWidth()
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
+        modifier = Modifier.fillMaxWidth().height(60.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(painter = painterResource(id = icon), contentDescription = "profile pic")

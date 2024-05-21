@@ -26,46 +26,48 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.navigation.AppScreens
+import com.dam.wewiza_front.ui.theme.MyLightTheme
 
 object Constants {
     const val FIREBASE_CLIENT_ID =
         "348348678536-sr4horn983c8c77q0ab122ettjmovtuf.apps.googleusercontent.com"
 
+
     @Composable
     fun BottomMenu(navController: NavController) {
-
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(70.dp)
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center,
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.fillMaxWidth()
+        MyLightTheme {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(70.dp)
+                    .background(MaterialTheme.colorScheme.onTertiary),
+                contentAlignment = Alignment.Center,
             ) {
-                BottomMenuItem(
-                    icon = R.drawable.google,
-                    text = "Destacado",
-                    onClick = { navController.navigate(AppScreens.HomeScreen.route) }
-                )
-                BottomMenuItem(
-                    icon = R.drawable.google,
-                    text = "Buscador",
-                    onClick = { navController.navigate(AppScreens.CategoriesScreen.route) }
-                )
-                BottomMenuItem(
-                    icon = R.drawable.google,
-                    text = "Mis listas",
-                    onClick = { navController.navigate(AppScreens.MyListScreen.route) }
-                )
-                BottomMenuItem(
-                    icon = R.drawable.google,
-                    text = "Mi perfil",
-                    onClick = { navController.navigate(AppScreens.ProfileScreen.route) }
-                )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    BottomMenuItem(
+                        icon = R.drawable.destacados,
+                        text = "Destacado",
+                        onClick = { navController.navigate(AppScreens.HomeScreen.route) }
+                    )
+                    BottomMenuItem(
+                        icon = R.drawable.buscador,
+                        text = "Buscador",
+                        onClick = { navController.navigate(AppScreens.CategoriesScreen.route) }
+                    )
+                    BottomMenuItem(
+                        icon = R.drawable.mis_listas,
+                        text = "Mis listas",
+                        onClick = { navController.navigate(AppScreens.MyListScreen.route) }
+                    )
+                    BottomMenuItem(
+                        icon = R.drawable.profile,
+                        text = "Mi perfil",
+                        onClick = { navController.navigate(AppScreens.ProfileScreen.route) }
+                    )
+                }
             }
         }
     }
@@ -106,10 +108,9 @@ object Constants {
             IconButton(onClick = {
                 navController.popBackStack()
             }, modifier = Modifier.align(Alignment.CenterStart)) {
-                Icon(Icons.Outlined.ArrowBack, contentDescription = "back")
+                Icon(Icons.Outlined.ArrowBack, contentDescription = "back", tint = Color.Black)
             }
-
-            Text(text = "Wewiza")
+            Image(painter = painterResource(id = R.drawable.logo_letras), contentDescription = "logo", modifier = Modifier.size(100.dp))
 
         }
     }
