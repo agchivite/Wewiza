@@ -599,6 +599,12 @@ PRODUCTS_TOP = calculate_top_products()
 #####################----------------#####################
 
 
+@app.get("/calculate/topics")
+def calculate_topics(background_tasks: BackgroundTasks):
+    background_tasks.add_task(update_global_variables)
+    return {"result": "Topics updated it going to take some time to show in endpoints"}
+
+
 @app.get(
     "/like/{product_id}/email/{email_user}",
     description="Like a product only one time per user, return true if liked or false if was liked before",
@@ -606,7 +612,7 @@ PRODUCTS_TOP = calculate_top_products()
 def like_product(product_id: str, email_user: str, background_tasks: BackgroundTasks):
     boolean_result = product_service.like_product(product_id, email_user)
     # CASE 2: like/unlike
-    background_tasks.add_task(update_global_variables)
+    # background_tasks.add_task(update_global_variables)
     return {"result": boolean_result}
 
 
@@ -617,7 +623,7 @@ def like_product(product_id: str, email_user: str, background_tasks: BackgroundT
 def unlike_product(product_id: str, email_user: str, background_tasks: BackgroundTasks):
     boolean_result = product_service.unlike_product(product_id, email_user)
     # CASE 2: like/unlike
-    background_tasks.add_task(update_global_variables)
+    # background_tasks.add_task(update_global_variables)
     return {"result": boolean_result}
 
 
