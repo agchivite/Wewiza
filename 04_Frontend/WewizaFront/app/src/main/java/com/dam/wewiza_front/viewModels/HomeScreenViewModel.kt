@@ -1,6 +1,7 @@
 package com.dam.wewiza_front.viewModels
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,15 +18,19 @@ import kotlinx.coroutines.withContext
 
 class HomeScreenViewModel : ViewModel() {
     private val service = RetrofitServiceFactory.makeRetrofitService()
-
     var allCategoriesList = mutableListOf<Category>()
     val allProductsList = mutableListOf<Product>()
+
+
     var topCategoriesList = mutableStateOf(mutableListOf<Category>())
     var topProductsList = mutableStateOf(mutableListOf<TopProduct>())
 
+    var isTopProductsLoading = mutableStateOf(true)
+    var isTopCategoriesLoading = mutableStateOf(true)
+
     init {
         getAllCategories()
-     //   getTopCategories()
+        getTopCategories()
         getTopProducts()
         sharedViewModel.setProducts(allProductsList)
 
@@ -33,32 +38,36 @@ class HomeScreenViewModel : ViewModel() {
 
     private fun getTopProducts() {
         viewModelScope.launch {
+            isTopProductsLoading.value = true
             try {
                 val products = withContext(Dispatchers.IO) {
                     service.getTopProducts()
                 }
                 withContext(Dispatchers.Main) {
-                    topProductsList.value.addAll(products)
+                    topProductsList.value = products.toMutableList()
                 }
-                Log.d("HomeScreenViewModel", "getTopProducts: ${products.size}")
             } catch (e: Exception) {
                 Log.d("HomeScreenViewModel", "getTopProducts: ${e.message}")
+            } finally {
+                isTopProductsLoading.value = false
             }
         }
     }
 
     private fun getTopCategories() {
         viewModelScope.launch {
+            isTopCategoriesLoading.value = true
             try {
                 val categories = withContext(Dispatchers.IO) {
                     service.getTopCategories()
                 }
                 withContext(Dispatchers.Main) {
-                    topCategoriesList.value.addAll(categories)
+                    topCategoriesList.value = categories.toMutableList()
                 }
-                Log.d("HomeScreenViewModel", "getTopCategories: ${categories.size}")
             } catch (e: Exception) {
                 Log.d("HomeScreenViewModel", "getTopCategories: ${e.message}")
+            } finally {
+                isTopCategoriesLoading.value = false
             }
         }
     }
@@ -150,4 +159,5 @@ class HomeScreenViewModel : ViewModel() {
     fun navigateToProductDetailsScreen(navController: NavController) {
         navController.navigate(AppScreens.ProductDetailsScreen.route)
     }
+
 }
