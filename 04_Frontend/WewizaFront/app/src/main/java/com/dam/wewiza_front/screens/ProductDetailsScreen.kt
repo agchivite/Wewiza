@@ -3,7 +3,9 @@ package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -23,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -30,10 +34,13 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.dam.wewiza_front.Formatter.MonthAxisValueFormatter
 import com.dam.wewiza_front.R
@@ -171,12 +178,43 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
         val auth = FirebaseAuth.getInstance()
 
         Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(text = "Nombre: ${currentProduct.name}")
-                Text(text = "Tienda: ${currentProduct.store_name}")
-                Text(text = "Precio: ${currentProduct.price} €")
+            Box(modifier = Modifier.padding(8.dp)){
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(text = currentProduct.name, fontFamily = FirsNeue, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(text = "Precio: ${currentProduct.price} €", fontFamily = FirsNeue, fontSize = 18.sp)
+                }
+                if (currentProduct.store_name.lowercase().trim() == "mercadona") {
+                    Image(
+                        painter = painterResource(id = R.drawable.mercadona_logo),
+                        contentDescription = "Imagen de la tienda",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .align(Alignment.BottomEnd)
+                            .padding(10.dp)
+                    )
+                } else if (currentProduct.store_name.lowercase().trim() == "ahorramas") {
+                    Image(
+                        painter = painterResource(id = R.drawable.ahorramas),
+                        contentDescription = "Ahorramas",
+                        modifier = Modifier
+                            .size(75.dp)
+                            .align(Alignment.BottomEnd)
+                            .padding(10.dp)
+                    )
+                } else {
+                    Image(
+                        painter = rememberImagePainter(data = currentProduct.store_image_url),
+                        contentDescription = "Imagen de la tienda",
+                        modifier = Modifier
+                            .size(70.dp)
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp)
+                    )
+                }
             }
+
+
 
             Row(modifier = Modifier.padding(20.dp)) {
                 Button(onClick = {

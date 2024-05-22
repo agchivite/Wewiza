@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,6 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,7 +30,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
@@ -45,6 +50,7 @@ import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.ProductScreenViewModel
 import com.dam.wewiza_front.viewModels.SharedViewModel
+import kotlinx.coroutines.delay
 
 var showDialog: MutableState<Boolean> = mutableStateOf(false)
 var sharedViewModel = SharedViewModel.instance
@@ -116,7 +122,9 @@ fun ProductScreenBodyContent(
     selectedCategories: MutableState<MutableMap<String, Boolean>>,
     priceSortOrder: String
 ) {
-    val products by remember { viewModel.allProductsList }
+    val products by viewModel.allProductsList.collectAsState()
+    val isProductsLoading by viewModel.isProductsLoading.collectAsState()
+
     val filteredProducts = products
         .filter { it.name.contains(searchText, ignoreCase = true) }
         .filter {
@@ -133,15 +141,27 @@ fun ProductScreenBodyContent(
             }
         )
 
-    ProductGrid(
-        products = filteredProducts,
-        isMercadonaChecked,
-        isAhorramasChecked,
-        isCarrefourChecked,
-        selectedCategories,
-        viewModel,
-        navController
-    )
+
+    if (isProductsLoading) {
+        Box(modifier = Modifier.fillMaxSize()){
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    }else{
+        LaunchedEffect(products){
+            delay(100)
+        }
+        ProductGrid(
+            products = filteredProducts,
+            isMercadonaChecked,
+            isAhorramasChecked,
+            isCarrefourChecked,
+            selectedCategories,
+            viewModel,
+            navController
+        )
+    }
+
+
 }
 
 @Composable
@@ -172,33 +192,62 @@ fun ProductItem(
     viewModel: ProductScreenViewModel,
     navController: NavHostController
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        onClick = {
-            sharedViewModel.clearCurrentProduct()
-            sharedViewModel.setCurrentProduct(product)
-            sharedViewModel.setProductHistoryDetails()
-            viewModel.navigateToProductDetailsScreen(navController)
-        }
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Image(
-                painter = rememberImagePainter(data = product.image_url),
-                contentDescription = product.name,
-                modifier = Modifier
-                    .size(100.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp)) // Espacio entre la imagen y el texto
-            Column {
-                Text(text = product.name)
-                Text(text = "${product.price} €")
-                Text(text = product.store_name)
+    Box(modifier = Modifier.padding(8.dp)){
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            onClick = {
+                sharedViewModel.clearCurrentProduct()
+                sharedViewModel.setCurrentProduct(product)
+                sharedViewModel.setProductHistoryDetails()
+                viewModel.navigateToProductDetailsScreen(navController)
             }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Image(
+                    painter = rememberImagePainter(data = product.image_url),
+                    contentDescription = product.name,
+                    modifier = Modifier
+                        .size(100.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp)) // Espacio entre la imagen y el texto
+                Column {
+                    Text(text = product.name, fontFamily = FirsNeue, fontWeight = FontWeight.SemiBold)
+                    Text(text = "${product.price} €", modifier = Modifier.padding(top = 10.dp), fontFamily = FirsNeue)
+                }
+            }
+        }
+        if (product.store_name.lowercase().trim() == "mercadona") {
+            Image(
+                painter = painterResource(id = R.drawable.mercadona_logo),
+                contentDescription = "Imagen de la tienda",
+                modifier = Modifier
+                    .size(60.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(10.dp)
+            )
+        } else if (product.store_name.lowercase().trim() == "ahorramas") {
+            Image(
+                painter = painterResource(id = R.drawable.ahorramas),
+                contentDescription = "Ahorramas",
+                modifier = Modifier
+                    .size(75.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(10.dp)
+            )
+        } else {
+            Image(
+                painter = rememberImagePainter(data = product.store_image_url),
+                contentDescription = "Imagen de la tienda",
+                modifier = Modifier
+                    .size(70.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp)
+            )
         }
     }
 }
@@ -360,6 +409,13 @@ fun ProductsSearchBar(
                                     expanded = false
                                 }, text = {
                                     Text("Ordenar por precio: Descendente")
+                                }
+                                )
+                                DropdownMenuItem(onClick = {
+                                    onPriceSortOrderChange("Ninguno")
+                                    expanded = false
+                                }, text = {
+                                    Text("Ordenar por precio: Ninguno")
                                 }
                                 )
                             }

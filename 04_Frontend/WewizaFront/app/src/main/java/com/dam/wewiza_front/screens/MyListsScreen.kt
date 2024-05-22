@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -117,11 +119,11 @@ private fun MyListItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(horizontalAlignment = Alignment.Start) {
+            Column(horizontalAlignment = Alignment.Start, modifier = Modifier.width(190.dp)) {
                 Text(text = shoppingList.name)
             }
 
-            Column(modifier = Modifier.width(140.dp), horizontalAlignment = Alignment.End) {
+            Column(horizontalAlignment = Alignment.End) {
                 Button(
                     onClick = {
                         Toast.makeText(context, "Por implementar...", Toast.LENGTH_SHORT).show()
@@ -191,8 +193,14 @@ fun AddNewListDialog(showDialog: MutableState<Boolean>, viewModel: MyListsScreen
             text = {
                 TextField(
                     value = textState.value,
-                    onValueChange = { textState.value = it },
-                    label = { Text("Introduce el nombre de la lista") }
+                    onValueChange = {
+                        if (it.text.length <= 20) {
+                            textState.value = it
+                        }
+                    },
+                    label = { Text("Introduce el nombre de la lista") },
+                    maxLines = 1,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                 )
             },
             confirmButton = {

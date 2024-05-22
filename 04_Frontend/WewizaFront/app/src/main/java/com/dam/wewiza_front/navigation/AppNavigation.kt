@@ -31,6 +31,7 @@ import com.dam.wewiza_front.viewModels.ProductScreenViewModel
 import com.dam.wewiza_front.viewModels.ProfileScreenViewModel
 import com.dam.wewiza_front.viewModels.RegisterScreenViewModel
 import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
+import com.dam.wewiza_front.viewModels.SharedViewModel
 import com.dam.wewiza_front.viewModels.SuggestionScreenViewModel
 import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -67,6 +68,7 @@ fun AppNavigation(
     }else{
         navController.popBackStack(AppScreens.SettingsScreen.route, true)
     }
+    val sharedViewModel = SharedViewModel.instance
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(route = AppScreens.WelcomeScreen.route) {
@@ -91,8 +93,8 @@ fun AppNavigation(
             CategoriesScreen(categoriesScreenViewModel, navController)
         }
         composable(route = AppScreens.ProfileScreen.route) {
-            if (profileScreenViewModel != null) {
-                ProfileScreen(profileScreenViewModel, navController)
+            if (auth.currentUser != null) {
+                ProfileScreen(profileScreenViewModel!!, navController)
             } else {
                 WelcomeScreen(welcomeScreenViewModel, navController)
             }

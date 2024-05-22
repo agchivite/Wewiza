@@ -116,10 +116,6 @@ fun ProductsSection(viewModel: HomeScreenViewModel, navController: NavController
     if (isTopProductsLoading) {
         LoadingIndicator()
     } else {
-        LaunchedEffect(products) {
-            delay(100)
-        }
-
         Box {
             LazyRow(
                 modifier = Modifier.padding(16.dp),
