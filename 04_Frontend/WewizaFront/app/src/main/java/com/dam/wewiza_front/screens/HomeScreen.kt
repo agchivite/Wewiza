@@ -30,6 +30,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -85,14 +87,12 @@ fun HomeBodyContent(
     navController: NavController,
     viewModel: HomeScreenViewModel,
 ) {
-    val topProducts = viewModel.topProductsList.value
 
-    // Observa los cambios en topProductsList y fuerza una recomposición
-    LaunchedEffect(topProducts) {
-        delay(100)
-    }
-
-    Column(modifier= Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
         WewizaLogoSection()
         FeaturedCategoriesSection(navController, viewModel)
         FeaturedProductsSection(navController, viewModel)
@@ -109,22 +109,29 @@ fun FeaturedProductsSection(navController: NavController, viewModel: HomeScreenV
 
 @Composable
 fun ProductsSection(viewModel: HomeScreenViewModel, navController: NavController) {
-    val products = viewModel.topProductsList
 
-    if (products.value.isEmpty()) {
+    val isTopProductsLoading by viewModel.isTopProductsLoading
+    val products by viewModel.topProductsList
+
+    if (isTopProductsLoading) {
         LoadingIndicator()
     } else {
+        LaunchedEffect(products) {
+            delay(100)
+        }
+
         Box {
             LazyRow(
                 modifier = Modifier.padding(16.dp),
                 content = {
-                    items(products.value.size) { index ->
-                        HomeProductItem(product = products.value[index], viewModel, navController)
+                    items(products.size) { index ->
+                        HomeProductItem(product = products[index], viewModel, navController)
                     }
                 }
             )
         }
     }
+
 }
 
 @Composable
@@ -172,15 +179,10 @@ fun FeaturedCategoriesSection(navController: NavController, viewModel: HomeScree
 
 @Composable
 fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavController) {
-    val categories = viewModel.allCategoriesList
-    val firstSixCategories = categories.take(6)
-    val categoriesLoaded = firstSixCategories.isNotEmpty()
+    val isTopCategoriesLoading by viewModel.isTopCategoriesLoading
+    val topCategories by viewModel.topCategoriesList
 
-    LaunchedEffect(categoriesLoaded) {
-        delay(100) // Añade un pequeño retraso opcional si es necesario
-    }
-
-    if (!categoriesLoaded) {
+    if (isTopCategoriesLoading) {
         LoadingIndicator()
     } else {
         Box {
@@ -188,9 +190,9 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
                 columns = GridCells.Fixed(3),
                 modifier = Modifier.padding(16.dp),
                 content = {
-                    items(firstSixCategories.size) { index ->
+                    items(topCategories.size) { index ->
                         HomeCategoryItem(
-                            category = firstSixCategories[index],
+                            category = topCategories[index],
                             viewModel,
                             navController
                         )
@@ -201,6 +203,7 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeProductItem(
     product: TopProduct,
