@@ -13,5 +13,5 @@ data class Product(
     val store_name: String,
     val url: String,
     val uuid: String,
-    val num_likes: Int,
+    var num_likes: Int,
 )

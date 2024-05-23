@@ -32,13 +32,13 @@ interface ApiService {
     suspend fun likeProduct(
         @Path("user_email") user_email: String,
         @Path("product_id") product_id: String
-    )
+    ):Map<String, Boolean>
 
     @GET("unlike/{product_id}/email/{user_email}")
     suspend fun unlikeProduct(
         @Path("user_email") user_email: String,
         @Path("product_id") product_id: String
-    )
+    ):  Map<String, Boolean>
 
     @GET("product/details/id/{product_id}")
     suspend fun getProductHistoryDetails(@Path("product_id") product_id: String): List<Product>
@@ -65,7 +65,7 @@ interface ApiService {
 object RetrofitServiceFactory {
 
     private val interceptor = HttpLoggingInterceptor().apply {
-        this.level = HttpLoggingInterceptor.Level.HEADERS
+        this.level = HttpLoggingInterceptor.Level.BASIC
     }
 
     private val okHttpClient = OkHttpClient.Builder()

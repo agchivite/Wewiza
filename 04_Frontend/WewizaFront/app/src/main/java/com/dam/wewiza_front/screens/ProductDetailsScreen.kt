@@ -3,6 +3,7 @@ package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -23,9 +24,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -166,9 +170,53 @@ fun LineChartView(entries: List<Entry>) {
     }
 }
 
-
 @Composable
 fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScreenViewModel) {
+    val likeResult by viewModel.likeResult.collectAsState()
+    val unlikeResult by viewModel.unlikeResult.collectAsState()
+
+    var likesNumber by remember { mutableStateOf(currentProduct.num_likes) }
+    var isInitialized by remember { mutableStateOf(false) }
+    var buttonsEnabled by remember { mutableStateOf(true) }
+    var disableButtonsTrigger by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    LaunchedEffect(likeResult) {
+        if (isInitialized && likeResult["result"] == true) {
+            viewModel.updateUserReviews()
+            likesNumber += 1
+            Toast.makeText(context, "Te gusta!", Toast.LENGTH_SHORT).show()
+            Log.d("ProductDetailsScreen", "LikesNumber: $likesNumber")
+        }else if (isInitialized && likeResult["result"] == false) {
+            Toast.makeText(context, "Ya has valorado este producto", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(unlikeResult) {
+        if (isInitialized && unlikeResult["result"] == true) {
+            viewModel.updateUserReviews()
+            likesNumber -= 1
+            Toast.makeText(context, "No te gusta...", Toast.LENGTH_SHORT).show()
+            Log.d("ProductDetailsScreen", "LikesNumber: $likesNumber")
+        }else if (isInitialized && unlikeResult["result"] == false) {
+            Toast.makeText(context, "Ya has valorado este producto", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        isInitialized = true
+    }
+
+    // LaunchedEffect to re-enable buttons after 2 seconds when disableButtonsTrigger changes
+    LaunchedEffect(disableButtonsTrigger) {
+        if (disableButtonsTrigger) {
+            buttonsEnabled = false
+            kotlinx.coroutines.delay(2000)
+            buttonsEnabled = true
+            disableButtonsTrigger = false
+        }
+    }
+
     Column(
         modifier = Modifier
             .padding(top = 20.dp)
@@ -214,24 +262,27 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                 }
             }
 
-
-
             Row(modifier = Modifier.padding(20.dp)) {
                 Button(onClick = {
-                    viewModel.unlikeProduct(currentProduct.uuid)
-
-                    viewModel.updateUserReviews()
-                }) {
+                    if (buttonsEnabled) {
+                        viewModel.unlikeProduct(currentProduct.uuid)
+                        disableButtonsTrigger = true
+                    }
+                }, enabled = buttonsEnabled) {
                     Text(text = "-")
                 }
-                Text(text = currentProduct.num_likes.toString())
+
+                Text(text = likesNumber.toString(), fontFamily = FirsNeue, fontSize = 18.sp)
 
                 Button(onClick = {
-                    viewModel.likeProduct(currentProduct.uuid)
-                    viewModel.updateUserReviews()
-                }) {
+                    if (buttonsEnabled) {
+                        viewModel.likeProduct(currentProduct.uuid)
+                        disableButtonsTrigger = true
+                    }
+                }, enabled = buttonsEnabled) {
                     Text(text = "+")
                 }
+
                 Spacer(modifier = Modifier.width(150.dp))
 
                 Column() {
@@ -243,11 +294,9 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                     }
                 }
 
-                //   val availableLists = sharedViewModel.getLocalShoppingLists().value
                 val context = LocalContext.current
 
                 if (showDialog.value) {
-
                     val availableLists = viewModel.recoverProfileData(auth.currentUser!!)
                         .collectAsState(initial = emptyList())
                     Log.d("ProductDetailsScreen", "Profile: ${availableLists.value}")
@@ -258,7 +307,7 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                         text = {
                             if (availableLists.value.isEmpty()) {
                                 Text("Parece que no tienes ninguna lista... ¡Crea tu primer lista!")
-                            }else {
+                            } else {
                                 Column {
                                     availableLists.value.forEach { shoppingList ->
                                         Button(onClick = {
@@ -287,13 +336,12 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                         }
                     )
                 }
-
-
             }
-
         }
     }
 }
+
+
 
 @Composable
 fun PhotoField(product: Product) {

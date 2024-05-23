@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.navigation.AppScreens
@@ -24,6 +25,8 @@ class ProductScreenViewModel : ViewModel() {
 
     private val _isProductsLoading = MutableStateFlow(true)
     val isProductsLoading: StateFlow<Boolean> get() = _isProductsLoading
+
+
 
 
     init {

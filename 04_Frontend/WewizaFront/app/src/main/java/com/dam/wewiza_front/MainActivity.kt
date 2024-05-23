@@ -54,6 +54,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
                 profileViewModel = null
             }
         }
+
         profileViewModel = if (auth.currentUser != null) get() else null
 
 

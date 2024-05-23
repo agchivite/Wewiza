@@ -16,6 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -33,6 +34,12 @@ class ProductDetailsScreenViewModel : ViewModel() {
     private var profile: Profile? = null
     private val profilesCollection = db.collection("profiles")
 
+    private val _likeResult = MutableStateFlow<MutableMap<String, Boolean>>(mutableMapOf("result" to false))
+    val likeResult: StateFlow<MutableMap<String, Boolean>> get() = _likeResult
+
+    private val _unlikeResult = MutableStateFlow<MutableMap<String, Boolean>>(mutableMapOf("result" to false))
+    val unlikeResult: StateFlow<MutableMap<String, Boolean>> get() = _unlikeResult
+
 
     fun getProductHistoryDetails(): MutableList<Product> {
         return sharedViewModel.getHistoryDetails()
@@ -42,9 +49,11 @@ class ProductDetailsScreenViewModel : ViewModel() {
     fun likeProduct(uuid: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                withContext(Dispatchers.IO) {
+                val serviceResult = withContext(Dispatchers.IO) {
                     service.likeProduct(auth.currentUser!!.email.toString(), uuid)
                 }
+                _likeResult.value = serviceResult as MutableMap<String, Boolean>
+                Log.d("ProductDetailsScreenViewModel", "likeProduct: ${_likeResult.value.values}")
             } catch (e: Exception) {
                 Log.d("ProductDetailsScreenViewModel", "likeProduct: ${e.message}")
             }
@@ -54,9 +63,11 @@ class ProductDetailsScreenViewModel : ViewModel() {
     fun unlikeProduct(uuid: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                withContext(Dispatchers.IO) {
+                val serviceResult = withContext(Dispatchers.IO) {
                     service.unlikeProduct(auth.currentUser!!.email.toString(), uuid)
                 }
+                _unlikeResult.value = serviceResult as MutableMap<String, Boolean>
+                Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${_unlikeResult.value.values}")
             } catch (e: Exception) {
                 Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${e.message}")
             }
