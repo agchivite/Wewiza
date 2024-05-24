@@ -81,53 +81,70 @@ class ProfileScreenViewModel() : ViewModel() {
         auth.removeAuthStateListener(authStateListener) //With this part of the code we remove the listener when the ViewModel is destroyed
     }
 
-    fun updateProfileDataOnFiresbase(originalImageUri: Uri?, selectedImageUri: Uri?, username: String?, context: Context) {
+
+    fun updateProfileDataOnFiresbase(
+        originalImageUri: Uri?,
+        selectedImageUri: Uri?,
+        username: String?,
+        context: Context
+    ) {
         val user = auth.currentUser
         if (user != null) {
             val profileRef = db.collection("profiles").document(user.email.toString())
             val profileUpdates = hashMapOf<String, Any>()
+
             if (username != null) {
                 profileUpdates["name"] = username
             }
 
-            // Si se seleccionó una imagen y es diferente de la original, subirla a Firebase Storage
             if (selectedImageUri != null && selectedImageUri != originalImageUri) {
                 val storageRef = Firebase.storage.reference
                 val imageRef = storageRef.child("images/${user.email}")
-                val uploadTask = imageRef.putFile(selectedImageUri)
 
+                val uploadTask = imageRef.putFile(selectedImageUri)
                 uploadTask.addOnSuccessListener {
-                    // Cuando la imagen se ha subido correctamente, obtener la URL de descarga
                     imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                        // Guardar la URL de descarga en Firestore
                         profileUpdates["imageUrl"] = downloadUri.toString()
+                        Log.d("Profile", "Image uploaded successfully")
+                        updateProfileInFirestore(profileRef, profileUpdates, context)
+                    }.addOnFailureListener { e ->
+                        Log.w("Profile", "Error obtaining download URL", e)
+                        Toast.makeText(
+                            context,
+                            "Error al obtener URL de descarga",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }.addOnFailureListener { e ->
                     Log.w("Profile", "Error uploading image", e)
                     Toast.makeText(context, "Error al subir la imagen", Toast.LENGTH_LONG).show()
                 }
+            } else {
+                Log.d("Profile", "No new image selected or image unchanged")
+                updateProfileInFirestore(profileRef, profileUpdates, context)
             }
-
-            // Actualizar el perfil en Firestore
-            updateProfileInFirestore(profileRef, profileUpdates, context)
         }
     }
 
-
-    private fun updateProfileInFirestore(profileRef: DocumentReference, profileUpdates: HashMap<String, Any>, context: Context) {
+    private fun updateProfileInFirestore(
+        profileRef: DocumentReference,
+        profileUpdates: HashMap<String, Any>,
+        context: Context
+    ) {
         profileRef.update(profileUpdates)
             .addOnSuccessListener {
-                Log.d("Profile", "Profile updated")
-                Toast.makeText(context, "Perfil actualizado correctamente", Toast.LENGTH_LONG).show()
+                Log.d("Profile", "Profile updated successfully")
+                Toast.makeText(context, "Perfil actualizado correctamente", Toast.LENGTH_LONG)
+                    .show()
                 loadProfileData()
             }
             .addOnFailureListener { e ->
                 Log.w("Profile", "Error updating profile", e)
-                // Aquí puedes manejar el error de la actualización del perfil
+                Toast.makeText(context, "Error al actualizar el perfil", Toast.LENGTH_LONG).show()
             }
     }
-}
 
+}
 
 
 
