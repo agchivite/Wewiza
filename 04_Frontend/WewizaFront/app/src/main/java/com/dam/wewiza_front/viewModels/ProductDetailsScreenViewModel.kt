@@ -34,44 +34,38 @@ class ProductDetailsScreenViewModel : ViewModel() {
     private var profile: Profile? = null
     private val profilesCollection = db.collection("profiles")
 
-    private val _likeResult = MutableStateFlow<MutableMap<String, Boolean>>(mutableMapOf("result" to false))
-    val likeResult: StateFlow<MutableMap<String, Boolean>> get() = _likeResult
-
-    private val _unlikeResult = MutableStateFlow<MutableMap<String, Boolean>>(mutableMapOf("result" to false))
-    val unlikeResult: StateFlow<MutableMap<String, Boolean>> get() = _unlikeResult
-
-
-    fun getProductHistoryDetails(): MutableList<Product> {
-        return sharedViewModel.getHistoryDetails()
-    }
-
-
-    fun likeProduct(uuid: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun likeProductWithCallback(productId: String, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
             try {
                 val serviceResult = withContext(Dispatchers.IO) {
-                    service.likeProduct(auth.currentUser!!.email.toString(), uuid)
+                    service.likeProduct(auth.currentUser!!.email.toString(), productId)
                 }
-                _likeResult.value = serviceResult as MutableMap<String, Boolean>
-                Log.d("ProductDetailsScreenViewModel", "likeProduct: ${_likeResult.value.values}")
+                val result = serviceResult.values.firstOrNull() ?: false
+                callback(result)
+                Log.d("ProductDetailsScreenViewModel", "likeProduct: ${result}")
             } catch (e: Exception) {
                 Log.d("ProductDetailsScreenViewModel", "likeProduct: ${e.message}")
             }
         }
     }
 
-    fun unlikeProduct(uuid: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun unlikeProductWithCallback(productId: String, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
             try {
                 val serviceResult = withContext(Dispatchers.IO) {
-                    service.unlikeProduct(auth.currentUser!!.email.toString(), uuid)
+                    service.unlikeProduct(auth.currentUser!!.email.toString(), productId)
                 }
-                _unlikeResult.value = serviceResult as MutableMap<String, Boolean>
-                Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${_unlikeResult.value.values}")
+                val result = serviceResult.values.firstOrNull() ?: false
+                callback(result)
+                Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${result}")
             } catch (e: Exception) {
                 Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${e.message}")
             }
         }
+    }
+
+    fun getProductHistoryDetails(): MutableList<Product> {
+        return sharedViewModel.getHistoryDetails()
     }
 
     fun updateUserReviews() {

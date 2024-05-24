@@ -25,13 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -175,176 +169,169 @@ fun LineChartView(entries: List<Entry>) {
 
 @Composable
 fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScreenViewModel) {
-    val likeResult by viewModel.likeResult.collectAsState()
-    val unlikeResult by viewModel.unlikeResult.collectAsState()
-
-    var likesNumber by remember { mutableStateOf(currentProduct.num_likes) }
-    var isInitialized by remember { mutableStateOf(false) }
     var buttonsEnabled by remember { mutableStateOf(true) }
-    var disableButtonsTrigger by remember { mutableStateOf(false) }
     val context = LocalContext.current
-
-    LaunchedEffect(likeResult) {
-        if (isInitialized && likeResult["result"] == true) {
-            viewModel.updateUserReviews()
-            likesNumber += 1
-            Toast.makeText(context, "Te gusta!", Toast.LENGTH_SHORT).show()
-            Log.d("ProductDetailsScreen", "LikesNumber: $likesNumber")
-        }else if (isInitialized && likeResult["result"] == false) {
-            Toast.makeText(context, "Ya has valorado este producto", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    LaunchedEffect(unlikeResult) {
-        if (isInitialized && unlikeResult["result"] == true) {
-            viewModel.updateUserReviews()
-            likesNumber -= 1
-            Toast.makeText(context, "No te gusta...", Toast.LENGTH_SHORT).show()
-            Log.d("ProductDetailsScreen", "LikesNumber: $likesNumber")
-        }else if (isInitialized && unlikeResult["result"] == false) {
-            Toast.makeText(context, "Ya has valorado este producto", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        isInitialized = true
-    }
-
-    // LaunchedEffect to re-enable buttons after 2 seconds when disableButtonsTrigger changes
-    LaunchedEffect(disableButtonsTrigger) {
-        if (disableButtonsTrigger) {
-            buttonsEnabled = false
-            kotlinx.coroutines.delay(2000)
-            buttonsEnabled = true
-            disableButtonsTrigger = false
-        }
-    }
+    val auth = FirebaseAuth.getInstance()
+    val showDialog = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .padding(top = 20.dp)
             .fillMaxWidth()
     ) {
-        val showDialog = remember { mutableStateOf(false) }
-        val auth = FirebaseAuth.getInstance()
+        Box(modifier = Modifier.padding(8.dp)) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    text = currentProduct.name,
+                    fontFamily = FirsNeue,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Precio: ${currentProduct.price} €",
+                    fontFamily = FirsNeue,
+                    fontSize = 18.sp,
+                    color = Color.Black
+                )
+            }
+            when (currentProduct.store_name.lowercase().trim()) {
+                "mercadona" -> Image(
+                    painter = painterResource(id = R.drawable.mercadona_logo),
+                    contentDescription = "Imagen de la tienda",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.BottomEnd)
+                        .padding(10.dp)
+                )
+                "ahorramas" -> Image(
+                    painter = painterResource(id = R.drawable.ahorramas),
+                    contentDescription = "Ahorramas",
+                    modifier = Modifier
+                        .size(75.dp)
+                        .align(Alignment.BottomEnd)
+                        .padding(10.dp)
+                )
+                else -> Image(
+                    painter = rememberImagePainter(data = currentProduct.store_image_url),
+                    contentDescription = "Imagen de la tienda",
+                    modifier = Modifier
+                        .size(70.dp)
+                        .align(Alignment.BottomEnd)
+                        .padding(8.dp)
+                )
+            }
+        }
 
-        Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-            Box(modifier = Modifier.padding(8.dp)){
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(text = currentProduct.name, fontFamily = FirsNeue, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(text = "Precio: ${currentProduct.price} €", fontFamily = FirsNeue, fontSize = 18.sp, color = Color.Black)
-                }
-                if (currentProduct.store_name.lowercase().trim() == "mercadona") {
-                    Image(
-                        painter = painterResource(id = R.drawable.mercadona_logo),
-                        contentDescription = "Imagen de la tienda",
-                        modifier = Modifier
-                            .size(60.dp)
-                            .align(Alignment.BottomEnd)
-                            .padding(10.dp)
-                    )
-                } else if (currentProduct.store_name.lowercase().trim() == "ahorramas") {
-                    Image(
-                        painter = painterResource(id = R.drawable.ahorramas),
-                        contentDescription = "Ahorramas",
-                        modifier = Modifier
-                            .size(75.dp)
-                            .align(Alignment.BottomEnd)
-                            .padding(10.dp)
-                    )
-                } else {
-                    Image(
-                        painter = rememberImagePainter(data = currentProduct.store_image_url),
-                        contentDescription = "Imagen de la tienda",
-                        modifier = Modifier
-                            .size(70.dp)
-                            .align(Alignment.BottomEnd)
-                            .padding(8.dp)
+        Row(modifier = Modifier.padding(20.dp)) {
+            Button(
+                onClick = {
+                    if (buttonsEnabled) {
+                        buttonsEnabled = false
+                        viewModel.unlikeProductWithCallback(currentProduct.uuid) { result ->
+                            // Manejar el resultado del unlike
+                            buttonsEnabled = true
+                            if (result) {
+                                viewModel.updateUserReviews()
+                                currentProduct.num_likes -= 1
+                                Toast.makeText(context, "No te gusta...", Toast.LENGTH_SHORT).show()
+                                Log.d("ProductDetailsScreen", "LikesNumber: ${currentProduct.num_likes}")
+                            } else {
+                                Toast.makeText(context, "Ya diste no me gusta a este producto", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                },
+                enabled = buttonsEnabled
+            ) {
+                Text(text = "-")
+            }
+
+            Text(
+                text = currentProduct.num_likes.toString(),
+                fontFamily = FirsNeue,
+                fontSize = 18.sp,
+                color = Color.Black
+            )
+
+            Button(
+                onClick = {
+                    if (buttonsEnabled) {
+                        buttonsEnabled = false
+                        viewModel.likeProductWithCallback(currentProduct.uuid) { result ->
+                            // Manejar el resultado del like
+                            buttonsEnabled = true
+                            if (result) {
+                                viewModel.updateUserReviews()
+                                currentProduct.num_likes += 1
+                                Toast.makeText(context, "Te gusta!", Toast.LENGTH_SHORT).show()
+                                Log.d("ProductDetailsScreen", "LikesNumber: ${currentProduct.num_likes}")
+                            } else {
+                                Toast.makeText(context, "Ya diste me gusta a este producto", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                },
+                enabled = buttonsEnabled
+            ) {
+                Text(text = "+")
+            }
+
+            Spacer(modifier = Modifier.width(150.dp))
+
+            Column {
+                Button(onClick = { showDialog.value = true }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24),
+                        contentDescription = "addToList"
                     )
                 }
             }
 
-            Row(modifier = Modifier.padding(20.dp)) {
-                Button(onClick = {
-                    if (buttonsEnabled) {
-                        viewModel.unlikeProduct(currentProduct.uuid)
-                        disableButtonsTrigger = true
-                    }
-                }, enabled = buttonsEnabled) {
-                    Text(text = "-")
-                }
+            if (showDialog.value) {
+                val availableLists = viewModel.recoverProfileData(auth.currentUser!!)
+                    .collectAsState(initial = emptyList())
+                Log.d("ProductDetailsScreen", "Profile: ${availableLists.value}")
 
-                Text(text = likesNumber.toString(), fontFamily = FirsNeue, fontSize = 18.sp, color = Color.Black)
-
-                Button(onClick = {
-                    if (buttonsEnabled) {
-                        viewModel.likeProduct(currentProduct.uuid)
-                        disableButtonsTrigger = true
-                    }
-                }, enabled = buttonsEnabled) {
-                    Text(text = "+")
-                }
-
-                Spacer(modifier = Modifier.width(150.dp))
-
-                Column() {
-                    Button(onClick = { showDialog.value = true }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24),
-                            contentDescription = "addToList"
-                        )
-                    }
-                }
-
-                val context = LocalContext.current
-
-                if (showDialog.value) {
-                    val availableLists = viewModel.recoverProfileData(auth.currentUser!!)
-                        .collectAsState(initial = emptyList())
-                    Log.d("ProductDetailsScreen", "Profile: ${availableLists.value}")
-
-                    AlertDialog(
-                        onDismissRequest = { showDialog.value = false },
-                        title = { Text(text = "Selecciona la lista a la que quieres agregar este producto") },
-                        text = {
-                            if (availableLists.value.isEmpty()) {
-                                Text("Parece que no tienes ninguna lista... ¡Crea tu primer lista!")
-                            } else {
-                                Column {
-                                    availableLists.value.forEach { shoppingList ->
-                                        Button(onClick = {
-                                            viewModel.addProductToList(
-                                                shoppingList.uuid,
-                                                currentProduct.uuid,
-                                                context
-                                            )
-                                            showDialog.value = false
-                                        }) {
-                                            Text(shoppingList.name)
-                                        }
+                AlertDialog(
+                    onDismissRequest = { showDialog.value = false },
+                    title = { Text(text = "Selecciona la lista a la que quieres agregar este producto") },
+                    text = {
+                        if (availableLists.value.isEmpty()) {
+                            Text("Parece que no tienes ninguna lista... ¡Crea tu primer lista!")
+                        } else {
+                            Column {
+                                availableLists.value.forEach { shoppingList ->
+                                    Button(onClick = {
+                                        viewModel.addProductToList(
+                                            shoppingList.uuid,
+                                            currentProduct.uuid,
+                                            context
+                                        )
+                                        showDialog.value = false
+                                    }) {
+                                        Text(shoppingList.name)
                                     }
                                 }
                             }
-                        },
-                        confirmButton = {
-                            Button(onClick = { showDialog.value = false }) {
-                                Text("Aceptar")
-                            }
-                        },
-                        dismissButton = {
-                            Button(onClick = { showDialog.value = false }) {
-                                Text("Cancelar")
-                            }
                         }
-                    )
-                }
+                    },
+                    confirmButton = {
+                        Button(onClick = { showDialog.value = false }) {
+                            Text("Aceptar")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showDialog.value = false }) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
             }
         }
     }
 }
-
-
 
 @Composable
 fun PhotoField(product: Product) {

@@ -94,8 +94,8 @@ fun HomeBodyContent(
             .background(MaterialTheme.colorScheme.surface)
     ) {
         WewizaLogoSection()
-        FeaturedProductsSection(navController, viewModel)
         FeaturedCategoriesSection(navController, viewModel)
+        FeaturedProductsSection(navController, viewModel)
     }
 }
 
@@ -286,7 +286,6 @@ fun HomeCategoryItem(
     )
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(start = 10.dp)
     ) {
 
         Card(
