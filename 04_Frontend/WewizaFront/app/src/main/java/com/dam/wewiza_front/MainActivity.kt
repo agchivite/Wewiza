@@ -3,9 +3,11 @@ package com.dam.wewiza_front
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material3.Surface
 import com.dam.wewiza_front.koinModules.appModule
 import com.dam.wewiza_front.navigation.AppNavigation
+import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.ui.theme.WewizaFrontTheme
 import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
@@ -33,6 +35,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         startKoin {
             androidContext(this@MainActivity)

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -93,6 +95,7 @@ fun ProductDetailsScreenBodyContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
             .padding(top = 70.dp),
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
     ) {
@@ -228,9 +231,9 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
         Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
             Box(modifier = Modifier.padding(8.dp)){
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text(text = currentProduct.name, fontFamily = FirsNeue, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Text(text = currentProduct.name, fontFamily = FirsNeue, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text(text = "Precio: ${currentProduct.price} €", fontFamily = FirsNeue, fontSize = 18.sp)
+                    Text(text = "Precio: ${currentProduct.price} €", fontFamily = FirsNeue, fontSize = 18.sp, color = Color.Black)
                 }
                 if (currentProduct.store_name.lowercase().trim() == "mercadona") {
                     Image(
@@ -272,7 +275,7 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                     Text(text = "-")
                 }
 
-                Text(text = likesNumber.toString(), fontFamily = FirsNeue, fontSize = 18.sp)
+                Text(text = likesNumber.toString(), fontFamily = FirsNeue, fontSize = 18.sp, color = Color.Black)
 
                 Button(onClick = {
                     if (buttonsEnabled) {

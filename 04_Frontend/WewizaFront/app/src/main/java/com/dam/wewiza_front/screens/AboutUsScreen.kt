@@ -70,6 +70,7 @@ fun AboutUsBodyContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
             .padding(top = 90.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -80,12 +81,12 @@ fun AboutUsBodyContent(
         Column (horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "Sobre nosotros",
-                style = TextStyle(fontSize = 30.sp),
+                style = TextStyle(fontSize = 30.sp), color = Color.Black,
                 modifier = Modifier.padding(20.dp)
             )
             Text(
                 text = "Wewiza es una aplicación innovadora desarrollada por dos estudiantes apasionados del Desarrollo de Aplicaciones Multiplataforma (DAM). Nuestro objetivo es simplificar y mejorar la experiencia de compra de alimentos para los usuarios. Como comparador de precios, Wewiza busca y compara precios de múltiples tiendas de alimentos para ayudarte a encontrar las mejores ofertas. Ya sea que estés buscando ingredientes para tu próxima receta o tu snack favorito, Wewiza te ayuda a ahorrar tiempo y dinero. Únete a nosotros en este viaje para hacer de las compras de alimentos una experiencia más eficiente y agradable.",
-                style = TextStyle(fontSize = 15.sp),
+                style = TextStyle(fontSize = 15.sp), color = Color.Black,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }
@@ -139,7 +140,7 @@ private fun ImageFields(context: Context, viewModel: AboutUsScreenViewModel) {
                             .clip(CircleShape)
                     )
 
-                    Text(text = "Angel Maroto Chivite")
+                    Text(text = "Angel Maroto Chivite", color = Color.Black)
                 }
                 Spacer(modifier = Modifier.size(20.dp))
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -151,7 +152,7 @@ private fun ImageFields(context: Context, viewModel: AboutUsScreenViewModel) {
                             .clip(CircleShape)
                     )
 
-                    Text(text = "JiaCheng Zhang")
+                    Text(text = "JiaCheng Zhang", color = Color.Black)
                 }
             }
             LinkFields(context, viewModel)

@@ -15,6 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WewizaFront"
         tools:targetApi="31"
+        android:forceDarkAllowed="false"
        >
         <activity
             android:name=".MainActivity"

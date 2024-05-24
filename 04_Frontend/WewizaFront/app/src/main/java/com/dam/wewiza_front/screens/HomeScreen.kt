@@ -94,8 +94,8 @@ fun HomeBodyContent(
             .background(MaterialTheme.colorScheme.surface)
     ) {
         WewizaLogoSection()
-        FeaturedCategoriesSection(navController, viewModel)
         FeaturedProductsSection(navController, viewModel)
+        FeaturedCategoriesSection(navController, viewModel)
     }
 }
 
@@ -117,10 +117,11 @@ fun ProductsSection(viewModel: HomeScreenViewModel, navController: NavController
         LoadingIndicator()
     } else {
         Box {
-            LazyRow(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
                 modifier = Modifier.padding(16.dp),
                 content = {
-                    items(products.size) { index ->
+                    items(products.take(6).size) { index ->
                         HomeProductItem(product = products[index], viewModel, navController)
                     }
                 }
@@ -145,7 +146,7 @@ fun ProductsTextSubSection(viewModel: HomeScreenViewModel, navController: NavCon
                 },
                 modifier = Modifier
                     .padding(start = 20.dp),
-                fontFamily = FirsNeue, fontWeight = FontWeight.Bold,
+                fontFamily = FirsNeue, fontWeight = FontWeight.Bold, color = Color.Black
             )
 
             Spacer(modifier = Modifier.weight(0.1f))
@@ -182,8 +183,7 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
         LoadingIndicator()
     } else {
         Box {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+            LazyRow(
                 modifier = Modifier.padding(16.dp),
                 content = {
                     items(topCategories.size) { index ->
@@ -211,7 +211,7 @@ fun HomeProductItem(
     Card(
         modifier = Modifier
             .width(140.dp)
-            .padding(20.dp)
+            .padding(10.dp)
             .fillMaxWidth()
             .height(130.dp), // Ajusta la altura según sea necesario
         shape = RoundedCornerShape(10.dp), // Esquinas redondeadas
@@ -285,7 +285,8 @@ fun HomeCategoryItem(
             .build()
     )
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(start = 10.dp)
     ) {
 
         Card(
@@ -313,7 +314,8 @@ fun HomeCategoryItem(
             fontSize = 12.sp,
             textAlign = TextAlign.Center,
             maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            color = Color.Black
         )
     }
 }
@@ -336,7 +338,7 @@ private fun CategoryTextsSubSection(
                 },
                 modifier = Modifier
                     .padding(start = 20.dp),
-                fontFamily = FirsNeue, fontWeight = FontWeight.Bold,
+                fontFamily = FirsNeue, fontWeight = FontWeight.Bold, color = Color.Black
             )
 
             Spacer(modifier = Modifier.weight(0.1f))
