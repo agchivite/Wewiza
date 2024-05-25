@@ -145,25 +145,31 @@ class ProductDetailsScreenViewModel : ViewModel() {
         Toast.makeText(context, "Producto añadido a la lista", Toast.LENGTH_SHORT).show()
     }
 
-    fun prepareChartData(productHistoryDetails: List<Product>): List<Entry> {
+    fun prepareChartData(productHistoryDetails: List<Product>): Pair<List<Entry>, Map<Float, String>> {
         val entries = mutableListOf<Entry>()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val uniqueMonths = mutableMapOf<Float, String>()
+        var index = 0
 
         productHistoryDetails.forEach { product ->
             val date = dateFormat.parse(product.date_created)
             val calendar = Calendar.getInstance()
             calendar.time = date
-            val monthYear = "${calendar.get(Calendar.MONTH) + 1}-${calendar.get(Calendar.YEAR)}"
+            val month = calendar.get(Calendar.MONTH) + 1
+            val year = calendar.get(Calendar.YEAR)
+            val monthValue = index.toFloat()
 
-            // Convierte la fecha a un valor numérico que pueda ser usado en la gráfica
-            val monthValue =
-                (calendar.get(Calendar.MONTH) + 1 + (calendar.get(Calendar.YEAR) - 2024) * 12).toFloat()
+            if (!uniqueMonths.containsValue("${calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())} $year")) {
+                uniqueMonths[monthValue] = "${calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())} $year"
+                index++
+            }
 
             val entry = Entry(monthValue, product.price.toFloat())
             entries.add(entry)
         }
 
-        return entries
+        return Pair(entries, uniqueMonths)
     }
+
 
 }

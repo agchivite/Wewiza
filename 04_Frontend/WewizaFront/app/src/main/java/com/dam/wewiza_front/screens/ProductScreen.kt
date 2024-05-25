@@ -81,6 +81,7 @@ fun ProductScreen(
         MyLightTheme {
             Column(
                 modifier = Modifier
+                    .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(8.dp)
                     .padding(top = 10.dp)

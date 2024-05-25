@@ -111,7 +111,8 @@ fun ListScreenBodyContent(
                 //product list total price
                 Text(
                     text = "Total: ${"%.2f".format(productsList.sumOf { it.price })} €",
-                    style = TextStyle(fontSize = 20.sp)
+                    style = TextStyle(fontSize = 20.sp),
+                    color = Color.Black
                 )
 
                 Button(onClick = { /* Aquí puedes colocar la lógica para sugerir */ }) {

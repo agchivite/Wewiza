@@ -56,6 +56,9 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -105,21 +108,22 @@ fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
     val productHistoryDetails = viewModel.getProductHistoryDetails().sortedBy { it.date_created }
     Log.d("ProductDetailsScreen", "ProductHistoryDetails: $productHistoryDetails")
     Log.d("ProductDetailsScreen", "CurrentProduct: ${sharedViewModel.getCurrentProduct()}")
-
+    
     if (
         productHistoryDetails.isNotEmpty() &&
         productHistoryDetails.last().uuid == sharedViewModel.getCurrentProduct().uuid
     ) {
-        val entries = viewModel.prepareChartData(productHistoryDetails)
+        val (entries, monthMap) = viewModel.prepareChartData(productHistoryDetails)
         Log.d("ProductDetailsScreen", "Entries: $entries")
-        LineChartView(entries)
+        LineChartView(entries, monthMap)
     } else {
         CircularProgressIndicator()
     }
 }
 
+
 @Composable
-fun LineChartView(entries: List<Entry>) {
+fun LineChartView(entries: List<Entry>, monthMap: Map<Float, String>) {
     Column(modifier = Modifier
         .padding(50.dp)
         .padding(bottom = 40.dp)) {
@@ -141,12 +145,11 @@ fun LineChartView(entries: List<Entry>) {
                     axisRight.isEnabled = false
                     xAxis.apply {
                         position = XAxis.XAxisPosition.BOTTOM
-                        valueFormatter = MonthAxisValueFormatter()
+                        valueFormatter = MonthAxisValueFormatter(monthMap)
                         setDrawLabels(true)
-                        labelRotationAngle =
-                            -45f // Rotar el texto en -45 grados para que aparezca en diagonal
+                        granularity = 1f // Asegura que solo se muestre una etiqueta por valor
+                        labelRotationAngle = -45f
                     }
-
 
                     val dataSet = LineDataSet(entries, "Precios a lo largo del tiempo").apply {
                         color = android.graphics.Color.RED
