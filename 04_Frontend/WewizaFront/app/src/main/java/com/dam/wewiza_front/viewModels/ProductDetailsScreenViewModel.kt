@@ -16,7 +16,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -131,7 +130,12 @@ class ProductDetailsScreenViewModel : ViewModel() {
         }
     }
 
-    fun addProductToList(shoppingListUuid: String, productUuid: String, context: Context) {
+    fun addProductToList(
+        shoppingListUuid: String,
+        productUuid: String,
+        context: Context,
+        name: String
+    ) {
         db.collection("profiles").document(auth.currentUser!!.email.toString()).get().addOnSuccessListener { document ->
             val profile = document.toObject(Profile::class.java)
             if (profile != null) {
@@ -142,7 +146,7 @@ class ProductDetailsScreenViewModel : ViewModel() {
                 }
             }
         }
-        Toast.makeText(context, "Producto añadido a la lista", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Producto añadido a $name", Toast.LENGTH_SHORT).show()
     }
 
     fun prepareChartData(productHistoryDetails: List<Product>): Pair<List<Entry>, Map<Float, String>> {

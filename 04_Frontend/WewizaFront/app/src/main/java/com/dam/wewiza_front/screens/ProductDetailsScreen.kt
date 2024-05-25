@@ -2,6 +2,7 @@ package com.dam.wewiza_front.screens
 
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -17,8 +18,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -46,6 +52,7 @@ import com.dam.wewiza_front.Formatter.MonthAxisValueFormatter
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
+import com.dam.wewiza_front.models.ShoppingList
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.ProductDetailsScreenViewModel
 import com.dam.wewiza_front.viewModels.SharedViewModel
@@ -56,9 +63,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.google.firebase.auth.FirebaseAuth
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import androidx.compose.foundation.clickable
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -91,7 +96,7 @@ fun ProductDetailsScreenBodyContent(
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .padding(top = 70.dp),
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
@@ -304,19 +309,13 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                         if (availableLists.value.isEmpty()) {
                             Text("Parece que no tienes ninguna lista... ¡Crea tu primer lista!")
                         } else {
-                            Column {
-                                availableLists.value.forEach { shoppingList ->
-                                    Button(onClick = {
-                                        viewModel.addProductToList(
-                                            shoppingList.uuid,
-                                            currentProduct.uuid,
-                                            context
-                                        )
-                                        showDialog.value = false
-                                    }) {
-                                        Text(shoppingList.name)
+                            Column(modifier = Modifier.height(300.dp)) {
+
+                                LazyColumn(content = {
+                                    items(availableLists.value.size) { index ->
+                                        ShoppingListItem(availableLists.value[index], viewModel, currentProduct, context)
                                     }
-                                }
+                                })
                             }
                         }
                     },
@@ -325,16 +324,66 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                             Text("Aceptar")
                         }
                     },
-                    dismissButton = {
-                        Button(onClick = { showDialog.value = false }) {
-                            Text("Cancelar")
-                        }
-                    }
                 )
             }
         }
     }
 }
+
+
+@Composable
+fun ShoppingListItem(
+    shoppingList: ShoppingList,
+    viewModel: ProductDetailsScreenViewModel,
+    currentProduct: Product,
+    context: Context
+
+) {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .clickable {
+                viewModel.addProductToList(
+                    shoppingList.uuid,
+                    currentProduct.uuid,
+                    context,
+                    shoppingList.name
+                )
+            },
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.elevatedCardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Column {
+                Text(
+                    text = shoppingList.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Productos: ${shoppingList.products.size}",
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun PhotoField(product: Product) {
