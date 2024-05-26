@@ -185,16 +185,16 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
 
-            documents = collection.find({"date_created": {"$regex": "^2024-05-01"}})
+            documents = collection.find()
 
             for doc in documents:
                 current_price = doc.get("price", 0)
                 new_price = round(current_price, 2)
-                result = collection.update_one(
+                collection.update_one(
                     {"_id": doc["_id"]}, {"$set": {"price": new_price}}
                 )
 
             self.db_manager.close_database()
-            return Result.success(result)
+            return Result.success("Prices updated to two decimal places.")
         except Exception as e:
             return Result.failure(str(e))
