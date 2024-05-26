@@ -192,22 +192,16 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
 
-            modified_count = 0
-            actual_date_year_month = datetime.now().strftime("%Y-%m")
-            documents = collection.find(
-                {"date_created": {"$regex": f"^{actual_date_year_month}"}}
-            )
+            documents = collection.find({"date_created": {"$regex": "^2024-05-01"}})
 
             for doc in documents:
                 current_price = doc.get("price", 0)
-                if current_price > 0:
-                    new_price = max(current_price - random.uniform(0.1, 0.5), 0)
-                    result = collection.update_one(
-                        {"_id": doc["_id"]}, {"$set": {"price": new_price}}
-                    )
-                    modified_count += result.modified_count
+                new_price = round(current_price, 2)
+                result = collection.update_one(
+                    {"_id": doc["_id"]}, {"$set": {"price": new_price}}
+                )
 
             self.db_manager.close_database()
-            return Result.success(modified_count)
+            return Result.success(result)
         except Exception as e:
             return Result.failure(str(e))
