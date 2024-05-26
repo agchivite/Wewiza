@@ -2,6 +2,7 @@ from python_on_rails.result import Result
 from api_market_03.src.schemas.product_schema import product_schema
 from api_market_03.src.database.database_manager import DatabaseManager
 from datetime import datetime
+import random
 
 
 class ProductRepository:
@@ -197,5 +198,30 @@ class ProductRepository:
             )
             self.db_manager.close_database()
             return Result.success(result.modified_count)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def update_to_random_price_less(self):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+
+            modified_count = 0
+            actual_date_year_month = datetime.now().strftime("%Y-%m")
+            documents = collection.find(
+                {"date_created": {"$regex": f"^{actual_date_year_month}"}}
+            )
+
+            for doc in documents:
+                current_price = doc.get("price", 0)
+                if current_price > 0:
+                    new_price = max(current_price - random.uniform(0.1, 0.5), 0)
+                    result = collection.update_one(
+                        {"_id": doc["_id"]}, {"$set": {"price": new_price}}
+                    )
+                    modified_count += result.modified_count
+
+            self.db_manager.close_database()
+            return Result.success(modified_count)
         except Exception as e:
             return Result.failure(str(e))

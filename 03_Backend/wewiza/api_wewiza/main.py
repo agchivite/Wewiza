@@ -675,3 +675,18 @@ def start_likes_database():
 def update():
     response = requests.get("http://api_market_03:8083/update/measure_carrefour")
     return response.json()
+
+
+@app.get("/update/minor_random_price")
+def update_to_random_price_less():
+    response_1 = requests.get("http://api_market_01:8081/update/minor_random_price")
+    response_2 = requests.get("http://api_market_02:8082/update/minor_random_price")
+    response_3 = requests.get("http://api_market_03:8083/update/minor_random_price")
+    return {
+        "result": "Result from all markets: "
+        + str(response_1.json())
+        + " "
+        + str(response_2.json())
+        + " "
+        + str(response_3.json())
+    }

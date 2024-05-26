@@ -188,3 +188,12 @@ class ProductService:
             del product["_id"]
 
         return products_list_json
+
+    def update_to_random_price_less(self):
+        result = self.product_repository.update_to_random_price_less()
+
+        if result.is_failure():
+            print("Failed to update to random price less:", result.error)
+            return []
+
+        return result.value

@@ -191,3 +191,12 @@ class ProductService:
 
     def update_price_by_standard_measure(self):
         self.product_repository.update_price_by_standard_measure()
+
+    def update_to_random_price_less(self):
+        result = self.product_repository.update_to_random_price_less()
+
+        if result.is_failure():
+            print("Failed to update to random price less:", result.error)
+            return []
+
+        return result.value

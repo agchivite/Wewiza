@@ -81,3 +81,8 @@ def get_product_by_name(product_name: str):
 @app.get("/delete/date/{date}")
 def delete_products_by_date(date: str):
     return product_service.delete_products_by_date(date)
+
+
+@app.get("/update/minor_random_price")
+def update_to_random_price_less():
+    return product_service.update_to_random_price_less()

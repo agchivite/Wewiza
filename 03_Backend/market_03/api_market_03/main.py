@@ -85,3 +85,8 @@ def get_product_by_name(product_name: str):
 @app.get("/update/measure_carrefour")
 def update_price_by_standard_measure():
     return product_service.update_price_by_standard_measure()
+
+
+@app.get("/update/minor_random_price")
+def update_to_random_price_less():
+    return product_service.update_to_random_price_less()
