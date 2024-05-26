@@ -1,9 +1,40 @@
-from fastapi import FastAPI, BackgroundTasks
+from typing import List
+from fastapi import FastAPI, BackgroundTasks, Query
 from api_wewiza.src.database.database_manager import DatabaseManager
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
 from api_wewiza.src.services.product_likes_service import ProductLikesService
 import requests
 import datetime
+import requests
+import time
+
+
+def check_service_availability(url):
+    try:
+        response = requests.get(url, timeout=5)
+        return response.status_code == 200
+    except requests.RequestException:
+        return False
+
+
+def main():
+    while True:
+        if all(
+            check_service_availability(url)
+            for url in [
+                "http://api_market_01:8081/size",
+                "http://api_market_02:8082/size",
+                "http://api_market_03:8083/size",
+            ]
+        ):
+            print("All APIs Market are available.")
+            break
+        else:
+            print("At least one API Market is not available. Retrying in 2 seconds...")
+            time.sleep(2)
+
+
+main()
 
 app = FastAPI()
 
@@ -690,3 +721,61 @@ def update_to_random_price_less():
         + " "
         + str(response_3.json())
     }
+
+
+# TODO: list markets filter, NOT ONLY ONE
+# https://127.0.0.2/suggest?filter_market=ahorramas&uuids=c36e79b3-4806-492c-ba2c-877395fc2ae5&uuids=35038e15-b874-471b-afd6-d694bedaeacf
+@app.get("/suggest")
+def get_suggest_products(
+    filter_market: str,
+    uuids: List[str] = Query(...),
+):
+    list_all_products_user = []
+    for uuid in uuids:
+        # Check in all market to get the complete data
+        response_market_01 = requests.get(
+            "http://api_market_01:8081/product/id/" + uuid
+        )
+        response_market_02 = requests.get(
+            "http://api_market_02:8082/product/id/" + uuid
+        )
+        response_market_03 = requests.get(
+            "http://api_market_03:8083/product/id/" + uuid
+        )
+
+        list_all_products_user.append(response_market_01.json())
+        list_all_products_user.append(response_market_02.json())
+        list_all_products_user.append(response_market_03.json())
+
+    # Clear None items
+    list_all_products_user = list(filter(None, list_all_products_user))
+
+    # Now I want to search the similar products name in all markets
+    # Create a dicctionary to store suggestion of list product for eacg uuid product
+    products_user_to_add_suggestions_list = {uuid: [] for uuid in uuids}
+
+    if filter_market.lower().strip() == "mercadona":
+        for product_user in list_all_products_user:
+            list_products_similar = requests.get(
+                "http://api_market_01:8081/product/similar/name/" + product_user["name"]
+            )
+            # Check if the list product suggestion are cheaper than the actual product
+            cheaper_products_suggestion = []
+
+            for product_suggestion in list_products_similar.json():
+                if (
+                    product_suggestion["price_by_standard_measure"]
+                    < product_user["price_by_standard_measure"]
+                ):
+                    cheaper_products_suggestion.append(product_suggestion)
+
+            existing_similar_products = products_user_to_add_suggestions_list.get(
+                product_user["uuid"], []
+            )
+            products_user_to_add_suggestions_list[product_user["uuid"]] = (
+                existing_similar_products + cheaper_products_suggestion
+            )
+
+    # TODO: others markets
+
+    return products_user_to_add_suggestions_list

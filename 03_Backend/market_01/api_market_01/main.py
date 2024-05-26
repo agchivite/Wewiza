@@ -77,6 +77,11 @@ def get_product_by_name(product_name: str):
     return product_service.get_products_by_name(product_name)
 
 
+@app.get("/product/similar/name/{product_name}")
+def get_product_by_similar_name(product_name: str):
+    return product_service.get_products_by_similar_name(product_name)
+
+
 # 2024-05-03
 @app.get("/delete/date/{date}")
 def delete_products_by_date(date: str):

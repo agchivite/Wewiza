@@ -3,12 +3,15 @@ from api_market_01.src.schemas.product_schema import product_schema
 from api_market_01.src.database.database_manager import DatabaseManager
 from datetime import datetime
 import random
+import spacy
+import re
 
 
 class ProductRepository:
     def __init__(self, db_manager: DatabaseManager, collection_name):
         self.db_manager = db_manager
         self.collection_name = collection_name
+        self.nlp_spanish = spacy.load("es_core_news_sm")
         self.__setup_collection_validation()
 
     def __setup_collection_validation(self):
@@ -134,6 +137,39 @@ class ProductRepository:
             products = list(collection.find({"name": product_name}))
             self.db_manager.close_database()
             return Result.success(products)
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def __normalize_text(self, text):
+        doc = self.nlp_spanish(text.lower())
+        tokens = [
+            token.lemma_ for token in doc if not token.is_stop and not token.is_punct
+        ]
+        return " ".join(tokens)
+
+    def get_products_by_similar_name(self, product_name):
+        try:
+
+            normalized_name = self.__normalize_text(product_name)
+            words = normalized_name.split()
+
+            regex_pattern = ".*(" + "|".join(re.escape(word) for word in words) + ").*"
+
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            regex_products = list(
+                collection.find({"name": {"$regex": regex_pattern, "$options": "i"}})
+            )
+
+            matching_products = []
+            for product in regex_products:
+                product_words = self.__normalize_text(product["name"]).split()
+                common_words_count = sum(1 for word in product_words if word in words)
+                if common_words_count >= len(words) / 2:
+                    matching_products.append(product)
+
+            self.db_manager.close_database()
+            return Result.success(matching_products)
         except Exception as e:
             return Result.failure(str(e))
 

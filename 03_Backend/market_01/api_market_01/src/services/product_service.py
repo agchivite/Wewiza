@@ -180,6 +180,21 @@ class ProductService:
 
         return products_list_json
 
+    def get_products_by_similar_name(self, product_name):
+        result = self.product_repository.get_products_by_similar_name(product_name)
+
+        if result.is_failure():
+            print("Failed to get products by similar name:", result.error)
+            return []
+
+        products_list_json = result.value
+
+        # Removing _id key, we don't want it
+        for product in products_list_json:
+            del product["_id"]
+
+        return products_list_json
+
     def delete_products_by_date(self, date):
         result = self.product_repository.delete_products_by_date(date)
 

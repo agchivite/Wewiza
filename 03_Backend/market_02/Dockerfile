@@ -2,7 +2,13 @@ FROM python:3.11-bullseye
 
 WORKDIR /market_02
 
-COPY /api_market_02/requirements.txt ./
+RUN pip install -U pip setuptools wheel
+
+RUN pip install -U spacy
+RUN python -m spacy download en_core_web_sm
+RUN python -m spacy download es_core_news_sm
+    
+COPY ./api_market_02/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8082

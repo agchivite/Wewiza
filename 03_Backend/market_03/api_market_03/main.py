@@ -82,6 +82,11 @@ def get_product_by_name(product_name: str):
     return product_service.get_products_by_name(product_name)
 
 
+@app.get("/product/similar/name/{product_name}")
+def get_product_by_similar_name(product_name: str):
+    return product_service.get_products_by_similar_name(product_name)
+
+
 @app.get("/update/measure_carrefour")
 def update_price_by_standard_measure():
     return product_service.update_price_by_standard_measure()
