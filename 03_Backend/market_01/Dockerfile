@@ -4,6 +4,11 @@ WORKDIR /market_01
 
 RUN pip install -U pip setuptools wheel
 
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    ninja-build
+
 RUN pip install -U spacy
 RUN python -m spacy download en_core_web_sm
 RUN python -m spacy download es_core_news_sm
