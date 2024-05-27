@@ -727,7 +727,7 @@ def update_to_random_price_less():
 # https://127.0.0.2/suggest?filter_market=ahorramas&uuids=c36e79b3-4806-492c-ba2c-877395fc2ae5&uuids=35038e15-b874-471b-afd6-d694bedaeacf
 @app.get("/suggest")
 def get_suggest_products(
-    filter_market: str,
+    filter_markets: List[str] = Query(...),
     uuids: List[str] = Query(...),
 ):
     list_all_products_user = []
@@ -754,28 +754,76 @@ def get_suggest_products(
     # Create a dicctionary to store suggestion of list product for eacg uuid product
     products_user_to_add_suggestions_list = {uuid: [] for uuid in uuids}
 
-    if filter_market.lower().strip() == "mercadona":
-        for product_user in list_all_products_user:
-            list_products_similar = requests.get(
-                "http://api_market_01:8081/product/similar/name/" + product_user["name"]
-            )
-            # Check if the list product suggestion are cheaper than the actual product
-            cheaper_products_suggestion = []
+    for market_name in filter_markets:
+        if market_name.lower().strip() == "mercadona":
+            for product_user in list_all_products_user:
+                list_products_similar = requests.get(
+                    "http://api_market_01:8081/product/similar/name/"
+                    + product_user["name"]
+                )
+                cheaper_products_suggestion = []
 
-            for product_suggestion in list_products_similar.json():
-                if (
-                    product_suggestion["price_by_standard_measure"]
-                    < product_user["price_by_standard_measure"]
-                ):
-                    cheaper_products_suggestion.append(product_suggestion)
+                for product_suggestion in list_products_similar.json():
+                    if (
+                        product_suggestion["price_by_standard_measure"]
+                        < product_user["price_by_standard_measure"]
+                    ):
+                        cheaper_products_suggestion.append(product_suggestion)
 
-            existing_similar_products = products_user_to_add_suggestions_list.get(
-                product_user["uuid"], []
-            )
-            products_user_to_add_suggestions_list[product_user["uuid"]] = (
-                existing_similar_products + cheaper_products_suggestion
-            )
+                existing_similar_products = products_user_to_add_suggestions_list.get(
+                    product_user["uuid"], []
+                )
+                products_user_to_add_suggestions_list[product_user["uuid"]] = (
+                    existing_similar_products + cheaper_products_suggestion
+                )
 
-    # TODO: others markets
+        if market_name.lower().strip() == "ahorramas":
+            for product_user in list_all_products_user:
+                list_products_similar = requests.get(
+                    "http://api_market_02:8082/product/similar/name/"
+                    + product_user["name"]
+                )
+                cheaper_products_suggestion = []
+
+                for product_suggestion in list_products_similar.json():
+                    if (
+                        product_suggestion["price_by_standard_measure"]
+                        < product_user["price_by_standard_measure"]
+                    ):
+                        cheaper_products_suggestion.append(product_suggestion)
+
+                existing_similar_products = products_user_to_add_suggestions_list.get(
+                    product_user["uuid"], []
+                )
+                products_user_to_add_suggestions_list[product_user["uuid"]] = (
+                    existing_similar_products + cheaper_products_suggestion
+                )
+
+        if market_name.lower().strip() == "carrefour":
+            for product_user in list_all_products_user:
+                list_products_similar = requests.get(
+                    "http://api_market_03:8083/product/similar/name/"
+                    + product_user["name"]
+                )
+                cheaper_products_suggestion = []
+
+                for product_suggestion in list_products_similar.json():
+                    if (
+                        product_suggestion["price_by_standard_measure"]
+                        < product_user["price_by_standard_measure"]
+                    ):
+                        cheaper_products_suggestion.append(product_suggestion)
+
+                existing_similar_products = products_user_to_add_suggestions_list.get(
+                    product_user["uuid"], []
+                )
+                products_user_to_add_suggestions_list[product_user["uuid"]] = (
+                    existing_similar_products + cheaper_products_suggestion
+                )
+
+    # Clear None items # TODO: this is optional?
+    products_user_to_add_suggestions_list = dict(
+        filter(lambda x: x[1] != [], products_user_to_add_suggestions_list.items())
+    )
 
     return products_user_to_add_suggestions_list
