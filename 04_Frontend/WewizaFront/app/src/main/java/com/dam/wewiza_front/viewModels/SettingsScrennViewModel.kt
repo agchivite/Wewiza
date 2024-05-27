@@ -40,6 +40,7 @@ class SettingsScrennViewModel: ViewModel() {
                     Log.e("Delete Account exception", e.message.toString())
                     launch(Dispatchers.Main) {
                         Toast.makeText(context, "No se ha podido eliminar la cuenta", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Reinicia la aplicación e inténtalo de nuevo", Toast.LENGTH_LONG).show()
                     }
                 }
             }
