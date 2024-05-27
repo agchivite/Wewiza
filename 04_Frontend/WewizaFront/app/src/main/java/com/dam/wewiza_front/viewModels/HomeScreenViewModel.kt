@@ -28,12 +28,31 @@ class HomeScreenViewModel : ViewModel() {
     var isTopProductsLoading = mutableStateOf(true)
     var isTopCategoriesLoading = mutableStateOf(true)
 
+    val isConnectionError = mutableStateOf(false)
+
     init {
+        checkApiConnection()
         getAllCategories()
         getTopCategories()
         getTopProducts()
         sharedViewModel.setProducts(allProductsList)
 
+    }
+
+
+    private fun checkApiConnection() {
+        viewModelScope.launch {
+            val result = safeApiCall { service.getAllMarketsProduct() }
+            isConnectionError.value = result.isFailure
+        }
+    }
+
+    private suspend fun <T> safeApiCall(apiCall: suspend () -> T): Result<T> {
+        return try {
+            Result.success(apiCall())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     private fun getTopProducts() {
