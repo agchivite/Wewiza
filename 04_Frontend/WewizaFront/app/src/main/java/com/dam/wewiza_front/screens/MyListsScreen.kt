@@ -101,6 +101,7 @@ private fun MyListItem(
     navController: NavHostController
 ) {
     val context = LocalContext.current
+    val showDeleteDialog = remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -108,7 +109,6 @@ private fun MyListItem(
             .padding(10.dp)
             .height(60.dp),
         onClick = {
-
             viewModel.navigateToListScreen(navController, shoppingList.uuid)
         },
         shape = RoundedCornerShape(8.dp)
@@ -131,15 +131,13 @@ private fun MyListItem(
                 ) {
                     Text(text = "Sugerir", fontSize = 10.sp)
                 }
-
             }
 
             // Delete button
             Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.End) {
                 Button(
                     onClick = {
-                        viewModel.deleteList(shoppingList.uuid)
-                        viewModel.updateUserList()
+                        showDeleteDialog.value = true
                     }
                 ) {
                     Icon(
@@ -147,12 +145,23 @@ private fun MyListItem(
                         contentDescription = "Delete"
                     )
                 }
-
             }
-
         }
     }
 
+    if (showDeleteDialog.value) {
+        DeleteConfirmationDialog(
+            showDialog = showDeleteDialog,
+            onConfirm = {
+                viewModel.deleteList(shoppingList.uuid)
+                viewModel.updateUserList()
+                showDeleteDialog.value = false
+            },
+            onDismiss = {
+                showDeleteDialog.value = false
+            }
+        )
+    }
 }
 
 @Composable
@@ -206,7 +215,6 @@ fun AddNewListDialog(showDialog: MutableState<Boolean>, viewModel: MyListsScreen
             confirmButton = {
                 Button(
                     onClick = {
-
                         viewModel.createNewList(textState.value.text, context)
                         viewModel.updateUserList()
                         showDialog.value = false
@@ -218,7 +226,6 @@ fun AddNewListDialog(showDialog: MutableState<Boolean>, viewModel: MyListsScreen
             dismissButton = {
                 Button(
                     onClick = {
-                        // Aquí puedes manejar el evento de clic en el botón de cancelar
                         showDialog.value = false
                     }
                 ) {
@@ -227,4 +234,31 @@ fun AddNewListDialog(showDialog: MutableState<Boolean>, viewModel: MyListsScreen
             }
         )
     }
+}
+
+@Composable
+fun DeleteConfirmationDialog(
+    showDialog: MutableState<Boolean>,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { showDialog.value = false },
+        title = { Text("Confirmar eliminación") },
+        text = { Text("¿Estás seguro de que deseas eliminar esta lista?") },
+        confirmButton = {
+            Button(
+                onClick = onConfirm
+            ) {
+                Text("Eliminar")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss
+            ) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
