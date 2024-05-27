@@ -3,7 +3,8 @@ from api_market_02.src.schemas.product_schema import product_schema
 from api_market_02.src.database.database_manager import DatabaseManager
 from datetime import datetime
 import random
-import spacy
+
+# import spacy
 import re
 
 
@@ -11,6 +12,7 @@ class ProductRepository:
     def __init__(self, db_manager: DatabaseManager, collection_name):
         self.db_manager = db_manager
         self.collection_name = collection_name
+        self.nlp_spanish = ""  # spacy.load("es_core_news_sm")
         self.__setup_collection_validation()
 
     def __setup_collection_validation(self):
