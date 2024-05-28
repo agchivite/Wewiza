@@ -3,8 +3,14 @@ from api_market_01.src.schemas.product_schema import product_schema
 from api_market_01.src.database.database_manager import DatabaseManager
 from datetime import datetime
 import random
-from textblob import TextBlob
 import re
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from textblob import TextBlob
+
+nltk.download("punkt")
+nltk.download("stopwords")
 
 
 class ProductRepository:
@@ -141,12 +147,8 @@ class ProductRepository:
 
     def __normalize_text(self, text):
         blob = TextBlob(text.lower())
-        tokens = [
-            word.lemmatize()
-            for word in blob.words
-            if word not in TextBlob.DEFAULT_STOPWORDS
-            and word not in TextBlob.DEFAULT_FRONTIER
-        ]
+        stop_words = set(stopwords.words("spanish"))
+        tokens = [word.lemmatize() for word in blob.words if word not in stop_words]
         return " ".join(tokens)
 
     def get_products_by_similar_name(self, product_name):

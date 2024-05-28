@@ -3,8 +3,11 @@ FROM python:3.11-bullseye
 WORKDIR /market_03
     
 COPY ./api_market_03/requirements.txt ./
+
 RUN pip install --no-cache-dir textblob && \
     python -m textblob.download_corpora
+
+RUN pip install --no-cache-dir -r requirements.txt
     
 EXPOSE 8083
 
