@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
     cmake \
     ninja-build
 
-RUN pip install -U spacy --no-binary blis
-RUN BLIS_ARCH="generic" pip install spacy --no-binary blis
+RUN BLIS_ARCH="generic" pip install --no-binary blis
+RUN pip install -U spacy
 
 RUN python -m spacy download en_core_web_sm
 RUN python -m spacy download es_core_news_sm
