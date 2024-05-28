@@ -3,7 +3,7 @@ from api_market_03.src.schemas.product_schema import product_schema
 from api_market_03.src.database.database_manager import DatabaseManager
 from datetime import datetime
 import random
-import spacy
+from textblob import TextBlob
 import re
 
 
@@ -11,7 +11,6 @@ class ProductRepository:
     def __init__(self, db_manager: DatabaseManager, collection_name):
         self.db_manager = db_manager
         self.collection_name = collection_name
-        self.nlp_spanish = spacy.load("es_core_news_sm")
         self.__setup_collection_validation()
 
     def __setup_collection_validation(self):
@@ -168,9 +167,12 @@ class ProductRepository:
             return Result.failure(str(e))
 
     def __normalize_text(self, text):
-        doc = self.nlp_spanish(text.lower())
+        blob = TextBlob(text.lower())
         tokens = [
-            token.lemma_ for token in doc if not token.is_stop and not token.is_punct
+            word.lemmatize()
+            for word in blob.words
+            if word not in TextBlob.DEFAULT_STOPWORDS
+            and word not in TextBlob.DEFAULT_FRONTIER
         ]
         return " ".join(tokens)
 
