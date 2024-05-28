@@ -7,21 +7,40 @@ from api_market_01.src.services.product_service import ProductService
 import re
 import os
 import requests
+from datetime import datetime
 
 
 class ScrappingService:
     def __init__(self, driver, product_service: ProductService):
         self.driver = driver
         self.product_service = product_service
-        self.output_folder = "log_error_mercadona"
+        self.output_folder = ""
 
-    def run_simulation(self, start_category, end_category):
+    def find_category(self, category_title, dictionaty_titles_categories):
+        for category, subcategories in dictionaty_titles_categories.items():
+            if any(
+                category_title.lower() in subcategory.lower()
+                for subcategory in subcategories
+            ):
+                return category
+        return "category_not_found"
+
+    def run_scrapping_mercadona(
+        self, list_num_categories, dictionaty_titles_categories
+    ):
+        current_directory = os.path.dirname(os.path.realpath(__file__))
+
+        api_market_02_folder = os.path.abspath(
+            os.path.join(current_directory, "..", "..")
+        )
+        log_error_folder = os.path.join(api_market_02_folder, "log_error_mercadona")
+        self.output_folder = log_error_folder
 
         # Only to keep a log when fail scrapping, because is imposible to check the failures in the console with a lot of products
-        if not os.path.exists(self.output_folder):
-            os.makedirs(self.output_folder)
+        if not os.path.exists(log_error_folder):
+            os.makedirs(log_error_folder)
 
-        for i in range(start_category, end_category + 1):
+        for i in list_num_categories:
             url = f"https://tienda.mercadona.es/categories/{i}"
 
             response = requests.get(url)
@@ -39,7 +58,10 @@ class ScrappingService:
                     category_title_element = self.driver.find_element(
                         "css selector", ".category-detail__title.title1-b"
                     )
-                    category_title = category_title_element.text.strip()
+                    category_title = self.find_category(
+                        category_title_element.text.strip(),
+                        dictionaty_titles_categories,
+                    )
                     id_category = self.map_category_title_to_id(category_title)
 
                     # Obtaining content page after JavaScript has loaded the data dynamically
@@ -55,10 +77,11 @@ class ScrappingService:
 
                         for product_html in products_html:
                             product_model = self.map_product_html_to_model(
-                                product_html, id_category
+                                product_html, id_category, url
                             )
 
                             if product_model.name != "[no-data]":
+                                # TODO: change when need it
                                 self.send_to_wewiza_server(product_model, id_category)
                                 # self.send_to_localhost_mongo(product_model)
 
@@ -120,12 +143,31 @@ class ScrappingService:
                 .lower()
             )
 
-    # TODO: make a mapper DTO
-    def map_product_html_to_model(self, product_html, id_category):
-        try:
-            # TODO: find url
-            url = "find"
+    def extract_quantity_and_unit(self, text):
+        # Case 1: "6 cualquier_texto x 125 g"
+        match = re.match(r"(\d+)\s*.*\s*x\s*(\d+)\s*([a-zA-Z]+)", text)
+        if match:
+            quantity1, quantity2, unit = match.groups()
+            total_quantity = int(quantity1) * int(quantity2)
+            return total_quantity, unit
 
+        # Case 2: "Cualqier texto 2 cualquier_texto (180 g)"
+        match = re.match(r".*\(\s*(\d+)\s*([a-zA-Z]+)\s*\)", text)
+        if match:
+            quantity, unit = match.groups()
+            return int(quantity), unit
+
+        # Case 3: "Cualquier texto 6 L"
+        match = re.match(r".*\b(\d+)\s*([a-zA-Z]+)\b", text)
+        if match:
+            quantity, unit = match.groups()
+            return int(quantity), unit
+
+        return None, None
+
+    # TODO: make a mapper DTO
+    def map_product_html_to_model(self, product_html, id_category, url):
+        try:
             name = product_html.find(
                 "h4", class_="subhead1-r product-cell__description-name"
             ).text
@@ -144,48 +186,22 @@ class ScrappingService:
                     "p", class_="product-price__unit-price subhead1-b"
                 ).text
 
-            # Sometimes the tag "footnote1-r" appears twice, so I join all in one
             footnote1_r_tags = product_html.find_all("span", class_="footnote1-r")
-            texts = []
-            for tag in footnote1_r_tags:
-                text = tag.get_text(
-                    strip=True
-                )  # Tag text without spaces at the beginning and end
-                texts.append(text)
+            texts = [tag.get_text(strip=True) for tag in footnote1_r_tags]
 
-            footnote1_r_in_one_text_by_spaces = " ".join(texts)
-            footnote1_r_splited_by_spaces = footnote1_r_in_one_text_by_spaces.split(" ")
-            possible_measures = [
-                "kg",
-                "g",
-                "L",
-                "ml",
-                "ud.",
-                "kg)",
-                "g)",
-                "L)",
-                "ml)",
-                "ud.)",
-            ]
-            measure = "failed_recollecting_measure"
+            # Sometimes there are 2 elements: [(None, None), (180, 'g')] take only the last
+            if texts:
+                quantities_and_units = [self.extract_quantity_and_unit(texts[-1])]
+
             quantity_measure = 0.0
-
-            for possible_measure in possible_measures:
-                if possible_measure in footnote1_r_splited_by_spaces:
-                    measure = possible_measure
-                    if ")" in measure:
-                        measure = measure.replace(")", "")
-                    break
-
-            # Searching quantity in the left value of the measure
-            for i in range(len(footnote1_r_splited_by_spaces)):
-                if footnote1_r_splited_by_spaces[i] in possible_measures:
-                    quantity_measure = footnote1_r_splited_by_spaces[i - 1]
-                    if "(" in quantity_measure:
-                        quantity_measure = quantity_measure.replace("(", "")
-                    break
-
-            quantity_measure = float(quantity_measure.replace(",", "."))
+            measure = ""
+            for quantity, unit in quantities_and_units:
+                if quantity is not None and unit is not None:
+                    print(f"Name: {name}, Quantity: {quantity}, Unit: {unit}")
+                    quantity_measure = quantity
+                    measure = unit
+                else:
+                    print("Name: ", name, " - No match found")
 
             price_per_measure = 0.0
             if quantity_measure != 0.0:
@@ -206,6 +222,10 @@ class ScrappingService:
 
             store_name = "Mercadona"
             store_image_url = "https://mirasol-centre.com/nousite/wp-content/uploads/2017/05/logo-Mercadona.png"
+
+            current_date = datetime.now()
+            current_date_str = current_date.strftime("%Y-%m-%d %H:%M:%S")
+
             product = Product(
                 str(uuid.uuid4()),
                 id_category,
@@ -218,6 +238,7 @@ class ScrappingService:
                 url,
                 store_name,
                 store_image_url,
+                current_date_str,
             )
         except AttributeError as e:
             print(f"Error obtaining data from product: {e}")
@@ -238,42 +259,41 @@ class ScrappingService:
                 no_data,
                 no_data,
                 no_data,
+                no_data,
             )
 
         return product
 
-    def calculate_price_per_measure(
-        self, quantity, measure, price_per_measure, name_product
-    ):
-        splited_euro = price_per_measure.split(" ")
-        price_per_measure = float(splited_euro[0].replace(",", "."))
+    def calculate_price_per_measure(self, quantity, measure, price, name_product):
+        splited_euro = price.split(" ")
+        price = float(splited_euro[0].replace(",", "."))
 
         measure = measure.lower()
 
         if measure == "g":
             quantity_in_kg = quantity / 1000
-            price_per_kg = price_per_measure / quantity_in_kg
+            price_per_kg = price / quantity_in_kg
             return price_per_kg
         elif measure == "kg":
-            price_per_kg = price_per_measure / quantity
+            price_per_kg = price / quantity
             return price_per_kg
         elif measure == "ml":
             quantity_in_liter = quantity / 1000
-            price_per_liter = price_per_measure / quantity_in_liter
+            price_per_liter = price / quantity_in_liter
             return price_per_liter
         elif measure == "l":
-            price_per_liter = price_per_measure / quantity
+            price_per_liter = price / quantity
             return price_per_liter
         elif (
             measure == "ud." and "huevo" in name_product.lower()
         ):  # In Mercadona ud. is same as dozens eggs.
             quantity_in_dozen = quantity / 12
-            return price_per_measure / quantity_in_dozen
-        elif measure == "ud.":
+            return price / quantity_in_dozen
+        elif measure == "ud." or measure == "ud":
             # Other cases with ud., it going to calculate with standard ud. as 1
-            return price_per_measure / quantity
+            return price / quantity
         else:
-            return "Measure is not valid"
+            return 0.0
 
     def write_error_to_file(self, error, output_file):
         with open(output_file, "a", encoding="utf-8") as file:

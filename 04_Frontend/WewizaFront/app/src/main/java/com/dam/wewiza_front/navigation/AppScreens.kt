@@ -1,5 +1,9 @@
 package com.dam.wewiza_front.navigation
 
+
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+
 sealed class AppScreens(val route: String){
     object WelcomeScreen: AppScreens("welcome_screen")
     object HomeScreen: AppScreens("home_screen")
@@ -11,11 +15,12 @@ sealed class AppScreens(val route: String){
     object ListScreen: AppScreens ("list_screen")
     object MyListScreen: AppScreens ("my_list_screen")
     object ProductListScreen: AppScreens ("product_list_screen")
-    object ProductScreen: AppScreens ("product_screen")
+    object ProductScreen: AppScreens("product/{id}") {
+        val arguments = listOf(navArgument("id") { type = NavType.StringType })
+    }
     object ProfileScreen: AppScreens ("profile_screen")
     object SettingsScreen: AppScreens ("settings_screen")
     object SuggestionScreen: AppScreens ("suggestion_screen")
     object AboutUsScreen: AppScreens ("about_us_screen")
-
-
+    object ProductDetailsScreen: AppScreens ("product_details_screen")
 }
