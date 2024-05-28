@@ -17,6 +17,7 @@ import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.ByteArrayOutputStream
+import java.util.regex.Pattern
 
 class RegisterScreenViewModel: ViewModel() {
 
@@ -49,6 +50,18 @@ class RegisterScreenViewModel: ViewModel() {
         val actualEmail = email.value
         val actualPassword = password.value
         val actualRepeatPassword = repeatPassword.value
+
+        if (!isEmailValid(actualEmail)) {
+            Toast.makeText(context, "Por favor, introduce un correo electrónico válido.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // Verificación de contraseña
+        if (actualPassword.length < 6) {
+            Toast.makeText(context, "La contraseña debe tener al menos 6 caracteres.", Toast.LENGTH_LONG).show()
+            return
+        }
+
 
         if (actualEmail.isNotEmpty() && actualPassword.isNotEmpty() && actualRepeatPassword.isNotEmpty()) {
             if (actualPassword == actualRepeatPassword) {
@@ -105,6 +118,14 @@ class RegisterScreenViewModel: ViewModel() {
                 Log.w("Firestore", "Error writing document", e)
                 Toast.makeText(context, "Error al crear el perfil. Por favor, inténtalo de nuevo.", Toast.LENGTH_LONG).show()
             }
+    }
+
+
+    private fun isEmailValid(email: String): Boolean {
+        val emailPattern = Pattern.compile(
+            "^[\\w-\\.]+@[\\w-]+\\.[a-z]{2,3}$"
+        )
+        return emailPattern.matcher(email).matches()
     }
 
 

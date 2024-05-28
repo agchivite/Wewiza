@@ -140,7 +140,7 @@ fun LineChartView(entries: List<Entry>, monthMap: Map<Float, String>) {
                     description = Description().apply {
                         text = ""
                     }
-                    setTouchEnabled(true)
+                    setTouchEnabled(false)
                     setDrawGridBackground(false)
                     isDragEnabled = false
                     setScaleEnabled(true)

@@ -29,9 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,7 +59,6 @@ import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.TopProduct
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
-import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,15 +85,39 @@ fun HomeBodyContent(
     viewModel: HomeScreenViewModel,
 ) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        WewizaLogoSection()
-        FeaturedCategoriesSection(navController, viewModel)
-        FeaturedProductsSection(navController, viewModel)
+    val isConnectionError by viewModel.isConnectionError
+
+    if (isConnectionError) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize(),
+        ) {
+            ServerMaintenanceScreen()
+        }
+
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+        ) {
+            WewizaLogoSection()
+            FeaturedCategoriesSection(navController, viewModel)
+            FeaturedProductsSection(navController, viewModel)
+        }
     }
+}
+
+@Composable
+fun ServerMaintenanceScreen() {
+    Text(
+        text = "Servidor en mantenimiento. Disculpe las molestias.",
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable

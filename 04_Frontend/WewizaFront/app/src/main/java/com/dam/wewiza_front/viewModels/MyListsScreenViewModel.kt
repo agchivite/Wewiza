@@ -51,7 +51,7 @@ class MyListsScreenViewModel : ViewModel() {
     }
 
     fun createNewList(text: String, context: Context) {
-        if (text.isNotEmpty()) {
+        if (text.isNotEmpty() && !isListNameExists(text)) {
             val newList = myLists.value.toMutableList()
             newList.add(
                 ShoppingList(
@@ -61,9 +61,15 @@ class MyListsScreenViewModel : ViewModel() {
                 )
             )
             myLists.value = newList
-        } else {
+        } else if (isListNameExists(text)){
+            Toast.makeText(context, "La lista $text ya existe", Toast.LENGTH_SHORT).show()
+        }else{
             Toast.makeText(context, "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun isListNameExists(name: String): Boolean {
+        return myLists.value.any { it.name == name }
     }
 
     fun deleteList(uuid: String) {
