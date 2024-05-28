@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     libatlas-base-dev \
     virtualenv \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    cmake
 
 # Crear y activar el entorno virtual
 RUN virtualenv /opt/spacy-build --python=python3
