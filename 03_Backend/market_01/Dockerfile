@@ -9,8 +9,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     ninja-build
 
-RUN BLIS_ARCH="generic" pip install --no-binary blis blis
-RUN pip install -U spacy
+RUN pip install spacy blis --extra-index-url=https://hoefling.io/pypi
 
 RUN python -m spacy download en_core_web_sm
 RUN python -m spacy download es_core_news_sm
