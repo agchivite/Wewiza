@@ -2,16 +2,16 @@ FROM python:3.11-bullseye
 
 WORKDIR /market_01
 
-#RUN pip install -U pip setuptools wheel
+RUN pip install -U pip setuptools wheel
 
-#RUN apt-get update && apt-get install -y \
-#    build-essential \
-#    cmake \
-#    ninja-build
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    ninja-build
 
-#RUN pip install -U spacy
-#RUN python -m spacy download en_core_web_sm
-#RUN python -m spacy download es_core_news_sm
+RUN pip install -U spacy --no-binary blis
+RUN python -m spacy download en_core_web_sm
+RUN python -m spacy download es_core_news_sm
 
 COPY ./api_market_01/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
