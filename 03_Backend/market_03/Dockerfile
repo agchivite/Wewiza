@@ -7,9 +7,12 @@ RUN pip install -U pip setuptools wheel
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
-    ninja-build
+    ninja-build \
+    python3-pip \
+    libatlas-base-dev
 
-RUN pip install spacy blis --extra-index-url=https://hoefling.io/pypi
+RUN pip3 install --user numpy cython
+RUN BLIS_ARCH="generic" pip3 install --user spacy --no-binary=blis
 
 RUN python -m spacy download en_core_web_sm
 RUN python -m spacy download es_core_news_sm
