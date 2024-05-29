@@ -847,3 +847,11 @@ def get_suggest_products(
         )
 
     return products_user_to_add_suggestions_list
+
+
+@app.get("/update/zero")
+def update_zero():
+    # call all markets
+    response_1 = requests.get("http://api_market_01:8081/update/zero")
+    response_2 = requests.get("http://api_market_02:8082/update/zero")
+    return {response_1 + response_2}

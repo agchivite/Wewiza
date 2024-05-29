@@ -248,3 +248,23 @@ class ProductRepository:
             return Result.success("Ok")
         except Exception as e:
             return Result.failure(str(e))
+
+    def updateZeroData(self):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+
+            documents = collection.find({"price": 0})
+
+            for doc in documents:
+                price = random.uniform(0.31, 0.51)
+                rounded_price = round(price, 2)
+                collection.update_one(
+                    {"_id": doc["_id"]},
+                    {"$set": {"price": rounded_price}},
+                )
+
+            self.db_manager.close_database()
+            return Result.success("Ok")
+        except Exception as e:
+            return Result.failure(str(e))

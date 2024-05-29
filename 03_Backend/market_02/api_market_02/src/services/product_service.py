@@ -212,3 +212,12 @@ class ProductService:
             return []
 
         return result.value
+
+    def updateZeroData(self):
+        result = self.product_repository.updateZeroData()
+
+        if result.is_failure():
+            print("Failed to update to random price less:", result.error)
+            return []
+
+        return result.value
