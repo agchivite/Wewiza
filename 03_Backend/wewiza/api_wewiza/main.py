@@ -205,25 +205,19 @@ def find_actual_product_by_uuid_past(uuid_past_product):
     response_1 = requests.get(
         "http://api_market_01:8081/find/actual/id/" + uuid_past_product
     ).json()
-    print("MARKET 1: ")
-    print(response_1)
-    if response_1["success"] == False:
+    if response_1["success"] == True:
         return response_1["uuid"]
 
     response_2 = requests.get(
         "http://api_market_02:8082/find/actual/id/" + uuid_past_product
     ).json()
-    print("MARKET 2: ")
-    print(response_2)
-    if response_2["success"] == False:
+    if response_2["success"] == True:
         return response_2["uuid"]
 
     response_3 = requests.get(
         "http://api_market_03:8083/find/actual/id/" + uuid_past_product
     ).json()
-    print("MARKET 3: ")
-    print(response_3)
-    if response_3["success"] == False:
+    if response_3["success"] == True:
         return response_3["uuid"]
 
     print("FINAL PRODUCT: " + uuid_past_product)
@@ -385,8 +379,6 @@ def get_all_products_by_market(market_name: str):
 def get_product_by_id(uuid: str):
     product_id = find_actual_product_by_uuid_past(uuid)
 
-    print("FIN: ", product_id)
-
     if product_id is None:
         return {"name": "Product not found"}
 
@@ -429,6 +421,9 @@ def get_product_by_id(uuid: str):
 )
 def get_product_details_by_id(uuid: str):
     product_id = find_actual_product_by_uuid_past(uuid)
+
+    if product_id is None:
+        return []
 
     # MARKET 01
     response_product_market_01_json = requests.get(
@@ -682,6 +677,9 @@ def calculate_topics(background_tasks: BackgroundTasks):
 def like_product(uuid: str, email_user: str, background_tasks: BackgroundTasks):
     product_id = find_actual_product_by_uuid_past(uuid)
 
+    if product_id is None:
+        return {"result": False}
+    
     boolean_result = product_service.like_product(product_id, email_user)
     # CASE 2: like/unlike
     # background_tasks.add_task(update_global_variables)
@@ -695,6 +693,9 @@ def like_product(uuid: str, email_user: str, background_tasks: BackgroundTasks):
 def unlike_product(uuid: str, email_user: str, background_tasks: BackgroundTasks):
     product_id = find_actual_product_by_uuid_past(uuid)
 
+    if product_id is None:
+        return {"result": False}
+    
     boolean_result = product_service.unlike_product(product_id, email_user)
     # CASE 2: like/unlike
     # background_tasks.add_task(update_global_variables)
@@ -707,6 +708,9 @@ def unlike_product(uuid: str, email_user: str, background_tasks: BackgroundTasks
 )
 def get_reaction(email_user: str, uuid: str):
     product_id = find_actual_product_by_uuid_past(uuid)
+
+    if product_id is None:
+        return {"reaction": "Product not found"}
 
     reaction = product_service.get_reaction(email_user, product_id)
     return {"reaction": reaction}
