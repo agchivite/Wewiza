@@ -153,6 +153,9 @@ class MyListsScreenViewModel : ViewModel() {
         }
     }
 
+    fun navigateToSuggestionScreen(navController: NavHostController) {
+        navController.navigate(AppScreens.SuggestionScreen.route)
+    }
 
 
 }
