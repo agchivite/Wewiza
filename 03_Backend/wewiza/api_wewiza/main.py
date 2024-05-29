@@ -205,21 +205,21 @@ def find_actual_product_by_uuid_past(uuid_past_product):
     response_1 = requests.get(
         "http://api_market_01:8081/find/actual/id/" + uuid_past_product
     ).json()
-    print(response_1)
+    print("MARKET 1: " + response_1)
     if response_1["success"] == False:
         return response_1["uuid"]
 
     response_2 = requests.get(
         "http://api_market_02:8082/find/actual/id/" + uuid_past_product
     ).json()
-    print(response_2)
+    print("MARKET 2: " + response_2)
     if response_2["success"] == False:
         return response_2["uuid"]
 
     response_3 = requests.get(
         "http://api_market_03:8083/find/actual/id/" + uuid_past_product
     ).json()
-    print(response_3)
+    print("MARKET 3: " + response_3)
     if response_3["success"] == False:
         return response_3["uuid"]
 
@@ -383,6 +383,9 @@ def get_product_by_id(uuid: str):
     product_id = find_actual_product_by_uuid_past(uuid)
 
     print("FIN: ", product_id)
+
+    if product_id is None:
+        return {"name": "Product not found"}
 
     response_product_market_01_raw_json = requests.get(
         "http://api_market_01:8081/product/id/" + product_id
