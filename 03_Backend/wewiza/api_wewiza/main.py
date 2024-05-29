@@ -793,67 +793,46 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     products_user_to_add_suggestions_list = []
 
     for market_name in filter_markets:
-        if market_name.lower().strip() == "mercadona":
-            for product_user in list_all_products_user:
+        for product_user in list_all_products_user:
+            if market_name.lower().strip() == "mercadona":
                 list_products_similar = requests.get(
-                    "http://api_market_01:8081/product/similar/name/"
-                    + product_user["name"]
+                    f"http://api_market_01:8081/product/similar/name/{product_user['name']}"
                 )
-                cheaper_products_suggestion = []
-
-                for product_suggestion in list_products_similar.json():
-                    if (
-                        product_suggestion["price_by_standard_measure"]
-                        < product_user["price_by_standard_measure"]
-                    ):
-                        cheaper_products_suggestion.append(product_suggestion)
-
-                products_user_to_add_suggestions_list += cheaper_products_suggestion
-
-        if market_name.lower().strip() == "ahorramas":
-            for product_user in list_all_products_user:
+            elif market_name.lower().strip() == "ahorramas":
                 list_products_similar = requests.get(
-                    "http://api_market_02:8082/product/similar/name/"
-                    + product_user["name"]
+                    f"http://api_market_02:8082/product/similar/name/{product_user['name']}"
                 )
-                cheaper_products_suggestion = []
-
-                for product_suggestion in list_products_similar.json():
-                    if (
-                        product_suggestion["price_by_standard_measure"]
-                        < product_user["price_by_standard_measure"]
-                    ):
-                        cheaper_products_suggestion.append(product_suggestion)
-
-                products_user_to_add_suggestions_list += cheaper_products_suggestion
-
-        if market_name.lower().strip() == "carrefour":
-            for product_user in list_all_products_user:
+            elif market_name.lower().strip() == "carrefour":
                 list_products_similar = requests.get(
-                    "http://api_market_03:8083/product/similar/name/"
-                    + product_user["name"]
+                    f"http://api_market_03:8083/product/similar/name/{product_user['name']}"
                 )
-                cheaper_products_suggestion = []
+            else:
+                continue
 
-                for product_suggestion in list_products_similar.json():
-                    if (
-                        product_suggestion["price_by_standard_measure"]
-                        < product_user["price_by_standard_measure"]
-                    ):
-                        cheaper_products_suggestion.append(product_suggestion)
+            cheaper_products_suggestion = [
+                product_suggestion
+                for product_suggestion in list_products_similar.json()
+                if product_suggestion.get("price_by_standard_measure", float("inf"))
+                < product_user.get("price_by_standard_measure", float("inf"))
+            ]
 
-                products_user_to_add_suggestions_list += cheaper_products_suggestion
+            products_user_to_add_suggestions_list.extend(cheaper_products_suggestion)
 
     # Clear None items
     products_user_to_add_suggestions_list = list(
         filter(None, products_user_to_add_suggestions_list)
     )
 
-    # Sort by the most cheaper
+    valid_products = [
+        x
+        for x in products_user_to_add_suggestions_list
+        if "price_by_standard_measure" in x
+    ]
+
     products_user_to_add_suggestions_list = sorted(
-        products_user_to_add_suggestions_list,
-        key=lambda x: x[0]["price_by_standard_measure"],
-        reverse=True,
+        valid_products,
+        key=lambda x: x["price_by_standard_measure"],
+        reverse=False,
     )
 
     return products_user_to_add_suggestions_list[:3]
