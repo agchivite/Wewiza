@@ -772,7 +772,6 @@ def update_to_random_price_less():
     }
 
 
-# TODO: list markets filter, NOT ONLY ONE
 # https://127.0.0.2/suggest/id/36e79b3-4806-492c-ba2c-877395fc2ae5?filter_market=ahorramas
 @app.get("/suggest/id/{uuid}")
 def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
@@ -791,8 +790,6 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     # Clear None items
     list_all_products_user = list(filter(None, list_all_products_user))
 
-    # Now I want to search the similar products name in all markets
-    # Create a dicctionary to store suggestion of list product for eacg uuid product
     products_user_to_add_suggestions_list = []
 
     for market_name in filter_markets:
@@ -811,10 +808,7 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
                     ):
                         cheaper_products_suggestion.append(product_suggestion)
 
-                # Add new list product
-                products_user_to_add_suggestions_list.append(
-                    cheaper_products_suggestion
-                )
+                products_user_to_add_suggestions_list += cheaper_products_suggestion
 
         if market_name.lower().strip() == "ahorramas":
             for product_user in list_all_products_user:
@@ -831,10 +825,7 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
                     ):
                         cheaper_products_suggestion.append(product_suggestion)
 
-                # Add new list product
-                products_user_to_add_suggestions_list.append(
-                    cheaper_products_suggestion
-                )
+                products_user_to_add_suggestions_list += cheaper_products_suggestion
 
         if market_name.lower().strip() == "carrefour":
             for product_user in list_all_products_user:
@@ -851,10 +842,7 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
                     ):
                         cheaper_products_suggestion.append(product_suggestion)
 
-                # Add new list product
-                products_user_to_add_suggestions_list.append(
-                    cheaper_products_suggestion
-                )
+                products_user_to_add_suggestions_list += cheaper_products_suggestion
 
     # Clear None items
     products_user_to_add_suggestions_list = list(
