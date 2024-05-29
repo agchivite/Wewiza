@@ -96,3 +96,8 @@ def update_to_random_price_less():
 @app.get("/update/zero")
 def updateZeroData():
     return product_service.updateZeroData()
+
+
+@app.get("/find/actual/id/{uuid}")
+def find_actual_id(uuid: str):
+    return product_service.find_actual_id(uuid)

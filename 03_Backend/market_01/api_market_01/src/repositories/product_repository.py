@@ -261,3 +261,25 @@ class ProductRepository:
             return Result.success("Ok")
         except Exception as e:
             return Result.failure(str(e))
+
+    def find_actual_id(self, uuid):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            product = collection.find_one({"uuid": uuid})
+
+            if product:
+                name_pasta_product = product["name"]
+                actual_date_year_month = datetime.now().strftime("%Y-%m")
+                product = collection.find_one(
+                    {
+                        "$and": [
+                            {"name": name_pasta_product},
+                            {"date_created": {"$regex": f"^{actual_date_year_month}"}},
+                        ]
+                    }
+                )
+            self.db_manager.close_database()
+            return Result.success(product["uuid"])
+        except Exception as e:
+            return Result.failure(str(e))

@@ -215,3 +215,13 @@ class ProductService:
             return []
 
         return result.value
+
+    def find_actual_id(self, uuid):
+        result = self.product_repository.find_actual_id(uuid)
+
+        if result.is_failure():
+            print("Failed to find actual id:", result.error)
+            return {"success": False, "failure": result.error, "uuid": None}
+
+        successJson = {"success": True, "failure": None, "uuid": result.value}
+        return successJson

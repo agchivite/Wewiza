@@ -95,3 +95,8 @@ def update_price_by_standard_measure():
 @app.get("/update/minor_random_price")
 def update_to_random_price_less():
     return product_service.update_to_random_price_less()
+
+
+@app.get("/find/actual/id/{uuid}")
+def find_actual_id(uuid: str):
+    return product_service.find_actual_id(uuid)
