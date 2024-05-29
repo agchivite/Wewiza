@@ -606,7 +606,7 @@ def calculate_top_products():
     top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
 
     # Sort the five most liked
-    top_likes_product.sort(key=lambda x: x["likes"], reverse=True)
+    top_likes_product.sort(key=lambda x: x["num_likes"], reverse=True)
     # Only get the five most likes products
     top_likes_product = top_likes_product[:5]
 
