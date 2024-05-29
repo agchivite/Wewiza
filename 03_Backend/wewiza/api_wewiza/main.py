@@ -821,9 +821,23 @@ def get_suggest_products(
                     existing_similar_products + cheaper_products_suggestion
                 )
 
-    # Clear None items # TODO: this is optional?
+    # Clear None items
     products_user_to_add_suggestions_list = dict(
         filter(lambda x: x[1] != [], products_user_to_add_suggestions_list.items())
     )
+
+    # Sort byt the most cheaper
+    for uuid in products_user_to_add_suggestions_list:
+        products_user_to_add_suggestions_list[uuid] = sorted(
+            products_user_to_add_suggestions_list[uuid],
+            key=lambda x: x["price_by_standard_measure"],
+            reverse=False,
+        )
+
+    # Only get the first 3 cheaper products for each product
+    for uuid in products_user_to_add_suggestions_list:
+        products_user_to_add_suggestions_list[uuid] = (
+            products_user_to_add_suggestions_list[uuid][:3]
+        )
 
     return products_user_to_add_suggestions_list
