@@ -22,16 +22,16 @@ def main():
         if all(
             check_service_availability(url)
             for url in [
-                "http://api_market_01:8081/size",
-                "http://api_market_02:8082/size",
-                "http://api_market_03:8083/size",
+                "http://api_market_01:8081/check",
+                "http://api_market_02:8082/check",
+                "http://api_market_03:8083/check",
             ]
         ):
             print("All APIs Market are available.")
             break
         else:
-            print("At least one API Market is not available. Retrying in 2 seconds...")
-            time.sleep(2)
+            print("At least one API Market is not available. Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 main()

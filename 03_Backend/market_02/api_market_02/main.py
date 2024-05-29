@@ -19,6 +19,11 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 
 
+@app.get("/check")
+def check_avaliable_api():
+    return {"message": "API is working"}
+
+
 @app.get("/update_all_date")
 def update_all_date():
     # Only update product with "date_created" in "2024-05-01 00:14:43"
