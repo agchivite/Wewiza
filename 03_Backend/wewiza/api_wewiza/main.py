@@ -679,7 +679,7 @@ def like_product(uuid: str, email_user: str, background_tasks: BackgroundTasks):
 
     if product_id is None:
         return {"result": False}
-    
+
     boolean_result = product_service.like_product(product_id, email_user)
     # CASE 2: like/unlike
     # background_tasks.add_task(update_global_variables)
@@ -695,7 +695,7 @@ def unlike_product(uuid: str, email_user: str, background_tasks: BackgroundTasks
 
     if product_id is None:
         return {"result": False}
-    
+
     boolean_result = product_service.unlike_product(product_id, email_user)
     # CASE 2: like/unlike
     # background_tasks.add_task(update_global_variables)
@@ -773,35 +773,27 @@ def update_to_random_price_less():
 
 
 # TODO: list markets filter, NOT ONLY ONE
-# https://127.0.0.2/suggest?filter_market=ahorramas&uuids=c36e79b3-4806-492c-ba2c-877395fc2ae5&uuids=35038e15-b874-471b-afd6-d694bedaeacf
-@app.get("/suggest")
-def get_suggest_products(
-    filter_markets: List[str] = Query(...),
-    uuids: List[str] = Query(...),
-):
-    list_all_products_user = []
-    for uuid in uuids:
-        # Check in all market to get the complete data
-        response_market_01 = requests.get(
-            "http://api_market_01:8081/product/id/" + uuid
-        )
-        response_market_02 = requests.get(
-            "http://api_market_02:8082/product/id/" + uuid
-        )
-        response_market_03 = requests.get(
-            "http://api_market_03:8083/product/id/" + uuid
-        )
+# https://127.0.0.2/suggest/id/36e79b3-4806-492c-ba2c-877395fc2ae5?filter_market=ahorramas
+@app.get("/suggest/id/{uuid}")
+def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
 
-        list_all_products_user.append(response_market_01.json())
-        list_all_products_user.append(response_market_02.json())
-        list_all_products_user.append(response_market_03.json())
+    list_all_products_user = []
+
+    # Check in all market to get the complete data
+    response_market_01 = requests.get("http://api_market_01:8081/product/id/" + uuid)
+    response_market_02 = requests.get("http://api_market_02:8082/product/id/" + uuid)
+    response_market_03 = requests.get("http://api_market_03:8083/product/id/" + uuid)
+
+    list_all_products_user.append(response_market_01.json())
+    list_all_products_user.append(response_market_02.json())
+    list_all_products_user.append(response_market_03.json())
 
     # Clear None items
     list_all_products_user = list(filter(None, list_all_products_user))
 
     # Now I want to search the similar products name in all markets
     # Create a dicctionary to store suggestion of list product for eacg uuid product
-    products_user_to_add_suggestions_list = {uuid: [] for uuid in uuids}
+    products_user_to_add_suggestions_list = []
 
     for market_name in filter_markets:
         if market_name.lower().strip() == "mercadona":
@@ -819,11 +811,9 @@ def get_suggest_products(
                     ):
                         cheaper_products_suggestion.append(product_suggestion)
 
-                existing_similar_products = products_user_to_add_suggestions_list.get(
-                    product_user["uuid"], []
-                )
-                products_user_to_add_suggestions_list[product_user["uuid"]] = (
-                    existing_similar_products + cheaper_products_suggestion
+                # Add new list product
+                products_user_to_add_suggestions_list.append(
+                    cheaper_products_suggestion
                 )
 
         if market_name.lower().strip() == "ahorramas":
@@ -841,11 +831,9 @@ def get_suggest_products(
                     ):
                         cheaper_products_suggestion.append(product_suggestion)
 
-                existing_similar_products = products_user_to_add_suggestions_list.get(
-                    product_user["uuid"], []
-                )
-                products_user_to_add_suggestions_list[product_user["uuid"]] = (
-                    existing_similar_products + cheaper_products_suggestion
+                # Add new list product
+                products_user_to_add_suggestions_list.append(
+                    cheaper_products_suggestion
                 )
 
         if market_name.lower().strip() == "carrefour":
@@ -863,33 +851,24 @@ def get_suggest_products(
                     ):
                         cheaper_products_suggestion.append(product_suggestion)
 
-                existing_similar_products = products_user_to_add_suggestions_list.get(
-                    product_user["uuid"], []
-                )
-                products_user_to_add_suggestions_list[product_user["uuid"]] = (
-                    existing_similar_products + cheaper_products_suggestion
+                # Add new list product
+                products_user_to_add_suggestions_list.append(
+                    cheaper_products_suggestion
                 )
 
     # Clear None items
-    products_user_to_add_suggestions_list = dict(
-        filter(lambda x: x[1] != [], products_user_to_add_suggestions_list.items())
+    products_user_to_add_suggestions_list = list(
+        filter(None, products_user_to_add_suggestions_list)
     )
 
-    # Sort byt the most cheaper
-    for uuid in products_user_to_add_suggestions_list:
-        products_user_to_add_suggestions_list[uuid] = sorted(
-            products_user_to_add_suggestions_list[uuid],
-            key=lambda x: x["price_by_standard_measure"],
-            reverse=False,
-        )
+    # Sort by the most cheaper
+    products_user_to_add_suggestions_list = sorted(
+        products_user_to_add_suggestions_list,
+        key=lambda x: x[0]["price_by_standard_measure"],
+        reverse=True,
+    )
 
-    # Only get the first 3 cheaper products for each product
-    for uuid in products_user_to_add_suggestions_list:
-        products_user_to_add_suggestions_list[uuid] = (
-            products_user_to_add_suggestions_list[uuid][:3]
-        )
-
-    return products_user_to_add_suggestions_list
+    return products_user_to_add_suggestions_list[:3]
 
 
 @app.get("/update/zero")
