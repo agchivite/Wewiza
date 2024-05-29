@@ -31,12 +31,12 @@ class ProductLikesService:
             return []
 
         products_list_json = result.value
-        uuid_list = [product["uuid"] for product in products_list_json]
-
-        uuid_list.sort(
-            key=lambda uuid: products_list_json[uuid]["num_likes"], reverse=True
+        sorted_products = sorted(
+            products_list_json, key=lambda x: x["num_likes"], reverse=True
         )
-        uuid_list = uuid_list[:5]
+        top_5_products = sorted_products[:5]
+        uuid_list = [product["uuid"] for product in top_5_products]
+
         return uuid_list
 
     def like_product(self, product_id, email_user):
