@@ -208,18 +208,21 @@ def find_actual_product_by_uuid_past(uuid_past_product):
     print(response_1)
     if response_1["success"] == False:
         return response_1["uuid"]
+
     response_2 = requests.get(
         "http://api_market_02:8082/find/actual/id/" + uuid_past_product
     ).json()
     print(response_2)
     if response_2["success"] == False:
         return response_2["uuid"]
+
     response_3 = requests.get(
         "http://api_market_03:8083/find/actual/id/" + uuid_past_product
     ).json()
     print(response_3)
     if response_3["success"] == False:
         return response_3["uuid"]
+
     print("FINAL PRODUCT: " + uuid_past_product)
     return uuid_past_product
 
@@ -373,11 +376,13 @@ def get_all_products_by_market(market_name: str):
 
 
 @app.get(
-    "/product/id/{product_id}",
+    "/product/id/{uuid}",
     description="Product details by id, if not found returns 'name': 'Product not found'",
 )
-def get_product_by_id(product_id: str):
-    product_id = find_actual_product_by_uuid_past(product_id)
+def get_product_by_id(uuid: str):
+    product_id = find_actual_product_by_uuid_past(uuid)
+
+    print("FIN: ", product_id)
 
     response_product_market_01_raw_json = requests.get(
         "http://api_market_01:8081/product/id/" + product_id
@@ -413,11 +418,11 @@ def get_product_by_id(product_id: str):
 
 
 @app.get(
-    "/product/details/id/{product_id}",
+    "/product/details/id/{uuid}",
     description="List of same product with different date_created, the latest one will be the main product, if not found returns empty list",
 )
-def get_product_details_by_id(product_id: str):
-    product_id = find_actual_product_by_uuid_past(product_id)
+def get_product_details_by_id(uuid: str):
+    product_id = find_actual_product_by_uuid_past(uuid)
 
     # MARKET 01
     response_product_market_01_json = requests.get(
@@ -665,11 +670,11 @@ def calculate_topics(background_tasks: BackgroundTasks):
 
 
 @app.get(
-    "/like/{product_id}/email/{email_user}",
+    "/like/{uuid}/email/{email_user}",
     description="Like a product only one time per user, return true if liked or false if was liked before",
 )
-def like_product(product_id: str, email_user: str, background_tasks: BackgroundTasks):
-    product_id = find_actual_product_by_uuid_past(product_id)
+def like_product(uuid: str, email_user: str, background_tasks: BackgroundTasks):
+    product_id = find_actual_product_by_uuid_past(uuid)
 
     boolean_result = product_service.like_product(product_id, email_user)
     # CASE 2: like/unlike
@@ -678,11 +683,11 @@ def like_product(product_id: str, email_user: str, background_tasks: BackgroundT
 
 
 @app.get(
-    "/unlike/{product_id}/email/{email_user}",
+    "/unlike/{uuid}/email/{email_user}",
     description="Unlike a product only one time per user, true if unliked or false if was unliked before",
 )
-def unlike_product(product_id: str, email_user: str, background_tasks: BackgroundTasks):
-    product_id = find_actual_product_by_uuid_past(product_id)
+def unlike_product(uuid: str, email_user: str, background_tasks: BackgroundTasks):
+    product_id = find_actual_product_by_uuid_past(uuid)
 
     boolean_result = product_service.unlike_product(product_id, email_user)
     # CASE 2: like/unlike
@@ -691,11 +696,11 @@ def unlike_product(product_id: str, email_user: str, background_tasks: Backgroun
 
 
 @app.get(
-    "/reaction/email/{email_user}/product/id/{product_id}",
+    "/reaction/email/{email_user}/product/id/{uuid}",
     description="Check if a user has liked a product, returns 'liked', 'unliked' or 'none'",
 )
-def get_reaction(email_user: str, product_id: str):
-    product_id = find_actual_product_by_uuid_past(product_id)
+def get_reaction(email_user: str, uuid: str):
+    product_id = find_actual_product_by_uuid_past(uuid)
 
     reaction = product_service.get_reaction(email_user, product_id)
     return {"reaction": reaction}
