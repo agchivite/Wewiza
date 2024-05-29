@@ -174,12 +174,8 @@ class ProductRepository:
 
     def __normalize_text(self, text):
         blob = TextBlob(text.lower())
-        stop_words = set(stopwords.words('spanish'))
-        tokens = [
-            word.lemmatize()
-            for word in blob.words
-            if word not in stop_words
-        ]
+        stop_words = set(stopwords.words("spanish"))
+        tokens = [word.lemmatize() for word in blob.words if word not in stop_words]
         return " ".join(tokens)
 
     def get_products_by_similar_name(self, product_name):
@@ -236,24 +232,19 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
 
-            modified_count = 0
-            actual_date_year_month = datetime.now().strftime("%Y-%m")
             documents = collection.find(
-                {"date_created": {"$regex": f"^{actual_date_year_month}"}}
+                {"price_by_standard_measure": {"$exists": True}}
             )
 
             for doc in documents:
-                current_price = doc.get("price", 0)
-                if current_price > 0:
-                    new_price = round(
-                        max(current_price + random.uniform(0.3, 0.5), 0), 2
-                    )
-                    result = collection.update_one(
-                        {"_id": doc["_id"]}, {"$set": {"price": new_price}}
-                    )
-                    modified_count += result.modified_count
+                price = doc["price_by_standard_measure"]
+                rounded_price = round(price, 2)
+                collection.update_one(
+                    {"_id": doc["_id"]},
+                    {"$set": {"price_by_standard_measure": rounded_price}},
+                )
 
             self.db_manager.close_database()
-            return Result.success(modified_count)
+            return Result.success("Ok")
         except Exception as e:
             return Result.failure(str(e))
