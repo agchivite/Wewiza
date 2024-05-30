@@ -5,9 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.lifecycleScope
 import com.dam.wewiza_front.koinModules.appModule
 import com.dam.wewiza_front.navigation.AppNavigation
-import com.dam.wewiza_front.ui.theme.MyLightTheme
+import com.dam.wewiza_front.services.RetrofitServiceFactory
 import com.dam.wewiza_front.ui.theme.WewizaFrontTheme
 import com.dam.wewiza_front.viewModels.AboutUsScreenViewModel
 import com.dam.wewiza_front.viewModels.CategoriesScreenViewModel
@@ -24,6 +26,7 @@ import com.dam.wewiza_front.viewModels.SettingsScrennViewModel
 import com.dam.wewiza_front.viewModels.SuggestionScreenViewModel
 import com.dam.wewiza_front.viewModels.WelcomeScreenViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -37,62 +40,97 @@ class MainActivity : ComponentActivity(), KoinComponent {
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-        startKoin {
-            androidContext(this@MainActivity)
-            modules(appModule)
-        }
-
-        val auth = FirebaseAuth.getInstance()
-        val welcomeViewModel = get<WelcomeScreenViewModel>()
-        val homeViewModel = get<HomeScreenViewModel>()
-        val loginViewModel = get<LoginScreenViewModel>()
-        val registerViewModel = get<RegisterScreenViewModel>()
-        val aboutUsViewModel = get<AboutUsScreenViewModel>()
-        val suggestionViewModel = get<SuggestionScreenViewModel>()
-        val categoriesViewModel = get<CategoriesScreenViewModel>()
-
-        val settingsViewModel = get<SettingsScrennViewModel>()
-        settingsViewModel.isUserSignedOut.observe(this) { isSignOut ->
-            if (isSignOut) {
-                profileViewModel = null
+        val service = RetrofitServiceFactory.makeRetrofitService()
+        val isConnectionError = mutableStateOf(false)
+        try {
+            lifecycleScope.launch {
+                val result = safeApiCall { service.testConnection() }
+                isConnectionError.value = result.isFailure
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
-        profileViewModel = if (auth.currentUser != null) get() else null
+        if (isConnectionError.value) {
+            startKoin {
+                androidContext(this@MainActivity)
+                modules(appModule)
+            }
 
+            val auth = FirebaseAuth.getInstance()
+            val welcomeViewModel = get<WelcomeScreenViewModel>()
+            val homeViewModel = get<HomeScreenViewModel>()
+            val loginViewModel = get<LoginScreenViewModel>()
+            val registerViewModel = get<RegisterScreenViewModel>()
+            val aboutUsViewModel = get<AboutUsScreenViewModel>()
+            val suggestionViewModel = get<SuggestionScreenViewModel>()
+            val categoriesViewModel = get<CategoriesScreenViewModel>()
 
-        val productDetailsScreenViewModel = get<ProductDetailsScreenViewModel>()
-        val myListsScreenViewModel = get<MyListsScreenViewModel>()
-
-
-        val customerSupportViewModel = get<CustomerSupportScreenViewModel>()
-        val productScreenViewModel = get<ProductScreenViewModel>()
-        val listScreenViewModel = get<ListScreenViewModel>()
-
-        setContent {
-            WewizaFrontTheme {
-                Surface {
-                    // Pasar los viewmodels como argumentos a AppNavigation
-                    AppNavigation(
-                        welcomeViewModel,
-                        homeViewModel,
-                        loginViewModel,
-                        registerViewModel,
-                        aboutUsViewModel,
-                        suggestionViewModel,
-                        categoriesViewModel,
-                        profileViewModel,
-                        settingsViewModel,
-                        myListsScreenViewModel,
-                        customerSupportViewModel,
-                        productScreenViewModel,
-                        productDetailsScreenViewModel,
-                        listScreenViewModel,
-                        this
-                    )
+            val settingsViewModel = get<SettingsScrennViewModel>()
+            settingsViewModel.isUserSignedOut.observe(this) { isSignOut ->
+                if (isSignOut) {
+                    profileViewModel = null
                 }
             }
+
+            profileViewModel = if (auth.currentUser != null) get() else null
+
+
+            val productDetailsScreenViewModel = get<ProductDetailsScreenViewModel>()
+            val myListsScreenViewModel = get<MyListsScreenViewModel>()
+
+
+            val customerSupportViewModel = get<CustomerSupportScreenViewModel>()
+            val productScreenViewModel = get<ProductScreenViewModel>()
+            val listScreenViewModel = get<ListScreenViewModel>()
+
+            setContent {
+                WewizaFrontTheme {
+                    Surface {
+                        // Pasar los viewmodels como argumentos a AppNavigation
+                        AppNavigation(
+                            welcomeViewModel,
+                            homeViewModel,
+                            loginViewModel,
+                            registerViewModel,
+                            aboutUsViewModel,
+                            suggestionViewModel,
+                            categoriesViewModel,
+                            profileViewModel,
+                            settingsViewModel,
+                            myListsScreenViewModel,
+                            customerSupportViewModel,
+                            productScreenViewModel,
+                            productDetailsScreenViewModel,
+                            listScreenViewModel,
+                            this
+                        )
+                    }
+                }
+            }
+        }else{
+            setContent{
+                AppNavigation(
+                    welcomeScreenViewModel = null,
+                    homeScreenViewModel = null ,
+                    loginScreenViewModel = null,
+                    registerScreenViewModel =null ,
+                    aboutUsScreenViewModel =null ,
+                    suggestionScreenViewModel =null ,
+                    categoriesScreenViewModel = null,
+                    profileScreenViewModel = null,
+                    settingsScreenViewModel =null,
+                    myListsScreenViewModel = null,
+                    customerSupportScreenViewModel =null ,
+                    productScreenViewModel =null ,
+                    productDetailsScreenViewModel = null,
+                    listScreenViewModel = null,
+                    mainActivity =null
+                )
+            }
         }
+
+
     }
 
 
@@ -104,6 +142,14 @@ class MainActivity : ComponentActivity(), KoinComponent {
         val aux = false
         if (aux) {
             super.onBackPressed()
+        }
+    }
+
+    private suspend fun <T> safeApiCall(apiCall: suspend () -> T): Result<T> {
+        return try {
+            Result.success(apiCall())
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

@@ -126,7 +126,9 @@ private fun MyListItem(
             Column(horizontalAlignment = Alignment.End) {
                 Button(
                     onClick = {
-                        Toast.makeText(context, "Por implementar...", Toast.LENGTH_SHORT).show()
+                        sharedViewModel.setWantedMarket(listOf("mercadona"))
+                        sharedViewModel.setSelectedList(shoppingList)
+                        viewModel.navigateToSuggestionScreen(navController)
                     }
                 ) {
                     Text(text = "Sugerir", fontSize = 10.sp)

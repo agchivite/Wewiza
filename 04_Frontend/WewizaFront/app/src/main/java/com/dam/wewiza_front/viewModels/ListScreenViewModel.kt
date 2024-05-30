@@ -1,5 +1,6 @@
 package com.dam.wewiza_front.viewModels
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -9,7 +10,6 @@ import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.Profile
 import com.dam.wewiza_front.models.ShoppingList
 import com.dam.wewiza_front.navigation.AppScreens
-import com.dam.wewiza_front.screens.sharedViewModel
 import com.dam.wewiza_front.services.RetrofitServiceFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -69,7 +69,10 @@ class ListScreenViewModel : ViewModel() {
 
                         Log.d("updateUserList", "Lists updated for list UUID: $listUuid")
                     } else {
-                        Log.d("updateUserList", "Shopping list with UUID $listUuid not found in user profile")
+                        Log.d(
+                            "updateUserList",
+                            "Shopping list with UUID $listUuid not found in user profile"
+                        )
                     }
                 } catch (e: Exception) {
                     Log.d("updateUserList", "updateUserList: ${e.message}")
@@ -95,29 +98,30 @@ class ListScreenViewModel : ViewModel() {
     }
 
 
-
     suspend fun getProductsFromList(selectedProductsIds: ShoppingList?): List<Product> {
         var updatedProducts = listOf<Product>()
-
-            if (selectedProductsIds != null && selectedProductsIds.products.isNotEmpty()) {
-                updatedProducts = selectedProductsIds.products.map { service.getProductById(it) }
-                Log.d("getProductsFromList", updatedProducts.toString())
-                while (updatedProducts.size != selectedProductsIds.products.size) {
-                    delay(100)
-                }
+        if (selectedProductsIds != null && selectedProductsIds.products.isNotEmpty()) {
+            updatedProducts = selectedProductsIds.products.map { service.getProductById(it) }
+            Log.d("getProductsFromList", updatedProducts.toString())
+            while (updatedProducts.size != selectedProductsIds.products.size) {
+                delay(100)
             }
+        }
 
         return updatedProducts
     }
 
     fun deleteProduct(product: Product) {
 
-        db.collection("profiles").document(auth.currentUser!!.email.toString()).get().addOnSuccessListener { document ->
-            val profile = document.toObject(Profile::class.java)
-            val shoppingList = profile?.shoppingListsList?.find { it.uuid == sharedViewModel.selectedList.value?.uuid }
-            shoppingList?.products?.remove(product.uuid)
-            db.collection("profiles").document(auth.currentUser!!.email.toString()).set(profile!!)
-        }
+        db.collection("profiles").document(auth.currentUser!!.email.toString()).get()
+            .addOnSuccessListener { document ->
+                val profile = document.toObject(Profile::class.java)
+                val shoppingList =
+                    profile?.shoppingListsList?.find { it.uuid == sharedViewModel.selectedList.value?.uuid }
+                shoppingList?.products?.remove(product.uuid)
+                db.collection("profiles").document(auth.currentUser!!.email.toString())
+                    .set(profile!!)
+            }
     }
 
     fun navigateToProductDetailsScreen(navController: NavController) {

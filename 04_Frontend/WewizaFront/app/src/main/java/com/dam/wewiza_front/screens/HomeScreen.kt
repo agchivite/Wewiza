@@ -85,40 +85,17 @@ fun HomeBodyContent(
     viewModel: HomeScreenViewModel,
 ) {
 
-    val isConnectionError by viewModel.isConnectionError
-
-    if (isConnectionError) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxSize(),
-        ) {
-            ServerMaintenanceScreen()
-        }
-
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-        ) {
-            WewizaLogoSection()
-            FeaturedCategoriesSection(navController, viewModel)
-            FeaturedProductsSection(navController, viewModel)
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
+        WewizaLogoSection()
+        FeaturedCategoriesSection(navController, viewModel)
+        FeaturedProductsSection(navController, viewModel)
     }
 }
 
-@Composable
-fun ServerMaintenanceScreen() {
-    Text(
-        text = "Servidor en mantenimiento. Disculpe las molestias.",
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        textAlign = TextAlign.Center
-    )
-}
 
 @Composable
 fun FeaturedProductsSection(navController: NavController, viewModel: HomeScreenViewModel) {

@@ -339,11 +339,13 @@ fun ShoppingListItem(
     context: Context
 
 ) {
+    var shoppingListSize = remember { mutableStateOf(shoppingList.products.size) }
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
             .clickable {
+                shoppingListSize.value += 1
                 viewModel.addProductToList(
                     shoppingList.uuid,
                     currentProduct.uuid,
@@ -375,7 +377,7 @@ fun ShoppingListItem(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Productos: ${shoppingList.products.size}",
+                    text = "Productos: ${shoppingListSize.value}",
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )

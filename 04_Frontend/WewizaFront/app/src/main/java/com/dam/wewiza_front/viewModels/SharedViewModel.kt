@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dam.wewiza_front.models.Category
+import com.dam.wewiza_front.models.Markets
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.Profile
 import com.dam.wewiza_front.models.ShoppingList
@@ -40,6 +41,7 @@ class SharedViewModel : ViewModel() {
     private val loggedUserProfile = mutableStateOf<Profile?>(null)
     private val localShoppingLists = mutableStateOf<List<ShoppingList>?>(null)
     val selectedList = mutableStateOf<ShoppingList?>(null)
+    private val wantedMarket = mutableStateOf<List<String>>(listOf())
 
 
     /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AFTER THIS, THERE ARE ALL THE FUNCTIONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
@@ -142,6 +144,14 @@ class SharedViewModel : ViewModel() {
         loggedUserProfile.value = null
         productHistoryDetails.clear()
         localShoppingLists.value = null
+    }
+
+    fun getWantedMarket(): List<String> {
+        return wantedMarket.value
+    }
+
+    fun setWantedMarket(markets: List<String>) {
+        wantedMarket.value = markets
     }
 
 
