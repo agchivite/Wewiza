@@ -676,36 +676,39 @@ def get_reaction(email_user: str, uuid: str):
 
 
 @app.get(
-    "/start_likes",
+    "/start_month/password/{password}",
     description="Start the database with likes in the same month we are, this will reset all the likes, only is used when scrapping monthly",
 )
-def start_likes_database():
-    response_products_market_01_json_list = requests.get(
-        "http://api_market_01:8081/products"
-    ).json()
+def start_likes_database(password: str):
+    if password != "wewiza":
+        response_products_market_01_json_list = requests.get(
+            "http://api_market_01:8081/products"
+        ).json()
 
-    response_products_market_02_json_list = requests.get(
-        "http://api_market_02:8082/products"
-    ).json()
+        response_products_market_02_json_list = requests.get(
+            "http://api_market_02:8082/products"
+        ).json()
 
-    response_products_market_03_json_list = requests.get(
-        "http://api_market_03:8083/products"
-    ).json()
+        response_products_market_03_json_list = requests.get(
+            "http://api_market_03:8083/products"
+        ).json()
 
-    # Directly delete all products in the current month to reset
-    product_service.delete_all_products_by_actual_month()
+        # Directly delete all products in the current month to reset
+        product_service.delete_all_products_by_actual_month()
 
-    product_service.insert_products_json_list(response_products_market_01_json_list)
-    product_service.insert_products_json_list(response_products_market_02_json_list)
-    product_service.insert_products_json_list(response_products_market_03_json_list)
+        product_service.insert_products_json_list(response_products_market_01_json_list)
+        product_service.insert_products_json_list(response_products_market_02_json_list)
+        product_service.insert_products_json_list(response_products_market_03_json_list)
 
-    # CASE 3: start new month
-    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
-    TOP_LIKES_AVERAGE = calculate_like_average()
-    CATEGORIES_TOP = calculate_top_categories()
-    PRODUCTS_TOP = calculate_top_products()
+        # CASE 3: start new month
+        global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
+        TOP_LIKES_AVERAGE = calculate_like_average()
+        CATEGORIES_TOP = calculate_top_categories()
+        PRODUCTS_TOP = calculate_top_products()
 
-    return {"message": "Database likes updated"}
+        return {"message": "Database likes updated"}
+
+    return {"message": "Wrong password"}
 
 
 # https://127.0.0.2/suggest/id/36e79b3-4806-492c-ba2c-877395fc2ae5?filter_market=ahorramas
