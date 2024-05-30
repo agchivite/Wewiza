@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
@@ -22,46 +21,42 @@ class SuggestionScreenViewModel: ViewModel() {
 
 
     val sharedViewModel = SharedViewModel.instance
-    private val service = RetrofitServiceFactory.makeRetrofitService()
+    val service = RetrofitServiceFactory.makeRetrofitService()
     var suggestions = mutableStateOf(mutableMapOf<String, List<Product>>())
 
 
-   private val ioDispatcher: CoroutineDispatcher = newFixedThreadPoolContext(4, "IOPool")
+   private val ioDispatcher: CoroutineDispatcher = newFixedThreadPoolContext(8, "IOPool")
 
     fun getSuggestions(wantedMarkets: List<String>, products: List<String>) {
         val baseUrl = "https://wewiza.ddns.net/suggest/id/"
-        val urlBuilder = StringBuilder(baseUrl)
-        val urlList = mutableListOf<String>()
-
-        // Append all UUIDs and markets to the URL
-        products.forEachIndexed { index, uuid ->
-            urlBuilder.append(uuid)
-            for (market in wantedMarkets) {
-                urlBuilder.append("?filter_markets=").append(market)
-            }
-            urlList.add(urlBuilder.toString())
-            Log.d("SuggestionScreenViewModel", "getSuggestions: $urlList")
-        }
         viewModelScope.launch(ioDispatcher) {
             try {
                 val resultMap = mutableMapOf<String, List<Product>>()
 
-                for (i in products.indices) {
-                    for (url in urlList) {
-                        val product = async { service.getSuggestions(url) }
-                        val result = product.await()
-                        resultMap[products[i]] = result
-                    }
+                for (uuid in products) {
+                    val url = buildUrl(baseUrl, uuid, wantedMarkets)
+                    val suggestedProducts = async {service.getSuggestions(url)}
+                    resultMap[uuid] = suggestedProducts.await()
                 }
-                // Move the result to the main thread and update the suggestions LiveData
+
                 withContext(Dispatchers.Main) {
+                    Log.d("Suggestions", "getSuggestions: $resultMap")
                     suggestions.value = resultMap.toMutableMap()
-                    Log.d("SuggestionScreenViewModel", "getSuggestions: ${suggestions.value}")
                 }
             } catch (e: Exception) {
                 Log.e("SuggestionScreenViewModel", "getSuggestions: ${e.message}")
             }
         }
+    }
+
+
+    private fun buildUrl(baseUrl: String, uuid: String, wantedMarkets: List<String>): String {
+        val urlBuilder = StringBuilder(baseUrl)
+        urlBuilder.append(uuid)
+        for (market in wantedMarkets) {
+            urlBuilder.append("?filter_markets=").append(market)
+        }
+        return urlBuilder.toString()
     }
 
 
