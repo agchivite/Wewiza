@@ -268,41 +268,6 @@ def get_categories():
 
 
 @app.get(
-    "/products",
-    description="Get all products in the current month",
-)
-def get_all_products():
-    response_products_market_01_json_list = requests.get(
-        "http://api_market_01:8081/products"
-    ).json()
-
-    response_products_market_02_json_list = requests.get(
-        "http://api_market_02:8082/products"
-    ).json()
-
-    response_products_market_03_json_list = requests.get(
-        "http://api_market_03:8083/products"
-    ).json()
-
-    # Map objetcs with LIKES data
-    map_list_market_01 = product_service.map_products_json_list(
-        response_products_market_01_json_list
-    )
-    map_list_market_02 = product_service.map_products_json_list(
-        response_products_market_02_json_list
-    )
-    map_list_market_03 = product_service.map_products_json_list(
-        response_products_market_03_json_list
-    )
-
-    return {
-        "mercadona": filter_current_month_elements(map_list_market_01),
-        "ahorramas": filter_current_month_elements(map_list_market_02),
-        "carrefour": filter_current_month_elements(map_list_market_03),
-    }
-
-
-@app.get(
     "/products/category/id/{category_id}",
     description="Get all products by category in the current month",
 )
@@ -664,12 +629,6 @@ PRODUCTS_TOP = calculate_top_products()
 #####################----------------#####################
 
 
-@app.get("/calculate/topics")
-def calculate_topics(background_tasks: BackgroundTasks):
-    background_tasks.add_task(update_global_variables)
-    return {"result": "Topics updated it going to take some time to show in endpoints"}
-
-
 @app.get(
     "/like/{uuid}/email/{email_user}",
     description="Like a product only one time per user, return true if liked or false if was liked before",
@@ -747,29 +706,6 @@ def start_likes_database():
     PRODUCTS_TOP = calculate_top_products()
 
     return {"message": "Database likes updated"}
-
-
-@app.get(
-    "/update/measure_carrefour",
-)
-def update():
-    response = requests.get("http://api_market_03:8083/update/measure_carrefour")
-    return response.json()
-
-
-@app.get("/update/minor_random_price")
-def update_to_random_price_less():
-    response_1 = requests.get("http://api_market_01:8081/update/minor_random_price")
-    response_2 = requests.get("http://api_market_02:8082/update/minor_random_price")
-    response_3 = requests.get("http://api_market_03:8083/update/minor_random_price")
-    return {
-        "result": "Result from all markets: "
-        + str(response_1.json())
-        + " "
-        + str(response_2.json())
-        + " "
-        + str(response_3.json())
-    }
 
 
 # https://127.0.0.2/suggest/id/36e79b3-4806-492c-ba2c-877395fc2ae5?filter_market=ahorramas
@@ -850,7 +786,7 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     valid_products = list(
         filter(lambda x: x["uuid"] != most_actual_uuid, valid_products)
     )
-    
+
     products_user_to_add_suggestions_list = sorted(
         valid_products,
         key=lambda x: x["price_by_standard_measure"],
@@ -860,9 +796,77 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     return products_user_to_add_suggestions_list[:3]
 
 
+"""
+@app.get(
+    "/products",
+    description="Get all products in the current month",
+)
+def get_all_products():
+    response_products_market_01_json_list = requests.get(
+        "http://api_market_01:8081/products"
+    ).json()
+
+    response_products_market_02_json_list = requests.get(
+        "http://api_market_02:8082/products"
+    ).json()
+
+    response_products_market_03_json_list = requests.get(
+        "http://api_market_03:8083/products"
+    ).json()
+
+    # Map objetcs with LIKES data
+    map_list_market_01 = product_service.map_products_json_list(
+        response_products_market_01_json_list
+    )
+    map_list_market_02 = product_service.map_products_json_list(
+        response_products_market_02_json_list
+    )
+    map_list_market_03 = product_service.map_products_json_list(
+        response_products_market_03_json_list
+    )
+
+    return {
+        "mercadona": filter_current_month_elements(map_list_market_01),
+        "ahorramas": filter_current_month_elements(map_list_market_02),
+        "carrefour": filter_current_month_elements(map_list_market_03),
+    }
+"""
+""" 
+@app.get("/calculate/topics")
+def calculate_topics(background_tasks: BackgroundTasks):
+    background_tasks.add_task(update_global_variables)
+    return {"result": "Topics updated it going to take some time to show in endpoints"}
+"""
+
+"""
+@app.get(
+    "/update/measure_carrefour",
+)
+def update():
+    response = requests.get("http://api_market_03:8083/update/measure_carrefour")
+    return response.json()
+"""
+
+"""
+@app.get("/update/minor_random_price")
+def update_to_random_price_less():
+    response_1 = requests.get("http://api_market_01:8081/update/minor_random_price")
+    response_2 = requests.get("http://api_market_02:8082/update/minor_random_price")
+    response_3 = requests.get("http://api_market_03:8083/update/minor_random_price")
+    return {
+        "result": "Result from all markets: "
+        + str(response_1.json())
+        + " "
+        + str(response_2.json())
+        + " "
+        + str(response_3.json())
+    }
+"""
+"""
 @app.get("/update/zero")
 def update_zero():
     # call all markets
     response_1 = requests.get("http://api_market_01:8081/update/zero")
     response_2 = requests.get("http://api_market_02:8082/update/zero")
     return {response_1}
+"""
