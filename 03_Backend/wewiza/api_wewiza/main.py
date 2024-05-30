@@ -777,11 +777,18 @@ def update_to_random_price_less():
 def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
 
     list_all_products_user = []
+    most_actual_uuid = find_actual_product_by_uuid_past(uuid)
 
     # Check in all market to get the complete data
-    response_market_01 = requests.get("http://api_market_01:8081/product/id/" + uuid)
-    response_market_02 = requests.get("http://api_market_02:8082/product/id/" + uuid)
-    response_market_03 = requests.get("http://api_market_03:8083/product/id/" + uuid)
+    response_market_01 = requests.get(
+        "http://api_market_01:8081/product/id/" + most_actual_uuid
+    )
+    response_market_02 = requests.get(
+        "http://api_market_02:8082/product/id/" + most_actual_uuid
+    )
+    response_market_03 = requests.get(
+        "http://api_market_03:8083/product/id/" + most_actual_uuid
+    )
 
     list_all_products_user.append(response_market_01.json())
     list_all_products_user.append(response_market_02.json())
@@ -840,7 +847,10 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     # Delete prodcuts that have uuid or uuid_searched, to not repeat them, only get the suggest
     valid_products = list(filter(lambda x: x["uuid"] != uuid, valid_products))
     valid_products = list(filter(lambda x: x["uuid"] != uuid_searched, valid_products))
-
+    valid_products = list(
+        filter(lambda x: x["uuid"] != most_actual_uuid, valid_products)
+    )
+    
     products_user_to_add_suggestions_list = sorted(
         valid_products,
         key=lambda x: x["price_by_standard_measure"],
