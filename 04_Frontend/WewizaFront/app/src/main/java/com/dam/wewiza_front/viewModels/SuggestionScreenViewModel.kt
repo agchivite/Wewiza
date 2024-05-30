@@ -21,11 +21,11 @@ class SuggestionScreenViewModel: ViewModel() {
 
 
     val sharedViewModel = SharedViewModel.instance
-    val service = RetrofitServiceFactory.makeRetrofitService()
+    private val service = RetrofitServiceFactory.makeRetrofitService()
     var suggestions = mutableStateOf(mutableMapOf<String, List<Product>>())
 
 
-   private val ioDispatcher: CoroutineDispatcher = newFixedThreadPoolContext(8, "IOPool")
+   private val ioDispatcher: CoroutineDispatcher = newFixedThreadPoolContext(3, "IOPool")
 
     fun getSuggestions(wantedMarkets: List<String>, products: List<String>) {
         val baseUrl = "https://wewiza.ddns.net/suggest/id/"
