@@ -790,6 +790,11 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     # Clear None items
     list_all_products_user = list(filter(None, list_all_products_user))
 
+    if len(list_all_products_user) == 0:
+        return []
+
+    uuid_searched = list_all_products_user[0]["uuid"]
+
     products_user_to_add_suggestions_list = []
 
     for market_name in filter_markets:
@@ -828,6 +833,13 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
         for x in products_user_to_add_suggestions_list
         if "price_by_standard_measure" in x
     ]
+
+    # Filter products that not match with actual year and month
+    valid_products = filter_current_month_elements(valid_products)
+
+    # Delete prodcuts that have uuid or uuid_searched, to not repeat them, only get the suggest
+    valid_products = list(filter(lambda x: x["uuid"] != uuid, valid_products))
+    valid_products = list(filter(lambda x: x["uuid"] != uuid_searched, valid_products))
 
     products_user_to_add_suggestions_list = sorted(
         valid_products,
