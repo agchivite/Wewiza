@@ -90,7 +90,7 @@ fun LoginScreenBodyContent(viewModel: LoginScreenViewModel, navController: NavCo
                     fontSize = 30.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = Butler,
-                    color = Color(0xFF2E2C31)
+                    color = Color.Black
                 )
             )
             LoginTextInputs(viewModel)

@@ -85,7 +85,7 @@ fun RegisterScreenBodyContent(viewModel: RegisterScreenViewModel, navController:
                     fontSize = 30.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = Butler,
-                    color = Color(0xFF2E2C31)
+                    color = Color.Black
                 )
             )
 
