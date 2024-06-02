@@ -40,7 +40,7 @@ class ProductService:
         for last_product in last_products_list_json:
             for actual_product in actual_products_list_json:
                 if (
-                    last_product["uuid"] == actual_product["uuid"]
+                    last_product["uuid"] != actual_product["uuid"]
                     and last_product["price_by_standard_measure"]
                     != actual_product["price_by_standard_measure"]
                 ):
