@@ -36,6 +36,7 @@ class ProductLikesService:
         )
         top_5_products = sorted_products[:5]
         uuid_list = [product["uuid"] for product in top_5_products]
+        print("TOP_5_PRODUCTS: ", uuid_list)
 
         return uuid_list
 

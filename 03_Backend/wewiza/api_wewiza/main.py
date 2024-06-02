@@ -550,6 +550,8 @@ def calculate_top_products():
     # We get the list with uuid´s
     top_likes_products_uuid_list = product_service.get_top_products(TOP_LIKES_AVERAGE)
     top_likes_product = []
+    
+    print(top_likes_products_uuid_list)
 
     for product_uuid in top_likes_products_uuid_list:
         respond_market_01 = requests.get(
