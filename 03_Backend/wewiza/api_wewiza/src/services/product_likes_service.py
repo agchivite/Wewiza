@@ -1,6 +1,7 @@
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
 import json
 import requests
+from datetime import datetime
 
 
 class ProductLikesService:
@@ -23,7 +24,14 @@ class ProductLikesService:
         return average
 
     def get_top_products(self, TOP_LIKES_AVERAGE):
-        query = {"num_likes": {"$gt": TOP_LIKES_AVERAGE}}
+        actual_date_year_month = datetime.now().strftime("%Y-%m")
+        query = {
+            "$and": [
+                {"date_created": {"$regex": f"^{actual_date_year_month}"}},
+                {"num_likes": {"$gt": TOP_LIKES_AVERAGE}},
+            ]
+        }
+
         result = self.product_likes_repository.get_all_products_by_query(query)
 
         if result.is_failure():
