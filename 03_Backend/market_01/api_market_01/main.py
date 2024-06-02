@@ -44,6 +44,8 @@ def get_products_with_good_profit():
 
         filtered_products.append(product)
 
+    print(filtered_products[:10])
+
     return filtered_products[:10]
 
 

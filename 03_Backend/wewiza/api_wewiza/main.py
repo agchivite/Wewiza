@@ -583,15 +583,19 @@ def calculate_top_products():
     # This list has the product data with the profit associate
     response_products_profit_market_01_json_list = requests.get(
         "http://api_market_01:8081/products/past/profit"
-    ).json()
+    )
 
     response_products_profit_market_02_json_list = requests.get(
         "http://api_market_02:8082/products/past/profit"
-    ).json()
+    )
 
     response_products_profit_market_03_json_list = requests.get(
         "http://api_market_03:8083/products/past/profit"
-    ).json()
+    )
+
+    print("RESPONSE-1: ", response_products_profit_market_01_json_list)
+    print("RESPONSE-2: ", response_products_profit_market_02_json_list)
+    print("RESPONSE-3: ", response_products_profit_market_03_json_list)
 
     top_profit_products_uuid_list = []
     top_profit_products_uuid_list.extend(response_products_profit_market_01_json_list)
