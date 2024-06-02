@@ -52,6 +52,8 @@ class ProductService:
         last_products_list_json = result_last_products.value
         actual_products_list_json = result_actual_products.value
 
+        print("ACTUAL-1: ", actual_products_list_json)
+
         for last_product in last_products_list_json:
             for actual_product in actual_products_list_json:
                 if (
@@ -68,10 +70,14 @@ class ProductService:
                         / last_product["price_by_standard_measure"]
                     ) * 100
 
+        print("ACTUAL-2: ", actual_products_list_json)
+
         # Only get the actual products that has key profit
         actual_products_list_json = [
             product for product in actual_products_list_json if "profit" in product
         ]
+
+        print("ACTUAL-3: ", actual_products_list_json)
 
         # Removing _id key, we don't want it
         for product in actual_products_list_json:
