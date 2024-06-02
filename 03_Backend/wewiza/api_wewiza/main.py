@@ -602,9 +602,8 @@ def calculate_top_products():
     print("TOP PROFIT: ", top_profit_products_uuid_list)
 
     # Parse all to items key profit_percentage to double round 2 decimales
-    for products in top_profit_products_uuid_list:
-        for product in products:
-            product["profit_percentage"] = round(product["profit_percentage"], 2)
+    for product in top_profit_products_uuid_list:
+        product["profit_percentage"] = round(product["profit_percentage"], 2)
 
     sorted_top_profit_products_uuid_list = sorted(
         top_profit_products_uuid_list,
