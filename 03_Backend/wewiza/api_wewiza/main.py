@@ -599,6 +599,8 @@ def calculate_top_products():
     top_profit_products_uuid_list.append(response_products_profit_market_03_json_list)
 
     # Sort by key "profit" and get the first 5
+    print("TOP PROFIT: ", top_profit_products_uuid_list)
+
     top_profit_products_uuid_list.sort(
         key=lambda x: x["profit_percentage"], reverse=True
     )
@@ -636,6 +638,8 @@ def calculate_daily_tasks():
     print("Daily execution for calculate tops", datetime.now())
     update_global_variables()
 
+
+# calculate_daily_tasks()
 
 scheduler = BackgroundScheduler()
 trigger = CronTrigger(hour=3, minute=0)
