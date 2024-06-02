@@ -62,7 +62,7 @@ class ProductService:
         actual_products_list_json = [
             product
             for product in actual_products_list_json
-            if product["profit_percentage"] >= 90
+            if product["profit_percentage"] >= 80
         ]
 
         # Removing _id key, we don't want it
