@@ -73,6 +73,13 @@ class ProductService:
             product for product in actual_products_list_json if "profit" in product
         ]
 
+        # Remove itmes that have mor than 90% profit beacause they are not correctly scrapped
+        actual_products_list_json = [
+            product
+            for product in actual_products_list_json
+            if product["profit_percentage"] >= 90
+        ]
+
         # Removing _id key, we don't want it
         for product in actual_products_list_json:
             del product["_id"]

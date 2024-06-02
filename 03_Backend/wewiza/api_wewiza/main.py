@@ -591,26 +591,21 @@ def calculate_top_products():
         "http://api_market_03:8083/products/past/profit"
     ).json()
 
-    top_profit_products_uuid_list = (
-        response_products_profit_market_01_json_list
-        + response_products_profit_market_02_json_list
-        + response_products_profit_market_03_json_list
-    )
+    top_profit_products_uuid_list = []
+    top_profit_products_uuid_list.append(response_products_profit_market_01_json_list)
+    top_profit_products_uuid_list.append(response_products_profit_market_02_json_list)
+    top_profit_products_uuid_list.append(response_products_profit_market_03_json_list)
 
-    print("RESPONSE 1 PROFIT: ", response_products_profit_market_01_json_list)
-    print("RESPONSE 2 PROFIT: ", response_products_profit_market_02_json_list)
-    print("RESPONSE 3 PROFIT: ", response_products_profit_market_03_json_list)
-
-    # Sort by key "profit" and get the first 10
+    # Sort by key "profit" and get the first 5
     top_profit_products_uuid_list.sort(
         key=lambda x: x["profit_percentage"], reverse=True
     )
-    top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
+    most_top_profit_products_uuid_list = top_profit_products_uuid_list[:5]
 
-    print("TOP PROFIT: ", top_profit_products_uuid_list)
+    print("TOP PROFIT: ", most_top_profit_products_uuid_list)
 
     # First show the most profitable products and then the most liked products
-    top_final_products = top_profit_products_uuid_list + top_likes_product
+    top_final_products = most_top_profit_products_uuid_list + top_likes_product
     map_products = product_service.map_products_json_list(top_final_products)
 
     return filter_current_month_elements(map_products)
