@@ -3,6 +3,8 @@ from fastapi import FastAPI, BackgroundTasks, Query
 from api_wewiza.src.database.database_manager import DatabaseManager
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
 from api_wewiza.src.services.product_likes_service import ProductLikesService
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 import requests
 import datetime
 import requests
@@ -623,10 +625,25 @@ def update_global_variables():
     PRODUCTS_TOP = calculate_top_products()
 
 
-# CASE 1: start server
-TOP_LIKES_AVERAGE = calculate_like_average()
-CATEGORIES_TOP = calculate_top_categories()
-PRODUCTS_TOP = calculate_top_products()
+##########------- Starting scheduler with server ---------#######
+
+
+def calculate_daily_tasks():
+    print("Daily execution for calculate tops", datetime.now())
+    update_global_variables()
+
+
+scheduler = BackgroundScheduler()
+trigger = CronTrigger(hour=3, minute=0)
+scheduler.add_job(calculate_daily_tasks, trigger)
+scheduler.start()
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    scheduler.shutdown()
+
+
 #####################----------------#####################
 
 
@@ -634,15 +651,14 @@ PRODUCTS_TOP = calculate_top_products()
     "/like/{uuid}/email/{email_user}",
     description="Like a product only one time per user, return true if liked or false if was liked before",
 )
-def like_product(uuid: str, email_user: str, background_tasks: BackgroundTasks):
+def like_product(uuid: str, email_user: str):
     product_id = find_actual_product_by_uuid_past(uuid)
 
     if product_id is None:
         return {"result": False}
 
     boolean_result = product_service.like_product(product_id, email_user)
-    # CASE 2: like/unlike
-    # background_tasks.add_task(update_global_variables)
+
     return {"result": boolean_result}
 
 
@@ -650,15 +666,14 @@ def like_product(uuid: str, email_user: str, background_tasks: BackgroundTasks):
     "/unlike/{uuid}/email/{email_user}",
     description="Unlike a product only one time per user, true if unliked or false if was unliked before",
 )
-def unlike_product(uuid: str, email_user: str, background_tasks: BackgroundTasks):
+def unlike_product(uuid: str, email_user: str):
     product_id = find_actual_product_by_uuid_past(uuid)
 
     if product_id is None:
         return {"result": False}
 
     boolean_result = product_service.unlike_product(product_id, email_user)
-    # CASE 2: like/unlike
-    # background_tasks.add_task(update_global_variables)
+
     return {"result": boolean_result}
 
 
