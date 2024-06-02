@@ -34,9 +34,6 @@ def get_products_with_good_profit():
     filtered_products = []
 
     for product in sorted_products:
-        product["profit_percentage"] = float(
-            product["profit_percentage"].replace(",", "")
-        )
         product["profit_percentage"] = round(product["profit_percentage"], 2)
 
         if product["profit_percentage"] <= 0.0 or product["profit_percentage"] >= 80.0:
