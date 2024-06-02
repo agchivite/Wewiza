@@ -38,18 +38,20 @@ def get_products_with_good_profit():
     sorted_products = sorted(
         top_profit_products_list, key=lambda x: x["profit_percentage"], reverse=True
     )
+    filtered_products = []
+
     for product in sorted_products:
+        product["profit_percentage"] = float(
+            product["profit_percentage"].replace(",", "")
+        )
         product["profit_percentage"] = round(product["profit_percentage"], 2)
 
-        if product["profit_percentage"] <= 0.0:
-            sorted_products.remove(product)
+        if product["profit_percentage"] <= 0.0 or product["profit_percentage"] >= 80.0:
+            continue
 
-        if product["profit_percentage"] >= 80.0:
-            sorted_products.remove(product)
+        filtered_products.append(product)
 
-    print(sorted_products)
-
-    return sorted_products[:10]
+    return filtered_products[:10]
 
 
 @app.get("/products")
