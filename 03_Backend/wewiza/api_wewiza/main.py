@@ -680,7 +680,7 @@ def get_reaction(email_user: str, uuid: str):
     description="Start the database with likes in the same month we are, this will reset all the likes, only is used when scrapping monthly",
 )
 def start_likes_database(password: str):
-    if password != "wewiza":
+    if password == "wewiza":
         response_products_market_01_json_list = requests.get(
             "http://api_market_01:8081/products"
         ).json()
@@ -699,12 +699,6 @@ def start_likes_database(password: str):
         product_service.insert_products_json_list(response_products_market_01_json_list)
         product_service.insert_products_json_list(response_products_market_02_json_list)
         product_service.insert_products_json_list(response_products_market_03_json_list)
-
-        # CASE 3: start new month
-        global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
-        TOP_LIKES_AVERAGE = calculate_like_average()
-        CATEGORIES_TOP = calculate_top_categories()
-        PRODUCTS_TOP = calculate_top_products()
 
         return {"message": "Database likes updated"}
 
@@ -799,6 +793,17 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     return products_user_to_add_suggestions_list[:3]
 
 
+@app.get("/calculate/topics")
+def calculate_topics():
+    # CASE 3: start new month
+    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
+    TOP_LIKES_AVERAGE = calculate_like_average()
+    CATEGORIES_TOP = calculate_top_categories()
+    PRODUCTS_TOP = calculate_top_products()
+
+    return {"result": "Topics updated it going to take some time to show in endpoints"}
+
+
 """
 @app.get(
     "/products",
@@ -833,12 +838,6 @@ def get_all_products():
         "ahorramas": filter_current_month_elements(map_list_market_02),
         "carrefour": filter_current_month_elements(map_list_market_03),
     }
-"""
-""" 
-@app.get("/calculate/topics")
-def calculate_topics(background_tasks: BackgroundTasks):
-    background_tasks.add_task(update_global_variables)
-    return {"result": "Topics updated it going to take some time to show in endpoints"}
 """
 
 """

@@ -244,8 +244,7 @@ class ScrappingService:
                 quantity_measure = 1
 
             current_date = datetime.now()
-            # current_date_str = current_date.strftime("%Y-%m-%d %H:%M:%S")
-            current_date_str = "2024-04-10 00:00:00"
+            current_date_str = current_date.strftime("%Y-%m-%d %H:%M:%S")
 
             product = Product(
                 str(uuid.uuid4()),
