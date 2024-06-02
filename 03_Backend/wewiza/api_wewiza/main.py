@@ -555,21 +555,18 @@ def calculate_top_products():
         respond_market_01 = requests.get(
             "http://api_market_01:8081/product/id/" + product_uuid
         )
-        print(respond_market_01)
         if respond_market_01.status_code == 200:
             top_likes_product.append(respond_market_01.json())
 
         respond_market_02 = requests.get(
             "http://api_market_02:8082/product/id/" + product_uuid
         )
-        print(respond_market_02)
         if respond_market_02.status_code == 200:
             top_likes_product.append(respond_market_02.json())
 
         respond_market_03 = requests.get(
             "http://api_market_03:8083/product/id/" + product_uuid
         )
-        print(respond_market_03)
         if respond_market_03.status_code == 200:
             top_likes_product.append(respond_market_03.json())
 
@@ -608,8 +605,13 @@ def calculate_top_products():
     )
     top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
 
+    print("TOP PROFIT: ", top_profit_products_uuid_list)
+
+    print("TOP likes: ", top_likes_product)
+
     # First show the most profitable products and then the most liked products
     top_final_products = top_profit_products_uuid_list + top_likes_product
+    print("TOP FINAL PRODUCTS: ", top_final_products)
     map_products = product_service.map_products_json_list(top_final_products)
 
     return filter_current_month_elements(map_products)
