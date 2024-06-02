@@ -33,11 +33,15 @@ def get_products_with_good_profit():
     )
 
     for product in sorted_products:
-        if product["profit_percentage"] <= 0:
+        product["profit_percentage"] = round(product["profit_percentage"], 2)
+
+        if product["profit_percentage"] <= 0.0:
             sorted_products.remove(product)
 
-        if product["profit_percentage"] >= 80:
+        if product["profit_percentage"] >= 80.0:
             sorted_products.remove(product)
+
+    print(sorted_products)
 
     return sorted_products[:10]
 
