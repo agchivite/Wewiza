@@ -601,10 +601,18 @@ def calculate_top_products():
     # Sort by key "profit" and get the first 5
     print("TOP PROFIT: ", top_profit_products_uuid_list)
 
-    top_profit_products_uuid_list.sort(
-        key=lambda x: x["profit_percentage"], reverse=True
+    # Parse all to items key profit_percentage to double round 2 decimales
+    for products in top_profit_products_uuid_list:
+        for product in products:
+            product["profit_percentage"] = round(product["profit_percentage"], 2)
+
+    sorted_top_profit_products_uuid_list = sorted(
+        top_profit_products_uuid_list,
+        key=lambda x: x["profit_percentage"],
+        reverse=True,
     )
-    most_top_profit_products_uuid_list = top_profit_products_uuid_list[:5]
+
+    most_top_profit_products_uuid_list = sorted_top_profit_products_uuid_list[:5]
 
     print("TOP PROFIT: ", most_top_profit_products_uuid_list)
 
