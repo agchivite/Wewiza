@@ -1,10 +1,19 @@
 package com.dam.wewiza_front.navigation
 
+import android.provider.ContactsContract.Profile
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dam.wewiza_front.MainActivity
+import com.dam.wewiza_front.profileViewModel
 import com.dam.wewiza_front.screens.AboutUsScreen
 import com.dam.wewiza_front.screens.CategoriesScreen
 import com.dam.wewiza_front.screens.CustomerSupportScreen
@@ -48,7 +57,6 @@ fun AppNavigation(
     aboutUsScreenViewModel: AboutUsScreenViewModel?,
     suggestionScreenViewModel: SuggestionScreenViewModel?,
     categoriesScreenViewModel: CategoriesScreenViewModel?,
-    profileScreenViewModel: ProfileScreenViewModel?,
     settingsScreenViewModel: SettingsScrennViewModel?,
     myListsScreenViewModel: MyListsScreenViewModel?,
     customerSupportScreenViewModel: CustomerSupportScreenViewModel?,
@@ -77,7 +85,8 @@ fun AppNavigation(
         startDestination = AppScreens.MaintenanceScreen.route
     }
 
-    val sharedViewModel = SharedViewModel.instance
+    var profileScreenViewModel by profileViewModel
+
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(route = AppScreens.WelcomeScreen.route) {
@@ -103,6 +112,7 @@ fun AppNavigation(
         }
         composable(route = AppScreens.ProfileScreen.route) {
             if (auth.currentUser != null) {
+                Log.d("ProfileScreenViewModel", profileScreenViewModel.toString())
                 ProfileScreen(profileScreenViewModel!!, navController)
             } else {
                 WelcomeScreen(welcomeScreenViewModel!!, navController)

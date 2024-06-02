@@ -1,11 +1,15 @@
 package com.dam.wewiza_front
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.dam.wewiza_front.koinModules.appModule
 import com.dam.wewiza_front.navigation.AppNavigation
@@ -32,9 +36,10 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.startKoin
 
+var profileViewModel: MutableState<ProfileScreenViewModel?> = mutableStateOf(null)
 class MainActivity : ComponentActivity(), KoinComponent {
+    val isAuthenticated = MutableLiveData<Boolean>()
 
-    var profileViewModel: ProfileScreenViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +57,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
         }
 
         if (isConnectionError.value) {
+
             startKoin {
                 androidContext(this@MainActivity)
                 modules(appModule)
@@ -69,11 +75,21 @@ class MainActivity : ComponentActivity(), KoinComponent {
             val settingsViewModel = get<SettingsScrennViewModel>()
             settingsViewModel.isUserSignedOut.observe(this) { isSignOut ->
                 if (isSignOut) {
-                    profileViewModel = null
+                    profileViewModel.value = null
                 }
             }
 
-            profileViewModel = if (auth.currentUser != null) get() else null
+            // Observe authentication state
+            isAuthenticated.value = auth.currentUser != null
+            auth.addAuthStateListener {
+                isAuthenticated.value = it.currentUser != null
+                Log.d("main", "isAuthenticated: ${isAuthenticated.value}")
+            }
+
+            isAuthenticated.observe(this@MainActivity) { isLoggedIn ->
+                profileViewModel.value = if (isLoggedIn) get() else null
+                Log.d("main", "ProfileViewModel: $profileViewModel")
+            }
 
 
             val productDetailsScreenViewModel = get<ProductDetailsScreenViewModel>()
@@ -96,7 +112,6 @@ class MainActivity : ComponentActivity(), KoinComponent {
                             aboutUsViewModel,
                             suggestionViewModel,
                             categoriesViewModel,
-                            profileViewModel,
                             settingsViewModel,
                             myListsScreenViewModel,
                             customerSupportViewModel,
@@ -118,7 +133,6 @@ class MainActivity : ComponentActivity(), KoinComponent {
                     aboutUsScreenViewModel =null ,
                     suggestionScreenViewModel =null ,
                     categoriesScreenViewModel = null,
-                    profileScreenViewModel = null,
                     settingsScreenViewModel =null,
                     myListsScreenViewModel = null,
                     customerSupportScreenViewModel =null ,
