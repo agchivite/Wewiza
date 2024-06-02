@@ -550,27 +550,30 @@ def calculate_top_products():
     # We get the list with uuid´s
     top_likes_products_uuid_list = product_service.get_top_products(TOP_LIKES_AVERAGE)
     top_likes_product = []
-    
-    print(top_likes_products_uuid_list)
 
     for product_uuid in top_likes_products_uuid_list:
         respond_market_01 = requests.get(
             "http://api_market_01:8081/product/id/" + product_uuid
         )
+        print(respond_market_01)
         if respond_market_01.status_code == 200:
             top_likes_product.append(respond_market_01.json())
 
         respond_market_02 = requests.get(
             "http://api_market_02:8082/product/id/" + product_uuid
         )
+        print(respond_market_02)
         if respond_market_02.status_code == 200:
             top_likes_product.append(respond_market_02.json())
 
         respond_market_03 = requests.get(
             "http://api_market_03:8083/product/id/" + product_uuid
         )
+        print(respond_market_03)
         if respond_market_03.status_code == 200:
             top_likes_product.append(respond_market_03.json())
+
+    print(top_likes_product)
 
     # Delete None items
     top_likes_product = [product for product in top_likes_product if product]
