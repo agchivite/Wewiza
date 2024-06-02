@@ -18,8 +18,8 @@ class ProductLikesService:
         likes_sum = sum(product["num_likes"] for product in products_list_json)
         likes_count = len(products_list_json)
         average = likes_sum / likes_count
+        print("AVERAGE_LIKES not rounded: ", average)
         average = round(average, 2)
-        print("AVERAGE_LIKES: ", average)
         return average
 
     def get_top_products(self, TOP_LIKES_AVERAGE):
