@@ -36,7 +36,7 @@ def get_products_with_good_profit():
     for product in sorted_products:
         product["profit_percentage"] = round(product["profit_percentage"], 2)
 
-        if product["profit_percentage"] <= 0.0 or product["profit_percentage"] >= 80.0:
+        if product["profit_percentage"] <= 0.0 or product["profit_percentage"] >= 50.0:
             continue
 
         filtered_products.append(product)
