@@ -613,8 +613,12 @@ def calculate_top_products():
     top_final_products = top_profit_products_uuid_list + top_likes_product
     print("TOP FINAL PRODUCTS: ", top_final_products)
     map_products = product_service.map_products_json_list(top_final_products)
+    print("MAPPED: ", map_products)
 
-    return filter_current_month_elements(map_products)
+    filteres_current_month = filter_current_month_elements(map_products)
+    print("FILTERED: ", filteres_current_month)
+
+    return filteres_current_month
 
 
 def calculate_top_categories():
