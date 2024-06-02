@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,9 +33,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
@@ -81,7 +87,7 @@ fun SuggestionScreenBodyContent(
             Log.d("ListScreen", "Products: $products")
         }
 
-        if (suggestions.isEmpty() && productsList.isEmpty()) {
+        if (suggestions.isEmpty() || productsList.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
@@ -119,6 +125,7 @@ fun ProductItem(product: Product, suggestedProducts: List<Product>) {
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
+            .height(250.dp)
     ) {
         Row(
             modifier = Modifier.padding(8.dp),
@@ -132,7 +139,7 @@ fun ProductItem(product: Product, suggestedProducts: List<Product>) {
                     painter = rememberImagePainter(data = product.image_url),
                     contentDescription = "Product Image",
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(80.dp)
                 )
                 Text(
                     text = product.name,
@@ -144,7 +151,7 @@ fun ProductItem(product: Product, suggestedProducts: List<Product>) {
             Box(
                 modifier = Modifier.padding(horizontal = 8.dp)
             ) {
-                Text(text = "→")
+                Text(text = "→", fontSize = 34.sp)
             }
 
             // Lista horizontal de productos sugeridos a la derecha
@@ -165,23 +172,42 @@ fun SuggestedProductItem(product: Product) {
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
             .padding(4.dp)
-            .size(100.dp)
+            .size(230.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(4.dp)
         ) {
             Image(
                 painter = rememberImagePainter(data = product.image_url),
                 contentDescription = "Suggested Product Image",
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(100.dp)
             )
             Text(
                 text = product.name,
                 modifier = Modifier.padding(top = 4.dp)
             )
+            Row (modifier = Modifier.weight(1f)) {
+
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_cancel_24),
+                    contentDescription = "cancel",
+                    modifier = Modifier.size(50.dp),
+                    tint = Color(0xFFD32F2F)
+                )
+
+                Icon(
+                    painter = painterResource(id = R.drawable.accept),
+                    contentDescription = "accept",
+                    modifier = Modifier.size(50.dp),
+                    tint = Color(0xFF4CAF50)
+                )
+
+            }
         }
     }
 }
+
+

@@ -131,7 +131,7 @@ fun BodyContent(viewModel: WelcomeScreenViewModel, navController: NavController)
             ) {
                 Text(
                     "¡Bienvenido a Wewiza!", style = TextStyle(
-                        fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, fontFamily = Butler, color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, fontFamily = Butler, color = Color.Black,
                     ),
                     modifier = Modifier.padding(bottom = 50.dp)
                 )

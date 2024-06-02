@@ -253,7 +253,7 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                 },
                 enabled = buttonsEnabled
             ) {
-                Text(text = "-")
+                Text(text = "👎")
             }
 
             Text(
@@ -283,7 +283,7 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                 },
                 enabled = buttonsEnabled
             ) {
-                Text(text = "+")
+                Text(text = "👍")
             }
 
             Spacer(modifier = Modifier.width(150.dp))

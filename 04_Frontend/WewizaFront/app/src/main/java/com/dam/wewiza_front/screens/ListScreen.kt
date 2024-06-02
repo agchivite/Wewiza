@@ -116,7 +116,7 @@ fun ListScreenBodyContent(
                 )
 
                 Button(onClick = { /* Aquí puedes colocar la lógica para sugerir */ }) {
-                    Text(text = "Sugerir")
+                    Text(text = "Sugerencias")
                 }
             }
         }

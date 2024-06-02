@@ -127,11 +127,11 @@ private fun MyListItem(
                 Button(
                     onClick = {
                         sharedViewModel.setWantedMarket(listOf("mercadona"))
-                        sharedViewModel.setSelectedList(shoppingList)
-                        viewModel.navigateToSuggestionScreen(navController)
-                    }
+                        viewModel.navigateToSuggestionScreen(navController, shoppingList.uuid)
+                    },
+                    modifier = Modifier.size(85.dp)
                 ) {
-                    Text(text = "Sugerir", fontSize = 10.sp)
+                    Text(text = "Sugerencias", fontSize = 6.9.sp)
                 }
             }
 
