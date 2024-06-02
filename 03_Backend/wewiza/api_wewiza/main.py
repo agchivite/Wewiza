@@ -594,9 +594,9 @@ def calculate_top_products():
     ).json()
 
     top_profit_products_uuid_list = []
-    top_profit_products_uuid_list.append(response_products_profit_market_01_json_list)
-    top_profit_products_uuid_list.append(response_products_profit_market_02_json_list)
-    top_profit_products_uuid_list.append(response_products_profit_market_03_json_list)
+    top_profit_products_uuid_list.extend(response_products_profit_market_01_json_list)
+    top_profit_products_uuid_list.extend(response_products_profit_market_02_json_list)
+    top_profit_products_uuid_list.extend(response_products_profit_market_03_json_list)
 
     # Sort by key "profit" and get the first 5
     print("TOP PROFIT: ", top_profit_products_uuid_list)
