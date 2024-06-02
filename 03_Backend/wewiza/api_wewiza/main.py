@@ -624,6 +624,10 @@ def update_global_variables():
     CATEGORIES_TOP = calculate_top_categories()
     PRODUCTS_TOP = calculate_top_products()
 
+    print("NEW top likes: ", TOP_LIKES_AVERAGE)
+    print("NEW top categories: ", CATEGORIES_TOP)
+    print("NEW top products: ", PRODUCTS_TOP)
+
 
 ##########------- Starting scheduler with server ---------#######
 
@@ -811,16 +815,11 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
 
 @app.get("/calculate/topics")
 def calculate_topics():
-    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
-    TOP_LIKES_AVERAGE = calculate_like_average()
-    CATEGORIES_TOP = calculate_top_categories()
-    PRODUCTS_TOP = calculate_top_products()
+    update_global_variables()
 
-    print("NEW top likes: ", TOP_LIKES_AVERAGE)
-    print("NEW top categories: ", CATEGORIES_TOP)
-    print("NEW top products: ", PRODUCTS_TOP)
-
-    return {"result": "Topics updated it going to take some time to show in endpoints"}
+    return {
+        "result": "Topics updated it going to take serveral minutes to show results"
+    }
 
 
 """

@@ -157,6 +157,12 @@ class ProductRepository:
             normalized_name = self.__normalize_text(product_name)
             words = normalized_name.split()
 
+            # Delete words that are not working
+            words_not_working = ["hacendado"]
+
+            # Chck workd in lowert case an trim text in both list
+            # words = [word.lower().strip() for word in words if word not in words_not_working]
+
             regex_pattern = ".*(" + "|".join(re.escape(word) for word in words) + ").*"
 
             database = self.db_manager.connect_database()
