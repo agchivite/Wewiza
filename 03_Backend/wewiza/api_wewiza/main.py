@@ -597,11 +597,17 @@ def calculate_top_products():
         + response_products_profit_market_03_json_list
     )
 
+    print("RESPONSE 1 PROFIT: ", response_products_profit_market_01_json_list)
+    print("RESPONSE 2 PROFIT: ", response_products_profit_market_02_json_list)
+    print("RESPONSE 3 PROFIT: ", response_products_profit_market_03_json_list)
+
     # Sort by key "profit" and get the first 10
     top_profit_products_uuid_list.sort(
         key=lambda x: x["profit_percentage"], reverse=True
     )
     top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
+
+    print("TOP PROFIT: ", top_profit_products_uuid_list)
 
     # First show the most profitable products and then the most liked products
     top_final_products = top_profit_products_uuid_list + top_likes_product
