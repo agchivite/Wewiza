@@ -879,8 +879,11 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     return products_user_to_add_suggestions_list[:3]
 
 
-@app.get("/calculate/topics", tags=["especial"])
-def calculate_topics():
+@app.get("/calculate/topics/password/{password}", tags=["especial"])
+def calculate_topics(password: str):
+    if password != "wewiza":
+        return {"result": "Wrong password"}
+
     update_global_variables()
 
     return {
