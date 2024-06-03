@@ -4,7 +4,7 @@
 
 <br>
 
-<p align="center"><img src="./02_Documentacion/Logos/loading.svg" width="350px"></p>
+<p align="center"><img src="./02_Documentacion/Logos/logo.png" width="350px"></p>
 
 ---
 
