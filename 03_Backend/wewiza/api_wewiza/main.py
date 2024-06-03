@@ -38,7 +38,36 @@ def main():
 
 main()
 
-app = FastAPI()
+description_api = """
+Wewiza API helps you to manage your monthly products ⭐
+
+## Actual markets
+
+- Mercadona
+- Ahorramas
+- Carrefour
+
+### Contributors
+
+https://github.com/JiaChengZhang14
+
+"""
+
+app = FastAPI(
+    title="Wewiza API ⭐",
+    description=description_api,
+    version="1.0",
+    contact={
+        "name": "Angel Maroto Chivite",
+        "url": "https://github.com/agchivite",
+        "email": "ag.chivite@gmail.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+)
+
 
 # TODO: Inyect with IoC
 CONNECTION_MONGO = "mongodb://root:root@mongo_wewiza:27017"
