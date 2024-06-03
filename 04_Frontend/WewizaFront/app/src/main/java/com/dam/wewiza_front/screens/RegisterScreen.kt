@@ -16,34 +16,47 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.dam.wewiza_front.R
+import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.RegisterScreenViewModel
 
 @Composable
 fun RegisterScreen(
     viewModel: RegisterScreenViewModel,
     navController: NavController
-){
-    Column() {
+) {
+    MyLightTheme {
         RegisterScreenBodyContent(viewModel, navController)
     }
 }
@@ -54,7 +67,7 @@ fun RegisterScreenBodyContent(viewModel: RegisterScreenViewModel, navController:
     val context = LocalContext.current
 
     Box(modifier = Modifier.run {
-        background(Color(0xFFD0C2DC))
+        background(MaterialTheme.colorScheme.surface)
     }) {
         Column(
             modifier = Modifier
@@ -63,7 +76,7 @@ fun RegisterScreenBodyContent(viewModel: RegisterScreenViewModel, navController:
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.provisional_logo),
+                painter = painterResource(id = R.drawable.loading),
                 contentDescription = "Logo",
                 modifier = Modifier.size(300.dp)
             )
@@ -88,12 +101,14 @@ fun RegisterScreenBodyContent(viewModel: RegisterScreenViewModel, navController:
 fun RegisterTextInputs(viewModel: RegisterScreenViewModel) {
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
-    val repeatPassword  by viewModel.repeatPassword.collectAsState()
+    val repeatPassword by viewModel.repeatPassword.collectAsState()
+    var passwordVisibility by remember { mutableStateOf(false) }
+    var repeatPasswordVisibility by remember { mutableStateOf(false) }
 
     Column {
         TextField(
             value = email,
-            onValueChange = { viewModel.setEmail(it)},
+            onValueChange = { viewModel.setEmail(it) },
             label = { Text("Correo") },
             modifier = Modifier
                 .padding(top = 30.dp)
@@ -105,16 +120,52 @@ fun RegisterTextInputs(viewModel: RegisterScreenViewModel) {
             label = { Text("Contraseña") },
             modifier = Modifier
                 .padding(top = 20.dp)
-                .width(350.dp)
+                .width(350.dp),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
+                    Icon(
+                        imageVector = if (passwordVisibility) {
+                            ImageVector.vectorResource(id = R.drawable.visibility)
+                        } else {
+                            ImageVector.vectorResource(id = R.drawable.visibility_off)
+                        },
+
+                        contentDescription = if (passwordVisibility) "Ocultar contraseña" else "Mostrar contraseña"
+                    )
+                }
+            }
         )
 
         TextField(
             value = repeatPassword,
-            onValueChange = { viewModel.setRepeatPassword(it)},
+            onValueChange = { viewModel.setRepeatPassword(it) },
             label = { Text("Repetir contraseña") },
             modifier = Modifier
                 .padding(top = 20.dp)
-                .width(350.dp)
+                .width(350.dp),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            visualTransformation = if (repeatPasswordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { repeatPasswordVisibility = !repeatPasswordVisibility }) {
+                    Icon(
+                        imageVector = if (repeatPasswordVisibility) {
+                            ImageVector.vectorResource(id = R.drawable.visibility)
+                        } else {
+                            ImageVector.vectorResource(id = R.drawable.visibility_off)
+                        },
+
+                        contentDescription = if (repeatPasswordVisibility) "Ocultar contraseña" else "Mostrar contraseña"
+                    )
+                }
+            }
         )
     }
 }
@@ -131,7 +182,7 @@ fun RegisterScreenButtons(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(
-            onClick = {viewModel.registerWithMail(context, navController)},
+            onClick = { viewModel.registerWithMail(context, navController) },
             modifier = Modifier
                 .padding(top = 20.dp)
                 .padding(start = 20.dp)
@@ -139,7 +190,7 @@ fun RegisterScreenButtons(
                 .fillMaxWidth()
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFBB84E8), // Color hexadecimal convertido a Color
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White
             ),
             shape = MaterialTheme.shapes.medium
@@ -150,16 +201,17 @@ fun RegisterScreenButtons(
         }
 
         Button(
-            onClick = {navController.popBackStack()},
+            onClick = { navController.popBackStack() },
             modifier = Modifier
                 .padding(start = 20.dp)
                 .padding(end = 20.dp)
                 .padding(bottom = 20.dp)
                 .fillMaxWidth()
                 .height(50.dp)
-                .border(3.dp, Color(0xFFBB84E8), RoundedCornerShape(10.dp)),
+                .border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(10.dp)),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFD0C2DC), contentColor = Color(0xFFBB84E8)
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary
             ),
             shape = MaterialTheme.shapes.medium,
 

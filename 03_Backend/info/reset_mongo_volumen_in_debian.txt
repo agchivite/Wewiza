@@ -1,0 +1,14 @@
+sudo docker rmi -f market_01-api_market_01
+sudo rm -r /var/lib/docker/volumes/market_01_mongo_database/_data
+sudo mkdir -p /var/lib/docker/volumes/market_01_mongo_database/_data
+
+# To check with sudo
+sudo su -
+cd /var/lib/docker/volumes
+
+
+# In case mongo reset because POWER OFF:
+https://www.mongodb.com/docs/v3.0/tutorial/recover-data-following-unexpected-shutdown/
+
+Use this:
+sudo docker compose run mongo_wewiza mongod --repair

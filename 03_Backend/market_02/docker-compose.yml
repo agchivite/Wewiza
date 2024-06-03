@@ -1,39 +1,39 @@
 version: "3"
 services:
-  api_market_02:
-    build: ./
-    restart: always
-    ports:
-      - "8082:8082"
-    environment:
-      - PORT=8082
-    command: uvicorn api_market_02.main:app --host 0.0.0.0 --port 8082 --reload
-    depends_on:
-      - mongo_market_02
-    networks:
-      - public-wewiza-network
-      - private-market-02-network
+    api_market_02:
+        build: ./
+        restart: always
+        ports:
+            - "8082:8082"
+        environment:
+            - PORT=8082
+        command: uvicorn api_market_02.main:app --host 0.0.0.0 --port 8082 --reload
+        depends_on:
+            - mongo_market_02
+        networks:
+            - public-wewiza-network
+            - private-market-02-network
 
-  mongo_market_02:
-    # apcheamitru/arm32v7-mongo:3.2.20
-    image: mongo:6.0.13
-    restart: always
-    ports:
-      - "27022:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_DATABASE: market_02_db
-    volumes:
-      - mongo_database:/data/db # Directorio de datos de MongoDB
-    networks:
-      - private-market-02-network
+    mongo_market_02:
+        # apcheamitru/arm32v7-mongo:3.2.20 # mongo:6.0.13
+        image: apcheamitru/arm32v7-mongo:3.2.20
+        restart: always
+        ports:
+            - "27022:27017"
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: root
+            MONGO_INITDB_DATABASE: market_02_db
+        volumes:
+            - mongo_database:/data/db # Directorio de datos de MongoDB
+        networks:
+            - private-market-02-network
 
 volumes:
-  mongo_database:
+    mongo_database:
 
 networks:
-  public-wewiza-network:
-    external: true
-  private-market-02-network:
-    driver: bridge
+    public-wewiza-network:
+        external: true
+    private-market-02-network:
+        driver: bridge

@@ -1,0 +1,1 @@
+Error obtaining data from product: 'float' object has no attribute 'replace'

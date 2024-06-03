@@ -22,4 +22,4 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 scrapping_service = ScrappingService(driver_chrome, product_service)
 
-scrapping_service.run_simulation()
+scrapping_service.run_scrapping_ahorramas()

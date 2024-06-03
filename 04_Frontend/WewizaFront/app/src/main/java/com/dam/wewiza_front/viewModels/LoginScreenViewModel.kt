@@ -37,6 +37,7 @@ class LoginScreenViewModel: ViewModel() {
                 auth.signInWithEmailAndPassword(actualEmail, actualPassword)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
+
                             Log.d("LoginWithMail", "LoginSuccessful")
                             navController.navigate(AppScreens.HomeScreen.route)
                         } else {

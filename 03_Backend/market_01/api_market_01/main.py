@@ -19,28 +19,75 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 
 
-@app.get("/get_all_products")
+@app.get("/products/past/profit")
+def get_products_with_good_profit():
+    # Has the product data with the ["profit_percentage"] and ["profit"] key associate
+    top_profit_products_list = product_service.get_products_with_good_profit()
+    sorted_products = sorted(
+        top_profit_products_list, key=lambda x: x["profit_percentage"], reverse=True
+    )
+
+    for product in sorted_products:
+        if product["profit_percentage"] <= 0:
+            sorted_products.remove(product)
+
+    return sorted_products[:10]
+
+
+@app.get("/products")
 def get_all_products():
     return product_service.get_all_products()
+
+
+@app.get("/products/market/{market_name}")
+def get_all_products_by_market(market_name: str):
+    return product_service.get_all_products_by_market(market_name)
 
 
 @app.post("/insert_new_scrapped_product")
 async def insert_new_scrapped_product(request: Request):
     data = await request.json()
     result = product_service.create_product_to_mongo_recieving_json(data)
+    print(result)
     return {"result": result}
 
 
-@app.get("/saludo")
-def enviar_saludo():
-    return {"mensaje": "¡Hola! Bienvenido desde el Contenedor Market-01"}
+@app.get("/products/category/id/{category_id}")
+def get_products_by_category(category_id: str):
+    return product_service.get_all_products_by_category_id(category_id)
 
 
-@app.get("/test")
-def test():
-    response = requests.get("http://api_wewiza:8080/saludo")
-    message = "Desde Market 1: "
-    print(message)
-    print(response.json())
+@app.get("/size")
+def get_size():
+    return product_service.get_size()
 
-    return {message: response.json()}
+
+@app.get("/products/range/{init_num}/{end_num}")
+def get_products_by_range(init_num: int, end_num: int):
+    return product_service.get_products_by_range(init_num, end_num)
+
+
+@app.get("/product/id/{uuid}")
+def get_product_by_uuid(uuid: str):
+    return product_service.get_product_by_uuid(uuid)
+
+
+@app.get("/product/name/{product_name}")
+def get_product_by_name(product_name: str):
+    return product_service.get_products_by_name(product_name)
+
+
+@app.get("/product/similar/name/{product_name}")
+def get_product_by_similar_name(product_name: str):
+    return product_service.get_products_by_similar_name(product_name)
+
+
+# 2024-05-03
+@app.get("/delete/date/{date}")
+def delete_products_by_date(date: str):
+    return product_service.delete_products_by_date(date)
+
+
+@app.get("/update/minor_random_price")
+def update_to_random_price_less():
+    return product_service.update_to_random_price_less()
