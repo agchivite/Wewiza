@@ -38,7 +38,43 @@ def main():
 
 main()
 
-app = FastAPI()
+tags_metadata = [
+    {"name": "especial", "description": "Especial operations"},
+    {"name": "products", "description": "Operations with products"},
+    {"name": "categories", "description": "Operations with categories"},
+    {"name": "markets", "description": "Operations with markets"},
+]
+
+description_api = """
+Wewiza API helps you to manage your monthly products ⭐
+
+## Actual markets
+
+- Mercadona
+- Ahorramas
+- Carrefour
+
+### Contributors
+
+https://github.com/JiaChengZhang14
+
+"""
+
+app = FastAPI(
+    title="Wewiza API ⭐",
+    description=description_api,
+    version="1.0",
+    contact={
+        "name": "Angel Maroto Chivite",
+        "url": "https://github.com/agchivite",
+        "email": "ag.chivite@gmail.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+)
+
 
 # TODO: Inyect with IoC
 CONNECTION_MONGO = "mongodb://root:root@mongo_wewiza:27017"
@@ -229,7 +265,10 @@ def find_actual_product_by_uuid_past(uuid_past_product):
 #####################----------------#####################
 
 
-@app.get("/")
+@app.get(
+    "/",
+    tags=["especial"],
+)
 def read_root():
     # Set all the endpoints
     return {
@@ -245,6 +284,7 @@ def read_root():
 @app.get(
     "/categories/top",
     description="Get maximum 6 top categories, it depends on top products",
+    tags=["categories"],
 )
 def get_top_categories():
     all_categories = get_all_categories()
@@ -259,12 +299,13 @@ def get_top_categories():
 @app.get(
     "/products/top",
     description="Get top products with benefits comparing the past or good likes, if the key ['profit'] and ['profit_percentage'] are 0 it means that the product is TOP because it has A LOT LIKES",
+    tags=["products"],
 )
 def get_top_products():
     return PRODUCTS_TOP
 
 
-@app.get("/categories", description="Get all categories")
+@app.get("/categories", description="Get all categories", tags=["categories"])
 def get_categories():
     return get_all_categories()
 
@@ -272,6 +313,7 @@ def get_categories():
 @app.get(
     "/products/category/id/{category_id}",
     description="Get all products by category in the current month",
+    tags=["products"],
 )
 def get_products_by_category(category_id: str):
     response_products_market_01_json_list = requests.get(
@@ -307,6 +349,7 @@ def get_products_by_category(category_id: str):
 @app.get(
     "/products/market/{market_name}",
     description="Get all products by market name (no case sensitive) in the current month, if not found returns empty list",
+    tags=["products"],
 )
 def get_all_products_by_market(market_name: str):
     if market_name.lower().strip() == "mercadona":
@@ -342,6 +385,7 @@ def get_all_products_by_market(market_name: str):
 @app.get(
     "/product/id/{uuid}",
     description="Product details by id, if not found returns 'name': 'Product not found'",
+    tags=["products"],
 )
 def get_product_by_id(uuid: str):
     product_id = find_actual_product_by_uuid_past(uuid)
@@ -385,6 +429,7 @@ def get_product_by_id(uuid: str):
 @app.get(
     "/product/details/id/{uuid}",
     description="List of same product with different date_created, the latest one will be the main product, if not found returns empty list",
+    tags=["products"],
 )
 def get_product_details_by_id(uuid: str):
     product_id = find_actual_product_by_uuid_past(uuid)
@@ -475,6 +520,7 @@ def get_product_details_by_id(uuid: str):
 @app.get(
     "/products/market/{market_name}/range/{init_num}/{end_num}",
     description="Get all products by market and range (start index = 0), if not found returns empty list",
+    tags=["products"],
 )
 def get_products_by_range(market_name: str, init_num: int, end_num: int):
     if market_name.lower().strip() == "mercadona":
@@ -519,6 +565,7 @@ def get_products_by_range(market_name: str, init_num: int, end_num: int):
 @app.get(
     "/size/market/{market_name}",
     description="Get the size of products by market, return number",
+    tags=["markets"],
 )
 def get_size_by_market(market_name: str):
     if market_name.lower().strip() == "mercadona":
@@ -583,15 +630,15 @@ def calculate_top_products():
     # This list has the product data with the profit associate
     response_products_profit_market_01_json_list = requests.get(
         "http://api_market_01:8081/products/past/profit"
-    )
+    ).json()
 
     response_products_profit_market_02_json_list = requests.get(
         "http://api_market_02:8082/products/past/profit"
-    )
+    ).json()
 
     response_products_profit_market_03_json_list = requests.get(
         "http://api_market_03:8083/products/past/profit"
-    )
+    ).json()
 
     print("RESPONSE-1: ", response_products_profit_market_01_json_list)
     print("RESPONSE-2: ", response_products_profit_market_02_json_list)
@@ -669,6 +716,7 @@ def shutdown_event():
 @app.get(
     "/like/{uuid}/email/{email_user}",
     description="Like a product only one time per user, return true if liked or false if was liked before",
+    tags=["products"],
 )
 def like_product(uuid: str, email_user: str):
     product_id = find_actual_product_by_uuid_past(uuid)
@@ -684,6 +732,7 @@ def like_product(uuid: str, email_user: str):
 @app.get(
     "/unlike/{uuid}/email/{email_user}",
     description="Unlike a product only one time per user, true if unliked or false if was unliked before",
+    tags=["products"],
 )
 def unlike_product(uuid: str, email_user: str):
     product_id = find_actual_product_by_uuid_past(uuid)
@@ -699,6 +748,7 @@ def unlike_product(uuid: str, email_user: str):
 @app.get(
     "/reaction/email/{email_user}/product/id/{uuid}",
     description="Check if a user has liked a product, returns 'liked', 'unliked' or 'none'",
+    tags=["products"],
 )
 def get_reaction(email_user: str, uuid: str):
     product_id = find_actual_product_by_uuid_past(uuid)
@@ -713,6 +763,7 @@ def get_reaction(email_user: str, uuid: str):
 @app.get(
     "/start_month/password/{password}",
     description="Start the database with likes in the same month we are, this will reset all the likes, only is used when scrapping monthly",
+    tags=["especial"],
 )
 def start_likes_database(password: str):
     if password == "wewiza":
@@ -741,7 +792,7 @@ def start_likes_database(password: str):
 
 
 # https://127.0.0.2/suggest/id/36e79b3-4806-492c-ba2c-877395fc2ae5?filter_market=ahorramas
-@app.get("/suggest/id/{uuid}")
+@app.get("/suggest/id/{uuid}", tags=["products"])
 def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
 
     list_all_products_user = []
@@ -828,8 +879,11 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     return products_user_to_add_suggestions_list[:3]
 
 
-@app.get("/calculate/topics")
-def calculate_topics():
+@app.get("/calculate/topics/password/{password}", tags=["especial"])
+def calculate_topics(password: str):
+    if password != "wewiza":
+        return {"result": "Wrong password"}
+
     update_global_variables()
 
     return {
