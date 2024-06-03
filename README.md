@@ -20,7 +20,7 @@ Documentación de la API-Rest Servidor -> https://wewiza.ddns.net/docs
 
 Mediante una aplicación en fase beta donde cualquier usuario con un dispositivo móvil podrías instalar y realizar diversas listas de la compra para comprobar en que mercados les saldría más económico.
 
-Guía de instalación -> https://github.com/agchivite/Wewiza/tree/main/02_Documentacion
+Guía de instalación (Videos) -> https://drive.google.com/drive/folders/1AE-GyxmD73Sb07PEGNz2KZO4QuMgQr2l?usp=sharing
 
 ### Tecnologías Servidor
 
