@@ -43,9 +43,9 @@ Guía de instalación -> https://github.com/agchivite/Wewiza/tree/main/02_Docume
 
 ### Desarrolladores
 
-![Jiacheng Zhang](https://github.com/JiaChengZhang14)
+<a href="https://github.com/JiaChengZhang14">Jiacheng Zhang<a>
 
-![Angel Maroto Chivite](https://github.com/agchivite)
+<a href="https://github.com/agchivite">Angel Maroto Chivite<a>
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
