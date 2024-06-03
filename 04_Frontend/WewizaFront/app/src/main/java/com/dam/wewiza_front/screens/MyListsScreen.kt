@@ -124,15 +124,17 @@ private fun MyListItem(
             }
 
             Column(horizontalAlignment = Alignment.End) {
-                Button(
-                    onClick = {
-                        sharedViewModel.setWantedMarket(listOf("mercadona"))
-                        viewModel.navigateToSuggestionScreen(navController, shoppingList.uuid)
-                    },
-                    modifier = Modifier.size(85.dp)
-                ) {
-                    Text(text = "Sugerencias", fontSize = 6.9.sp)
-                }
+
+                    Button(
+                        onClick = {
+                            sharedViewModel.setWantedMarket(listOf("mercadona"))
+                            viewModel.navigateToSuggestionScreen(navController, shoppingList.uuid)
+                        },
+                        modifier = Modifier.size(85.dp)
+                    ) {
+                        Text(text = "Sugerencias", fontSize = 6.9.sp)
+                    }
+
             }
 
             // Delete button

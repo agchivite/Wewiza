@@ -57,7 +57,11 @@ fun ListScreen(listScreenViewModel: ListScreenViewModel, navController: NavHostC
                     CircularProgressIndicator()
                 }
             } else {
-                ListScreenBodyContent(listScreenViewModel, navController, productsList) { updatedProductsList ->
+                ListScreenBodyContent(
+                    listScreenViewModel,
+                    navController,
+                    productsList
+                ) { updatedProductsList ->
                     productsList = updatedProductsList
                 }
             }
@@ -83,7 +87,11 @@ fun ListScreenBodyContent(
             modifier = Modifier.weight(1f) // Ocupa todo el espacio restante
         ) {
             items(productsList.size) { index ->
-                ListProductItem(product = productsList[index], viewModel, navController) { deletedProduct ->
+                ListProductItem(
+                    product = productsList[index],
+                    viewModel,
+                    navController
+                ) { deletedProduct ->
                     val updatedProductsList = productsList.toMutableList().apply {
                         remove(deletedProduct)
                     }
@@ -115,9 +123,16 @@ fun ListScreenBodyContent(
                     color = Color.Black
                 )
 
-                Button(onClick = { /* Aquí puedes colocar la lógica para sugerir */ }) {
+                Button(onClick = {
+                    sharedViewModel.setWantedMarket(listOf("mercadona"))
+                    viewModel.navigateToSuggestionScreen(
+                        navController,
+                        sharedViewModel.selectedList.value!!.uuid
+                    )
+                }) {
                     Text(text = "Sugerencias")
                 }
+
             }
         }
     }

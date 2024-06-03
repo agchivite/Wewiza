@@ -168,7 +168,7 @@ class ProductDetailsScreenViewModel : ViewModel() {
                 index++
             }
 
-            val entry = Entry(monthValue, product.price.toFloat())
+            val entry = Entry(monthValue, product.price_by_standard_measure.toFloat())
             entries.add(entry)
         }
 

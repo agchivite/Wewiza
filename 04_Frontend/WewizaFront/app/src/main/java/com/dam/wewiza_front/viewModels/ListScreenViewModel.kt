@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.Profile
 import com.dam.wewiza_front.models.ShoppingList
@@ -126,6 +127,40 @@ class ListScreenViewModel : ViewModel() {
 
     fun navigateToProductDetailsScreen(navController: NavController) {
         navController.navigate(AppScreens.ProductDetailsScreen.route)
+    }
+
+    private fun retrieveShoppingListFromProfile(profileEmail: String, listUuid: String, callback: (ShoppingList?) -> Unit) {
+        val profileRef = db.collection("profiles").document(profileEmail)
+        var shoppingList: ShoppingList? = null
+
+        profileRef.get().addOnSuccessListener { document ->
+            val profile = document.toObject(Profile::class.java)
+
+            if (profile?.shoppingListsList?.isNotEmpty() == true) {
+                val wantedList = profile.shoppingListsList!!.find { it.uuid == listUuid }
+                callback(wantedList)
+            } else {
+                callback(null)
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("RetrieveListFromFirebase", "Error retrieving profile", exception)
+            callback(null)
+        }
+    }
+
+    fun navigateToSuggestionScreen(navController: NavHostController, uuid: String) {
+        viewModelScope.launch {
+            retrieveShoppingListFromProfile(auth.currentUser!!.email!!, uuid) { selectedList ->
+                selectedList?.let { // Verifica si la lista seleccionada no es nula
+                    Log.d("ListsScreenViewModel", "selectedList: $selectedList")
+                    sharedViewModel.setSelectedList(selectedList)
+                    navController.navigate(AppScreens.SuggestionScreen.route)
+                } ?: run {
+
+                    Log.e("ListsScreenViewModel", "Error: No se pudo recuperar la lista seleccionada")
+                }
+            }
+        }
     }
 
 

@@ -73,6 +73,11 @@ class SuggestionScreenViewModel: ViewModel() {
         return updatedProducts
     }
 
+    fun deleteProductFromSuggestions(product: Product, uuid: String) {
+        val updatedSuggestions = suggestions.value.toMutableMap()
+        updatedSuggestions[uuid] = updatedSuggestions[uuid]?.filter { it.uuid != product.uuid } ?: emptyList()
+        suggestions.value = updatedSuggestions
+    }
 
 
 }
