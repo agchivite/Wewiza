@@ -16,6 +16,6 @@ data class TopProduct(
     val uuid: String,
     val num_likes: Int,
     val profit: Double,
-    val profit_percentage: Int
+    val profit_percentage: Double
 
 )
