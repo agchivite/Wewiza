@@ -2,6 +2,7 @@ package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -102,6 +104,7 @@ private fun MyListItem(
 ) {
     val context = LocalContext.current
     val showDeleteDialog = remember { mutableStateOf(false) }
+    val showMarketDialog = remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -127,8 +130,7 @@ private fun MyListItem(
 
                     Button(
                         onClick = {
-                            sharedViewModel.setWantedMarket(listOf("mercadona"))
-                            viewModel.navigateToSuggestionScreen(navController, shoppingList.uuid)
+                            showMarketDialog.value = true
                         },
                         modifier = Modifier.size(85.dp)
                     ) {
@@ -163,6 +165,76 @@ private fun MyListItem(
             },
             onDismiss = {
                 showDeleteDialog.value = false
+            }
+        )
+    }
+
+
+    if (showMarketDialog.value) {
+        MarketSelectionDialog(showMarketDialog) { selectedMarkets ->
+            sharedViewModel.setWantedMarket(selectedMarkets)
+            viewModel.navigateToSuggestionScreen(navController, shoppingList.uuid)
+        }
+    }
+}
+
+@Composable
+fun MarketSelectionDialog(showDialog: MutableState<Boolean>, onConfirm: (List<String>) -> Unit) {
+    val mercadonaChecked = remember { mutableStateOf(false) }
+    val carrefourChecked = remember { mutableStateOf(false) }
+    val ahorramasChecked = remember { mutableStateOf(false) }
+
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Selecciona los mercados de los que quieres recibir sugerencias: ") },
+            text = {
+                Column {
+                    Row (horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                        Text("Mercadona")
+                        Checkbox(
+                            checked = mercadonaChecked.value,
+                            onCheckedChange = { mercadonaChecked.value = it }
+                        )
+                    }
+                    Row (horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                        Text("Carrefour")
+                        Checkbox(
+                            checked = carrefourChecked.value,
+                            onCheckedChange = { carrefourChecked.value = it }
+                        )
+                    }
+
+                    Row (horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                        Text("Ahorramas")
+                        Checkbox(
+                            checked = ahorramasChecked.value,
+                            onCheckedChange = { ahorramasChecked.value = it }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val selectedMarkets = mutableListOf<String>()
+                        if (mercadonaChecked.value) selectedMarkets.add("mercadona")
+                        if (carrefourChecked.value) selectedMarkets.add("carrefour")
+                        if (ahorramasChecked.value) selectedMarkets.add("ahorramas")
+
+                        onConfirm(selectedMarkets)
+                        showDialog.value = false
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog.value = false }
+                ) {
+                    Text("Cancelar")
+                }
             }
         )
     }

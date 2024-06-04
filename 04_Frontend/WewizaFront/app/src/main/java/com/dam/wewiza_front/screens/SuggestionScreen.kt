@@ -114,6 +114,12 @@ fun SuggestionScreenBodyContent(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Este proceso puede tardar varios minutos...",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 } else {
                     val combinedMap = productsList.associateWith { product ->
@@ -133,7 +139,8 @@ fun SuggestionScreenBodyContent(
 
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth().padding(bottom = 10.dp),
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp),
                         contentAlignment = Alignment.BottomCenter
                     ) {
                         AcceptSuggestionsButton(viewModel, navController, selectedList!!.uuid)
