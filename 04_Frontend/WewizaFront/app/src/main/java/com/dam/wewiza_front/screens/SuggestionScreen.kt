@@ -4,12 +4,18 @@ package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,7 +23,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,16 +45,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.SuggestionScreenViewModel
+import kotlinx.coroutines.launch
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -63,63 +80,137 @@ fun SuggestionScreen(
     }
 }
 
+
 @Composable
 fun SuggestionScreenBodyContent(
     viewModel: SuggestionScreenViewModel,
     navController: NavController
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .padding(top = 70.dp)
     ) {
-
         val selectedList = viewModel.sharedViewModel.selectedList.value
         val wantedMarket = viewModel.sharedViewModel.getWantedMarket()
         var productsList by remember { mutableStateOf(emptyList<Product>()) }
         val suggestions by viewModel.suggestions
 
-        LaunchedEffect(selectedList!!.products.isNotEmpty()) {
-            viewModel.getSuggestions(wantedMarket, selectedList.products)
-            val products = viewModel.getProductsFromList(selectedList)
-            productsList = products
-            Log.d("ListScreen", "Products: $products")
-        }
-
-        if (suggestions.isEmpty() || productsList.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
+        Column(modifier = Modifier.fillMaxSize()) {
+            LaunchedEffect(selectedList!!.products.isNotEmpty()) {
+                viewModel.getSuggestions(wantedMarket, selectedList.products)
+                val products = viewModel.getProductsFromList(selectedList)
+                productsList = products
+                Log.d("ListScreen", "Products: $products")
             }
-        } else {
+            if (selectedList.products.isNotEmpty()) {
+                if (suggestions.isEmpty() || productsList.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Este proceso puede tardar varios minutos...",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                } else {
+                    val combinedMap = productsList.associateWith { product ->
+                        suggestions[product.uuid] ?: emptyList()
+                    }
 
-            val combinedMap = productsList.associateWith { product ->
-                suggestions[product.uuid] ?: emptyList()
-            }
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(bottom = 10.dp)
+                    ) {
+                        items(combinedMap.entries.toList().size) { index ->
+                            val entry = combinedMap.entries.toList()[index]
+                            ProductItem(entry, viewModel)
+                        }
+                    }
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(combinedMap.entries.toList().size) { index ->
-                    val entry = combinedMap.entries.toList()[index]
-                    val product = entry.key
-                    val suggestedProducts = entry.value
-                    ProductItem(product, suggestedProducts)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        AcceptSuggestionsButton(viewModel, navController, selectedList!!.uuid)
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_simple),
+                        contentDescription = "logo"
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Añade un producto a la lista para recibir sugerencias",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
 
 
     }
-
 }
 
+
 @Composable
-fun ProductItem(product: Product, suggestedProducts: List<Product>) {
+fun AcceptSuggestionsButton(
+    viewModel: SuggestionScreenViewModel,
+    navController: NavController,
+    shoppingListUUID: String
+) {
+    Button(
+        onClick = {
+            viewModel.acceptSuggestions(shoppingListUUID)
+            viewModel.navigateToMyListsScreen(navController)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(50), // Bordes redondeados
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary, // Color de fondo del botón
+            contentColor = Color.White // Color del texto del botón
+        )
+    ) {
+        Text(
+            text = "Aceptar sugerencias",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+    }
+}
+
+
+@Composable
+fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionScreenViewModel) {
+    val product = entry.key
+    val suggestedProducts = entry.value
+
     Card(
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
@@ -136,7 +227,7 @@ fun ProductItem(product: Product, suggestedProducts: List<Product>) {
                 modifier = Modifier.weight(1f)
             ) {
                 Image(
-                    painter = rememberImagePainter(data = product.image_url),
+                    painter = rememberAsyncImagePainter(model = product.image_url),
                     contentDescription = "Product Image",
                     modifier = Modifier
                         .size(80.dp)
@@ -159,20 +250,67 @@ fun ProductItem(product: Product, suggestedProducts: List<Product>) {
                 modifier = Modifier.weight(2f)
             ) {
                 items(suggestedProducts.size) { index ->
-                    SuggestedProductItem(suggestedProducts[index])
+                    SuggestedProductItem(suggestedProducts[index], viewModel, product.uuid)
                 }
             }
         }
     }
 }
 
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SuggestedProductItem(product: Product) {
+fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel, uuid: String) {
+    var isAccepted by remember { mutableStateOf(false) }
+
+    // Animaciones para escala y posición Y
+    val scale = remember { Animatable(1f) }
+    val offsetY = remember { Animatable(0f) }
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    val lazyListState = rememberLazyListState()
+
+    LaunchedEffect(isAccepted) {
+        if (isAccepted) {
+            // Primero centramos el elemento en el LazyRow
+            launch {
+                lazyListState.animateScrollToItem(lazyListState.layoutInfo.visibleItemsInfo.indexOfFirst { it.key == product.uuid })
+                bringIntoViewRequester.bringIntoView()
+            }
+            // Luego ejecutamos la animación
+            launch {
+                offsetY.animateTo(
+                    targetValue = -30f,
+                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                )
+                offsetY.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                )
+            }
+            launch {
+                scale.animateTo(
+                    targetValue = 1.1f,
+                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                )
+                scale.animateTo(
+                    targetValue = 0.75f,
+                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                )
+            }
+        }
+    }
+
     Card(
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
             .padding(4.dp)
             .size(230.dp)
+            .graphicsLayer {
+                translationY = offsetY.value
+                scaleX = scale.value
+                scaleY = scale.value
+            }
+            .bringIntoViewRequester(bringIntoViewRequester)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -180,34 +318,39 @@ fun SuggestedProductItem(product: Product) {
             modifier = Modifier.padding(4.dp)
         ) {
             Image(
-                painter = rememberImagePainter(data = product.image_url),
+                painter = rememberAsyncImagePainter(model = product.image_url),
                 contentDescription = "Suggested Product Image",
-                modifier = Modifier
-                    .size(100.dp)
+                modifier = Modifier.size(100.dp)
             )
             Text(
                 text = product.name,
                 modifier = Modifier.padding(top = 4.dp)
             )
-            Row (modifier = Modifier.weight(1f)) {
-
+            Row(modifier = Modifier.weight(1f)) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_cancel_24),
                     contentDescription = "cancel",
-                    modifier = Modifier.size(50.dp),
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clickable(onClick = {
+                            viewModel.deleteProductFromSuggestions(product, uuid)
+                        }),
                     tint = Color(0xFFD32F2F)
                 )
 
                 Icon(
                     painter = painterResource(id = R.drawable.accept),
                     contentDescription = "accept",
-                    modifier = Modifier.size(50.dp),
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clickable(onClick = {
+                            isAccepted = true  // Trigger the jump and shrink animation
+                            viewModel.addProductToChoosenProductsList(product, uuid)
+                        }),
                     tint = Color(0xFF4CAF50)
                 )
-
             }
         }
     }
 }
-
 

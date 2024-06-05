@@ -4,9 +4,14 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.dam.wewiza_front.models.Product
+import com.dam.wewiza_front.models.Profile
 import com.dam.wewiza_front.models.ShoppingList
+import com.dam.wewiza_front.navigation.AppScreens
 import com.dam.wewiza_front.services.RetrofitServiceFactory
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -19,10 +24,12 @@ import kotlinx.coroutines.withContext
 @OptIn(DelicateCoroutinesApi::class)
 class SuggestionScreenViewModel: ViewModel() {
 
-
+    private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
     val sharedViewModel = SharedViewModel.instance
     private val service = RetrofitServiceFactory.makeRetrofitService()
     var suggestions = mutableStateOf(mutableMapOf<String, List<Product>>())
+    private val choosenSuggestionsList = mutableStateOf(mutableMapOf<String, String>())
 
 
    private val ioDispatcher: CoroutineDispatcher = newFixedThreadPoolContext(3, "IOPool")
@@ -73,6 +80,66 @@ class SuggestionScreenViewModel: ViewModel() {
         return updatedProducts
     }
 
+    fun deleteProductFromSuggestions(product: Product, uuid: String) {
+        val updatedSuggestions = suggestions.value.toMutableMap()
+        updatedSuggestions[uuid] = updatedSuggestions[uuid]?.filter { it.uuid != product.uuid } ?: emptyList()
+        suggestions.value = updatedSuggestions
+    }
+
+    fun addProductToChoosenProductsList(product: Product, listUuid: String) {
+        choosenSuggestionsList.value[listUuid] = product.uuid
+
+        //remove rest of the suggestions
+        val updatedSuggestions = suggestions.value.toMutableMap()
+        updatedSuggestions[listUuid] = updatedSuggestions[listUuid]?.filter { it.uuid == product.uuid} ?: emptyList()
+        suggestions.value = updatedSuggestions
+    }
+
+    fun acceptSuggestions(shoppingListUUID: String) {
+        updateSelectedListWithSuggestions(shoppingListUUID)
+    }
+
+
+    private fun updateSelectedListWithSuggestions(shoppingListUUID: String) {
+        try {
+            val userEmail = auth.currentUser?.email ?: throw Exception("User not authenticated")
+
+            db.collection("profiles").document(userEmail).get()
+                .addOnSuccessListener { document ->
+                    val profile = document.toObject(Profile::class.java)
+                    val shoppingList = profile?.shoppingListsList?.find { it.uuid == shoppingListUUID }
+
+                    if (shoppingList != null) {
+                        // Reemplaza los UUID originales por los sugeridos
+                        val updatedProducts = shoppingList.products.map { originalUuid ->
+                            choosenSuggestionsList.value[originalUuid] ?: originalUuid
+                        }
+
+                        // Actualiza la lista de compras en el perfil
+                        shoppingList.products = updatedProducts as MutableList<String>
+
+                        // Guarda el perfil actualizado en Firebase
+                        db.collection("profiles").document(userEmail)
+                            .set(profile)
+                            .addOnSuccessListener {
+                                Log.d("UpdateSuggestions", "Successfully updated profile in Firebase")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.d("UpdateSuggestions", "Failed to update profile in Firebase: ${e.message}")
+                            }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.d("UpdateSuggestions", "Failed to get profile from Firebase: ${e.message}")
+                }
+        } catch (e: Exception) {
+            Log.d("UpdateSuggestions", "Failed to update profile in Firebase: ${e.message}")
+        }
+    }
+
+    fun navigateToMyListsScreen(navController: NavController) {
+        navController.navigate(AppScreens.MyListScreen.route)
+    }
 
 
 }

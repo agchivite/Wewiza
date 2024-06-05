@@ -57,7 +57,11 @@ fun ListScreen(listScreenViewModel: ListScreenViewModel, navController: NavHostC
                     CircularProgressIndicator()
                 }
             } else {
-                ListScreenBodyContent(listScreenViewModel, navController, productsList) { updatedProductsList ->
+                ListScreenBodyContent(
+                    listScreenViewModel,
+                    navController,
+                    productsList
+                ) { updatedProductsList ->
                     productsList = updatedProductsList
                 }
             }
@@ -72,6 +76,9 @@ fun ListScreenBodyContent(
     productsList: List<Product>,
     onProductsListChanged: (List<Product>) -> Unit
 ) {
+
+    val showMarketDialog = remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,7 +90,11 @@ fun ListScreenBodyContent(
             modifier = Modifier.weight(1f) // Ocupa todo el espacio restante
         ) {
             items(productsList.size) { index ->
-                ListProductItem(product = productsList[index], viewModel, navController) { deletedProduct ->
+                ListProductItem(
+                    product = productsList[index],
+                    viewModel,
+                    navController
+                ) { deletedProduct ->
                     val updatedProductsList = productsList.toMutableList().apply {
                         remove(deletedProduct)
                     }
@@ -107,7 +118,6 @@ fun ListScreenBodyContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 //product list total price
                 Text(
                     text = "Total: ${"%.2f".format(productsList.sumOf { it.price })} €",
@@ -115,12 +125,21 @@ fun ListScreenBodyContent(
                     color = Color.Black
                 )
 
-                Button(onClick = { /* Aquí puedes colocar la lógica para sugerir */ }) {
+                Button(onClick = {
+                    showMarketDialog.value = true
+                }) {
                     Text(text = "Sugerencias")
                 }
             }
         }
     }
+    if (showMarketDialog.value) {
+        MarketSelectionDialog(showMarketDialog) { selectedMarkets ->
+            sharedViewModel.setWantedMarket(selectedMarkets)
+            viewModel.navigateToSuggestionScreen(navController, sharedViewModel.selectedList.value!!.uuid)
+        }
+    }
+
 }
 
 @Composable

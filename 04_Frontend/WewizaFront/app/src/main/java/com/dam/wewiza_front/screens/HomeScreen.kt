@@ -248,7 +248,7 @@ fun HomeProductItem(
                     .padding(bottom = 10.dp)
 
             )
-            if (product.profit == 0 && product.profit_percentage == 0) {
+            if (product.profit == 0.0 && product.profit_percentage == 0.0) {
                 Text(
                     text = "MÁS GUSTADO!", style = TextStyle(
                         fontWeight = FontWeight.Bold,
@@ -258,7 +258,7 @@ fun HomeProductItem(
                 )
             } else {
                 Text(
-                    text = "Ahorro: ${product.profit}€ (${product.profit_percentage}%)",
+                    text = "Ahorro: (${String.format("%.2f", product.profit_percentage)}%)",
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
