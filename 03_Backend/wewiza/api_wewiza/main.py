@@ -693,7 +693,7 @@ def update_global_variables():
 
 
 def calculate_daily_tasks():
-    print("Daily execution for calculate tops", datetime.now())
+    print("Daily execution for calculate tops", datetime.datetime.now())
     update_global_variables()
 
 
