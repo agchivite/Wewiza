@@ -52,20 +52,24 @@ class ProductService:
         last_products_list_json = result_last_products.value
         actual_products_list_json = result_actual_products.value
 
-        for last_product in last_products_list_json:
-            for actual_product in actual_products_list_json:
+        last_products_dict = {
+            product["uuid"]: product for product in last_products_list_json
+        }
+
+        for actual_product in actual_products_list_json:
+            uuid = actual_product["uuid"]
+            if uuid in last_products_dict:
+                last_product = last_products_dict[uuid]
                 if (
-                    last_product["uuid"] != actual_product["uuid"]
-                    and last_product["price_by_standard_measure"]
+                    last_product["price_by_standard_measure"]
                     != actual_product["price_by_standard_measure"]
-                    and last_product["name"] == actual_product["name"]
                 ):
                     actual_product["profit"] = (
                         last_product["price_by_standard_measure"]
                         - actual_product["price_by_standard_measure"]
                     )
                     actual_product["profit_percentage"] = (
-                        actual_product["profit"]
+                        actual_product["price_by_standard_measure"]
                         / last_product["price_by_standard_measure"]
                     ) * 100
 
