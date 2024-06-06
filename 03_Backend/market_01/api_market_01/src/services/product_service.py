@@ -37,26 +37,22 @@ class ProductService:
         last_products_list_json = result_last_products.value
         actual_products_list_json = result_actual_products.value
 
-        last_products_dict = {
-            product["uuid"]: product for product in last_products_list_json
-        }
-
-        for actual_product in actual_products_list_json:
-            last_product = last_products_dict.get(actual_product["name"])
-            if (
-                last_product
-                and last_product["price_by_standard_measure"]
-                != actual_product["price_by_standard_measure"]
-                and last_product["name"] == actual_product["name"]
-            ):
-                actual_product["profit"] = (
-                    last_product["price_by_standard_measure"]
-                    - actual_product["price_by_standard_measure"]
-                )
-                actual_product["profit_percentage"] = (
-                    actual_product["price_by_standard_measure"]
-                    / last_product["price_by_standard_measure"]
-                ) * 100
+        for last_product in last_products_list_json:
+            for actual_product in actual_products_list_json:
+                if (
+                    last_product["uuid"] != actual_product["uuid"]
+                    and last_product["name"] == actual_product["name"]
+                    and last_product["price_by_standard_measure"]
+                    != actual_product["price_by_standard_measure"]
+                ):
+                    actual_product["profit"] = (
+                        last_product["price_by_standard_measure"]
+                        - actual_product["price_by_standard_measure"]
+                    )
+                    actual_product["profit_percentage"] = (
+                        actual_product["price_by_standard_measure"]
+                        / last_product["price_by_standard_measure"]
+                    ) * 100
 
         # Only get the actual products that has key profit
         actual_products_list_json = [
