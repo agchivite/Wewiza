@@ -59,6 +59,7 @@ import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.TopProduct
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
+import com.dam.wewiza_front.viewModels.SharedViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -196,7 +197,6 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeProductItem(
@@ -211,8 +211,8 @@ fun HomeProductItem(
             .width(140.dp)
             .padding(10.dp)
             .fillMaxWidth()
-            .height(130.dp), // Ajusta la altura según sea necesario
-        shape = RoundedCornerShape(10.dp), // Esquinas redondeadas
+            .height(130.dp),
+        shape = RoundedCornerShape(10.dp),
         onClick = {
             sharedViewModel.clearCurrentProduct()
             val parsedProduct = Product(
@@ -231,8 +231,9 @@ fun HomeProductItem(
                 product.num_likes
             )
             sharedViewModel.setCurrentProduct(parsedProduct)
-            sharedViewModel.setProductHistoryDetails()
-            viewModel.navigateToProductDetailsScreen(navController)
+            sharedViewModel.setProductHistoryDetails {
+                viewModel.navigateToProductDetailsScreen(navController)
+            }
         }
     ) {
         Column(
@@ -246,15 +247,14 @@ fun HomeProductItem(
                 modifier = Modifier
                     .size(100.dp)
                     .padding(bottom = 10.dp)
-
             )
             if (product.profit == 0.0 && product.profit_percentage == 0.0) {
                 Text(
-                    text = "MÁS GUSTADO!", style = TextStyle(
+                    text = "MÁS GUSTADO!",
+                    style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     )
-
                 )
             } else {
                 Text(
@@ -265,7 +265,6 @@ fun HomeProductItem(
                     )
                 )
             }
-
         }
     }
 }

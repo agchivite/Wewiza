@@ -20,6 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
@@ -158,14 +159,15 @@ fun ListProductItem(
             .clickable(onClick = {
                 sharedViewModel.clearCurrentProduct()
                 sharedViewModel.setCurrentProduct(product)
-                sharedViewModel.setProductHistoryDetails()
-                viewModel.navigateToProductDetailsScreen(navController)
+                sharedViewModel.setProductHistoryDetails{
+                    viewModel.navigateToProductDetailsScreen(navController)
+                }
             })
 
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Image(
-                painter = rememberImagePainter(data = product.image_url),
+                painter = rememberAsyncImagePainter(model = product.image_url),
                 contentDescription = "Product Image",
                 modifier = Modifier
                     .size(100.dp)

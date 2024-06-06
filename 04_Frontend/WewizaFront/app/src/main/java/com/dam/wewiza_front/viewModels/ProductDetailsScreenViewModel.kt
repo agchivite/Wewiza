@@ -33,8 +33,6 @@ class ProductDetailsScreenViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private var profile: Profile? = null
     private val profilesCollection = db.collection("profiles")
-    private val _historyDetails = MutableStateFlow<List<Product>>(emptyList())
-    val historyDetails: StateFlow<List<Product>> = _historyDetails
 
     fun likeProductWithCallback(productId: String, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
@@ -66,13 +64,6 @@ class ProductDetailsScreenViewModel : ViewModel() {
         }
     }
 
-    fun getProductHistoryDetails() {
-        viewModelScope.launch {
-            val details = sharedViewModel.getHistoryDetails()
-            _historyDetails.value = details
-            Log.d("ProductDetailsScreenViewModel", "getProductHistoryDetails: ${_historyDetails.value}")
-        }
-    }
 
     fun updateUserReviews() {
         viewModelScope.launch(Dispatchers.IO) {

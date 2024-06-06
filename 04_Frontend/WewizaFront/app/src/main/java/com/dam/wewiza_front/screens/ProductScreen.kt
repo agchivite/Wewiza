@@ -204,8 +204,9 @@ fun ProductItem(
             onClick = {
                 sharedViewModel.clearCurrentProduct()
                 sharedViewModel.setCurrentProduct(product)
-                sharedViewModel.setProductHistoryDetails()
-                viewModel.navigateToProductDetailsScreen(navController)
+                sharedViewModel.setProductHistoryDetails{
+                    viewModel.navigateToProductDetailsScreen(navController)
+                }
             }
         ) {
             Row(

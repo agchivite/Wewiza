@@ -89,9 +89,6 @@ fun ProductDetailsScreenBodyContent(
     viewModel: ProductDetailsScreenViewModel,
     sharedViewModel: SharedViewModel
 ) {
-
-    val currentProduct = sharedViewModel.getCurrentProduct()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -99,27 +96,29 @@ fun ProductDetailsScreenBodyContent(
             .padding(top = 70.dp),
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
     ) {
+        val currentProduct = sharedViewModel.getCurrentProduct()
+
         PhotoField(currentProduct)
         ProductDetailsFields(currentProduct, viewModel)
         GraphicField(viewModel)
-    }
 
+    }
 }
+
 
 @Composable
 fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
-    viewModel.getProductHistoryDetails()
 
-    val productHistoryDetails by viewModel.historyDetails.collectAsState(initial = emptyList())
-    Log.d("ProductDetailsScreen", "CurrentProduct: ${sharedViewModel.getCurrentProduct()}")
+    val productHistoryDetails by sharedViewModel.productHistoryDetails
 
-    LaunchedEffect(productHistoryDetails) {
-        Log.d("ProductDetailsScreen", "ProductHistoryDetails: $productHistoryDetails")
-    }
+    val isDataLoaded = productHistoryDetails.isNotEmpty()
+
+    Log.d("ProductDetailsScreen", "ProductHistoryDetails: $productHistoryDetails")
+    Log.d("ProductDetailsScreen", "CurrentProduct: ${sharedViewModel.getCurrentProduct().uuid}")
+
 
     if (
-        productHistoryDetails.isNotEmpty() &&
-        productHistoryDetails.last().uuid == sharedViewModel.getCurrentProduct().uuid
+        isDataLoaded
     ) {
         val sortedDetails = productHistoryDetails.sortedBy { it.date_created }
         val (entries, monthMap) = viewModel.prepareChartData(sortedDetails)
