@@ -57,21 +57,21 @@ class ProductService:
         }
 
         for actual_product in actual_products_list_json:
-            uuid = actual_product["uuid"]
-            if uuid in last_products_dict:
-                last_product = last_products_dict[uuid]
-                if (
+            last_product = last_products_dict.get(actual_product["name"])
+            if (
+                last_product
+                and last_product["price_by_standard_measure"]
+                != actual_product["price_by_standard_measure"]
+                and last_product["name"] == actual_product["name"]
+            ):
+                actual_product["profit"] = (
                     last_product["price_by_standard_measure"]
-                    != actual_product["price_by_standard_measure"]
-                ):
-                    actual_product["profit"] = (
-                        last_product["price_by_standard_measure"]
-                        - actual_product["price_by_standard_measure"]
-                    )
-                    actual_product["profit_percentage"] = (
-                        actual_product["price_by_standard_measure"]
-                        / last_product["price_by_standard_measure"]
-                    ) * 100
+                    - actual_product["price_by_standard_measure"]
+                )
+                actual_product["profit_percentage"] = (
+                    actual_product["price_by_standard_measure"]
+                    / last_product["price_by_standard_measure"]
+                ) * 100
 
         # Only get the actual products that has key profit
         actual_products_list_json = [
