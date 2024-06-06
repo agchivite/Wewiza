@@ -122,11 +122,11 @@ class SharedViewModel : ViewModel() {
     }
 
 
-    private fun getProductHistoryDetails(product_id: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+    private fun getProductHistoryDetails(productId: String) {
+        viewModelScope.launch{
             try {
                 val products = withContext(Dispatchers.IO) {
-                    service.getProductHistoryDetails(product_id)
+                    service.getProductHistoryDetails(productId)
                 }
                 withContext(Dispatchers.Main) {
                     productHistoryDetails.clear()

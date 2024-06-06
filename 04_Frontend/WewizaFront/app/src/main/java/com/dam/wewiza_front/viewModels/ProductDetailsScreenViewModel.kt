@@ -3,6 +3,7 @@ package com.dam.wewiza_front.viewModels
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dam.wewiza_front.models.Product
@@ -16,9 +17,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -32,6 +33,8 @@ class ProductDetailsScreenViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private var profile: Profile? = null
     private val profilesCollection = db.collection("profiles")
+    private val _historyDetails = MutableStateFlow<List<Product>>(emptyList())
+    val historyDetails: StateFlow<List<Product>> = _historyDetails
 
     fun likeProductWithCallback(productId: String, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
@@ -56,15 +59,19 @@ class ProductDetailsScreenViewModel : ViewModel() {
                 }
                 val result = serviceResult.values.firstOrNull() ?: false
                 callback(result)
-                Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${result}")
+                Log.d("ProductDetailsScreenViewModel", "unlikeProduct: $result")
             } catch (e: Exception) {
                 Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${e.message}")
             }
         }
     }
 
-    fun getProductHistoryDetails(): MutableList<Product> {
-        return sharedViewModel.getHistoryDetails()
+    fun getProductHistoryDetails() {
+        viewModelScope.launch {
+            val details = sharedViewModel.getHistoryDetails()
+            _historyDetails.value = details
+            Log.d("ProductDetailsScreenViewModel", "getProductHistoryDetails: ${_historyDetails.value}")
+        }
     }
 
     fun updateUserReviews() {
@@ -112,23 +119,6 @@ class ProductDetailsScreenViewModel : ViewModel() {
     }
 
 
-
-
-    private suspend fun updateProfileInFirebaseByEmail(userEmail: String, userProfile: Profile) {
-        try {
-            val querySnapshot = profilesCollection.whereEqualTo("email", userEmail).get().await()
-            if (!querySnapshot.isEmpty) {
-                // Se espera que haya solo un documento con el correo electrónico único
-                val profileDocument = querySnapshot.documents[0]
-                profileDocument.reference.set(userProfile).await()
-                Log.d("updateUserList", "Profile updated in Firebase for email: $userEmail")
-            } else {
-                Log.d("updateUserList", "User profile not found in Firebase for email: $userEmail")
-            }
-        } catch (e: Exception) {
-            Log.d("updateUserList", "Failed to update profile in Firebase: ${e.message}")
-        }
-    }
 
     fun addProductToList(
         shoppingListUuid: String,

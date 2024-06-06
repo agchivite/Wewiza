@@ -245,12 +245,18 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
                 Text(text = "→", fontSize = 34.sp)
             }
 
-            // Lista horizontal de productos sugeridos a la derecha
-            LazyRow(
-                modifier = Modifier.weight(2f)
-            ) {
-                items(suggestedProducts.size) { index ->
-                    SuggestedProductItem(suggestedProducts[index], viewModel, product.uuid)
+            if (suggestedProducts.isEmpty()) {
+                Text(
+                    text = "No hay sugerencias para este producto",
+                    modifier = Modifier.weight(2f)
+                )
+            }else{
+                LazyRow(
+                    modifier = Modifier.weight(2f)
+                ) {
+                    items(suggestedProducts.size) { index ->
+                        SuggestedProductItem(suggestedProducts[index], viewModel, product.uuid)
+                    }
                 }
             }
         }
@@ -322,8 +328,9 @@ fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel,
                 contentDescription = "Suggested Product Image",
                 modifier = Modifier.size(100.dp)
             )
+            val text = product.name.split(" ").take(3).joinToString(" ")
             Text(
-                text = product.name,
+                text = text,
                 modifier = Modifier.padding(top = 4.dp)
             )
             Row(modifier = Modifier.weight(1f)) {

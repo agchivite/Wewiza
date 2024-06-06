@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.dam.wewiza_front.Formatter.MonthAxisValueFormatter
 import com.dam.wewiza_front.R
@@ -63,7 +63,6 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.google.firebase.auth.FirebaseAuth
-import androidx.compose.foundation.clickable
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -80,7 +79,7 @@ fun ProductDetailsScreen(
     }) {
         MyLightTheme {
             val sharedViewModel = SharedViewModel.instance
-            ProductDetailsScreenBodyContent(viewModel, navController, sharedViewModel)
+            ProductDetailsScreenBodyContent(viewModel, sharedViewModel)
         }
     }
 }
@@ -88,7 +87,6 @@ fun ProductDetailsScreen(
 @Composable
 fun ProductDetailsScreenBodyContent(
     viewModel: ProductDetailsScreenViewModel,
-    navController: NavController,
     sharedViewModel: SharedViewModel
 ) {
 
@@ -110,15 +108,21 @@ fun ProductDetailsScreenBodyContent(
 
 @Composable
 fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
-    val productHistoryDetails = viewModel.getProductHistoryDetails().sortedBy { it.date_created }
-    Log.d("ProductDetailsScreen", "ProductHistoryDetails: $productHistoryDetails")
+    viewModel.getProductHistoryDetails()
+
+    val productHistoryDetails by viewModel.historyDetails.collectAsState(initial = emptyList())
     Log.d("ProductDetailsScreen", "CurrentProduct: ${sharedViewModel.getCurrentProduct()}")
-    
+
+    LaunchedEffect(productHistoryDetails) {
+        Log.d("ProductDetailsScreen", "ProductHistoryDetails: $productHistoryDetails")
+    }
+
     if (
         productHistoryDetails.isNotEmpty() &&
         productHistoryDetails.last().uuid == sharedViewModel.getCurrentProduct().uuid
     ) {
-        val (entries, monthMap) = viewModel.prepareChartData(productHistoryDetails)
+        val sortedDetails = productHistoryDetails.sortedBy { it.date_created }
+        val (entries, monthMap) = viewModel.prepareChartData(sortedDetails)
         Log.d("ProductDetailsScreen", "Entries: $entries")
         LineChartView(entries, monthMap)
     } else {
@@ -129,9 +133,11 @@ fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
 
 @Composable
 fun LineChartView(entries: List<Entry>, monthMap: Map<Float, String>) {
-    Column(modifier = Modifier
-        .padding(50.dp)
-        .padding(bottom = 40.dp)) {
+    Column(
+        modifier = Modifier
+            .padding(50.dp)
+            .padding(bottom = 40.dp)
+    ) {
         AndroidView(
             factory = { context ->
                 LineChart(context).apply {
@@ -187,7 +193,11 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
             .padding(top = 20.dp)
             .fillMaxWidth()
     ) {
-        Box(modifier = Modifier.padding(8.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
                     text = currentProduct.name,
@@ -213,6 +223,7 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                         .align(Alignment.BottomEnd)
                         .padding(10.dp)
                 )
+
                 "ahorramas" -> Image(
                     painter = painterResource(id = R.drawable.ahorramas),
                     contentDescription = "Ahorramas",
@@ -221,8 +232,9 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                         .align(Alignment.BottomEnd)
                         .padding(10.dp)
                 )
+
                 else -> Image(
-                    painter = rememberImagePainter(data = currentProduct.store_image_url),
+                    painter = rememberAsyncImagePainter(model = currentProduct.store_image_url),
                     contentDescription = "Imagen de la tienda",
                     modifier = Modifier
                         .size(70.dp)
@@ -244,9 +256,16 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                                 viewModel.updateUserReviews()
                                 currentProduct.num_likes -= 1
                                 Toast.makeText(context, "No te gusta...", Toast.LENGTH_SHORT).show()
-                                Log.d("ProductDetailsScreen", "LikesNumber: ${currentProduct.num_likes}")
+                                Log.d(
+                                    "ProductDetailsScreen",
+                                    "LikesNumber: ${currentProduct.num_likes}"
+                                )
                             } else {
-                                Toast.makeText(context, "Ya diste no me gusta a este producto", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Ya diste no me gusta a este producto",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
@@ -274,9 +293,16 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                                 viewModel.updateUserReviews()
                                 currentProduct.num_likes += 1
                                 Toast.makeText(context, "Te gusta!", Toast.LENGTH_SHORT).show()
-                                Log.d("ProductDetailsScreen", "LikesNumber: ${currentProduct.num_likes}")
+                                Log.d(
+                                    "ProductDetailsScreen",
+                                    "LikesNumber: ${currentProduct.num_likes}"
+                                )
                             } else {
-                                Toast.makeText(context, "Ya diste me gusta a este producto", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Ya diste me gusta a este producto",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
@@ -313,7 +339,12 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
 
                                 LazyColumn(content = {
                                     items(availableLists.value.size) { index ->
-                                        ShoppingListItem(availableLists.value[index], viewModel, currentProduct, context)
+                                        ShoppingListItem(
+                                            availableLists.value[index],
+                                            viewModel,
+                                            currentProduct,
+                                            context
+                                        )
                                     }
                                 })
                             }

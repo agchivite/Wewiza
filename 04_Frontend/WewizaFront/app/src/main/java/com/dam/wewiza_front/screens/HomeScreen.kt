@@ -204,7 +204,7 @@ fun HomeProductItem(
     viewModel: HomeScreenViewModel,
     navController: NavController
 ) {
-    val painter: Painter = rememberImagePainter(data = product.image_url)
+    val painter: Painter = rememberAsyncImagePainter(model = product.image_url)
 
     Card(
         modifier = Modifier
