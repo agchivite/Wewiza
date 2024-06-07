@@ -94,7 +94,7 @@ fun ProductDetailsScreenBodyContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .padding(top = 70.dp),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val currentProduct = sharedViewModel.getCurrentProduct()
 
@@ -212,6 +212,26 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                     fontSize = 18.sp,
                     color = Color.Black
                 )
+                Text(
+                    text = "Precio por medida: ${currentProduct.price_by_standard_measure} €/${
+                        if (currentProduct.measure.lowercase().contains("mg") || 
+                            currentProduct.measure.lowercase().contains("g") || 
+                            currentProduct.measure.lowercase().contains("kg")
+                        ){
+                            "Kg"
+                        }else if (currentProduct.measure.lowercase().contains("ml") ||
+                            currentProduct.measure.lowercase().contains("cl") ||
+                            currentProduct.measure.lowercase().contains("l")
+                        ){
+                            "L"
+                        }else{
+                            "Ud"
+                        }
+                    }",
+                    fontFamily = FirsNeue,
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
             }
             when (currentProduct.store_name.lowercase().trim()) {
                 "mercadona" -> Image(
@@ -316,7 +336,7 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
             Column {
                 Button(onClick = { showDialog.value = true }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24),
+                        painter = painterResource(id = R.drawable.add_to_list),
                         contentDescription = "addToList"
                     )
                 }

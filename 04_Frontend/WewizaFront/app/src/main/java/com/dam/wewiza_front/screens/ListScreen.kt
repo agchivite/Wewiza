@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -37,7 +38,7 @@ fun ListScreen(listScreenViewModel: ListScreenViewModel, navController: NavHostC
     Log.d("ListScreen", "Selected Products: ${selectedProductsIds!!.products.size}")
     var loading by remember { mutableStateOf(false) }
 
-    if (selectedProductsIds!!.products.isNotEmpty()) {
+    if (selectedProductsIds.products.isNotEmpty()) {
         LaunchedEffect(selectedProductsIds) {
             loading = true
             val products = listScreenViewModel.getProductsFromList(selectedProductsIds)
@@ -180,8 +181,24 @@ fun ListProductItem(
             ) {
                 Text(text = product.name)
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "Price: ${product.price} €")
-                Text(text = "Store: ${product.store_name}")
+                Text(text = "Precio: ${product.price} €")
+                Text(text = "Precio por medida: ${product.price_by_standard_measure} €/${
+                    if (product.measure.lowercase().contains("mg") ||
+                        product.measure.lowercase().contains("g") ||
+                        product.measure.lowercase().contains("kg")
+                    ){
+                        "Kg"
+                    }else if (product.measure.lowercase().contains("ml") ||
+                        product.measure.lowercase().contains("cl") ||
+                        product.measure.lowercase().contains("l")
+                    ){
+                        "L"
+                    }else{
+                        "Ud"
+                    }
+                }", fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(5.dp))
+                Text(text = "Tienda: ${product.store_name}")
             }
 
             Button(

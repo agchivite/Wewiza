@@ -3,49 +3,19 @@
 package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
@@ -68,7 +38,7 @@ fun ProductScreen(
     var isMercadonaChecked by remember { mutableStateOf(true) }
     var isAhorramasChecked by remember { mutableStateOf(true) }
     var isCarrefourChecked by remember { mutableStateOf(true) }
-    var selectedCategories by remember {
+    val selectedCategories by remember {
         sharedViewModel.selectedCategories
     }
     var priceSortOrder by remember { mutableStateOf("Ninguno") }
@@ -135,7 +105,7 @@ fun ProductScreenBodyContent(
             ((it.store_name == "Mercadona" && isMercadonaChecked) ||
                     (it.store_name == "Ahorramas" && isAhorramasChecked) ||
                     (it.store_name == "Carrefour" && isCarrefourChecked)) && (
-                    (selectedCategories.value[it.category_id] == true))
+                    selectedCategories.value[it.category_id] == true)
         }
         .sortedWith(
             when (priceSortOrder) {
@@ -214,7 +184,7 @@ fun ProductItem(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Image(
-                    painter = rememberImagePainter(data = product.image_url),
+                    painter = rememberAsyncImagePainter(model = product.image_url),
                     contentDescription = product.name,
                     modifier = Modifier
                         .size(100.dp)
@@ -223,6 +193,22 @@ fun ProductItem(
                 Column {
                     Text(text = product.name, fontFamily = FirsNeue, fontWeight = FontWeight.SemiBold)
                     Text(text = "${product.price} €", modifier = Modifier.padding(top = 10.dp), fontFamily = FirsNeue)
+                    Text(
+                        text = "${product.price_by_standard_measure} €/${
+                            if (product.measure.lowercase().contains("mg") ||
+                                product.measure.lowercase().contains("g") ||
+                                product.measure.lowercase().contains("kg")
+                            ){
+                                "Kg"
+                            }else if (product.measure.lowercase().contains("ml") ||
+                                product.measure.lowercase().contains("cl") ||
+                                product.measure.lowercase().contains("l")
+                            ){
+                                "L"
+                            }else{
+                                "Ud"
+                            }
+                        }", modifier = Modifier.padding(top = 2.dp), fontFamily = FirsNeue, fontSize = 12.sp)
                 }
             }
         }
@@ -246,7 +232,7 @@ fun ProductItem(
             )
         } else {
             Image(
-                painter = rememberImagePainter(data = product.store_image_url),
+                painter = rememberAsyncImagePainter(model = product.store_image_url),
                 contentDescription = "Imagen de la tienda",
                 modifier = Modifier
                     .size(70.dp)
