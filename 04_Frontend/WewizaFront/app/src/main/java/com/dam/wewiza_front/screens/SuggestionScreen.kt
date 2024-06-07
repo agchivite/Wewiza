@@ -11,16 +11,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -216,7 +207,6 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .height(250.dp)
     ) {
         Row(
             modifier = Modifier.padding(8.dp),
@@ -264,7 +254,7 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel, uuid: String) {
     var isAccepted by remember { mutableStateOf(false) }
@@ -309,8 +299,8 @@ fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel,
     Card(
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
-            .padding(4.dp)
-            .size(230.dp)
+            .width(170.dp)
+            .padding(start =3.dp)
             .graphicsLayer {
                 translationY = offsetY.value
                 scaleX = scale.value
@@ -328,36 +318,46 @@ fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel,
                 contentDescription = "Suggested Product Image",
                 modifier = Modifier.size(100.dp)
             )
-            val text = product.name.split(" ").take(3).joinToString(" ")
             Text(
-                text = text,
+                text = product.name,
                 modifier = Modifier.padding(top = 4.dp)
             )
-            Row(modifier = Modifier.weight(1f)) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Cancel Icon
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_cancel_24),
                     contentDescription = "cancel",
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(60.dp)
                         .clickable(onClick = {
                             viewModel.deleteProductFromSuggestions(product, uuid)
-                        }),
+                        })
+                        .padding(8.dp),
                     tint = Color(0xFFD32F2F)
                 )
 
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Accept Icon
                 Icon(
                     painter = painterResource(id = R.drawable.accept),
                     contentDescription = "accept",
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(60.dp)
                         .clickable(onClick = {
                             isAccepted = true  // Trigger the jump and shrink animation
                             viewModel.addProductToChoosenProductsList(product, uuid)
-                        }),
+                        })
+                        .padding(8.dp),
                     tint = Color(0xFF4CAF50)
                 )
             }
         }
     }
 }
+
 
