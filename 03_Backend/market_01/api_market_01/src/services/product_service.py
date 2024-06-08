@@ -43,6 +43,8 @@ class ProductService:
                     last_product["uuid"] != actual_product["uuid"]
                     and last_product["name"] == actual_product["name"]
                     and last_product["price_by_standard_measure"]
+                    and last_product["price_by_standard_measure"]
+                    != 0  # Verificación para evitar división por cero
                     != actual_product["price_by_standard_measure"]
                 ):
                     actual_product["profit"] = (
