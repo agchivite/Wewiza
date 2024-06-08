@@ -295,12 +295,12 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
 
-            # I want to reduce the price from all products that has more than 1.5 in price
-            # and the same month that actual
+            # I want get the products that has in price_by_standard_measure 0.1 or less
+            # an the date_created is the current month
             documents = collection.find(
                 {
                     "$and": [
-                        {"price": {"$gt": 1.5}},
+                        {"price_by_standard_measure": {"$lte": 0.1}},
                         {
                             "date_created": {
                                 "$regex": f"^{datetime.now().strftime('%Y-%m')}"
@@ -313,10 +313,10 @@ class ProductRepository:
             for doc in documents:
                 price = doc["price"]
                 price_by_standard_measure = doc["price_by_standard_measure"]
-                # Reduce -0.3 price and price by standard measure
-                rounded_price = round(price - 0.15, 2)
+                # Reduce add 0.15 price by standard measure
+                rounded_price = round(price + 0.15, 2)
                 rounded_price_by_standard_measure = round(
-                    price_by_standard_measure - 0.15, 2
+                    price_by_standard_measure + 0.15, 2
                 )
                 # Now update
                 collection.update_one(
