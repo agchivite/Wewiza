@@ -63,6 +63,25 @@ class ProductRepository:
         except Exception as e:
             return Result.failure(str(e))
 
+    def update_product_by_uuid(self, uuid):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            product = collection.find_one({"uuid": uuid})
+            name = product["name"]
+            price_per_standar_measure = product["price_by_standard_measure"]
+            price_per_standar_measure = float(price_per_standar_measure) - 0.4
+
+            result = collection.update_one(
+                {"uuid": uuid},
+                {"$set": {"price_by_standard_measure": price_per_standar_measure}},
+            )
+
+            self.db_manager.close_database()
+            return Result.success(result.modified_count)
+        except Exception as e:
+            return Result.failure(str(e))
+
     # TODO: Implement this method no HARDCODE dates
     def update_all_date(self):
         try:

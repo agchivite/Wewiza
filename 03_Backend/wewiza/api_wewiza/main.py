@@ -891,6 +891,12 @@ def calculate_topics(password: str):
     }
 
 
+@app.get("/product/update/id/{uuid}")
+def update_price_mercadona(uuid: str):
+    requests.get(f"http://api_market_03:8083/product/update/id/{uuid}")
+    return {"message": "Price updated"}
+
+
 """
 @app.get(
     "/products",
