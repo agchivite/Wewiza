@@ -44,6 +44,10 @@ list_agua_y_refrescos = [
 ]
 dictionaty_titles_categories["agua_y_refrescos"] = list_agua_y_refrescos
 
+### verduras ###
+list_verduras = ["Lechuga y ensalada preparada", "Verdura"]
+dictionaty_titles_categories["verduras"] = list_verduras
+
 ### aperitivos ###
 list_aperitivos = [
     "Aceitunas y encurtidos",
@@ -165,10 +169,6 @@ dictionaty_titles_categories["conservas_caldos_y_cremas"] = (
 list_frutas = ["Fruta"]
 dictionaty_titles_categories["frutas"] = list_frutas
 
-### verduras ###
-list_verduras = ["Lechuga y ensalada preparada", "Verdura"]
-dictionaty_titles_categories["verduras"] = list_verduras
-
 ### huevos_leche_batidos_y_mantequilla ###
 list_huevos_leche_batidos_y_mantequilla = [
     "Huevos",
@@ -237,6 +237,10 @@ list_zumos = ["Fruta variada", "Melocotón y piña", "Naranja", "Tomate y otros 
 dictionaty_titles_categories["zumos"] = list_zumos
 
 list_num_categories = [
+    29,
+    27,
+    163,
+    158,
     105,
     110,
     111,
@@ -275,8 +279,6 @@ list_num_categories = [
     72,
     77,
     28,
-    29,
-    27,
     126,
     129,
     130,
@@ -342,8 +344,6 @@ list_num_categories = [
     116,
     117,
     156,
-    163,
-    158,
     159,
     161,
     162,
