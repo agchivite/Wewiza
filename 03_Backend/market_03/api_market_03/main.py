@@ -24,6 +24,12 @@ def check_avaliable_api():
     return {"message": "API is working"}
 
 
+@app.get("/product/update/id/{uuid}")
+def update_product(uuid: str):
+    product_service.update_product_by_uuid(uuid)
+    return {"result": "Product updated"}
+
+
 @app.get("/update_all_date")
 def update_all_date():
     # Only update product with "date_created" in "2024-05-01 00:14:43"
@@ -43,7 +49,7 @@ def get_products_with_good_profit():
     for product in sorted_products:
         product["profit_percentage"] = round(product["profit_percentage"], 2)
 
-        if product["profit_percentage"] <= 0.0 or product["profit_percentage"] >= 50.0:
+        if product["profit_percentage"] <= 0.0 or product["profit_percentage"] >= 60.0:
             continue
 
         filtered_products.append(product)

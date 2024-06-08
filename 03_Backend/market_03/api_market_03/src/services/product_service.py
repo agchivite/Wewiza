@@ -13,6 +13,14 @@ class ProductService:
         return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
     #####################----------------#####################
+    def update_product_by_uuid(self, uuid):
+        result = self.product_repository.update_product_by_uuid(uuid)
+
+        if result.is_failure():
+            print("Failed to update product by uuid:", result.error)
+            return []
+
+        return result.value
 
     def update_all_date(self):
         result = self.product_repository.update_all_date()
