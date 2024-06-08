@@ -113,3 +113,9 @@ def updateZeroData():
 @app.get("/find/actual/id/{uuid}")
 def find_actual_id(uuid: str):
     return product_service.find_actual_id(uuid)
+
+
+@app.get("/products/update/mercadona")
+def update_mercadona():
+    product_service.update_mercadona()
+    return {"message": "Update Mercadona"}

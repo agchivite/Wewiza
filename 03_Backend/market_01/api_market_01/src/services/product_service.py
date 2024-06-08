@@ -232,3 +232,12 @@ class ProductService:
 
         successJson = {"success": True, "failure": None, "uuid": result.value}
         return successJson
+
+    def update_mercadona(self):
+        result = self.product_repository.update_mercadona()
+
+        if result.is_failure():
+            print("Failed to update mercadona:", result.error)
+            return []
+
+        return result.value

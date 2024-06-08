@@ -289,3 +289,47 @@ class ProductRepository:
             return Result.success(product["uuid"])
         except Exception as e:
             return Result.failure(str(e))
+
+    def update_mercadona(self):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+
+            # I want to reduce the price from all products that has more than 1.5 in price
+            # and the same month that actual
+            documents = collection.find(
+                {
+                    "$and": [
+                        {"price": {"$gt": 1.5}},
+                        {
+                            "date_created": {
+                                "$regex": f"^{datetime.now().strftime('%Y-%m')}"
+                            }
+                        },
+                    ]
+                }
+            )
+
+            for doc in documents:
+                price = doc["price"]
+                price_by_standard_measure = doc["price_by_standard_measure"]
+                # Reduce -0.3 price and price by standard measure
+                rounded_price = round(price - 0.15, 2)
+                rounded_price_by_standard_measure = round(
+                    price_by_standard_measure - 0.15, 2
+                )
+                # Now update
+                collection.update_one(
+                    {"_id": doc["_id"]},
+                    {
+                        "$set": {
+                            "price": rounded_price,
+                            "price_by_standard_measure": rounded_price_by_standard_measure,
+                        }
+                    },
+                )
+
+            self.db_manager.close_database()
+            return Result.success("Ok")
+        except Exception as e:
+            return Result.failure(str(e))
