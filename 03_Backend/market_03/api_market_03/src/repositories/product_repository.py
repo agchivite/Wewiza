@@ -67,16 +67,16 @@ class ProductRepository:
         try:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
-            # Get the name and price_per_standar_measure of product and update the other product with the same name
             product = collection.find_one({"uuid": uuid})
             name = product["name"]
             price_per_standar_measure = product["price_by_standard_measure"]
-            price_per_standar_measure = float(price_per_standar_measure) + 0.2
+            price_per_standar_measure = float(price_per_standar_measure) - 0.4
 
-            result = collection.update_many(
-                {"name": name},
+            result = collection.update_one(
+                {"uuid": uuid},
                 {"$set": {"price_by_standard_measure": price_per_standar_measure}},
             )
+
             self.db_manager.close_database()
             return Result.success(result.modified_count)
         except Exception as e:
