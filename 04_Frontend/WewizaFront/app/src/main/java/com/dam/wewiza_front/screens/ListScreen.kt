@@ -17,12 +17,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
@@ -155,16 +154,14 @@ fun ListProductItem(
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp)
             .padding(8.dp)
             .clickable(onClick = {
                 sharedViewModel.clearCurrentProduct()
                 sharedViewModel.setCurrentProduct(product)
-                sharedViewModel.setProductHistoryDetails{
+                sharedViewModel.setProductHistoryDetails {
                     viewModel.navigateToProductDetailsScreen(navController)
                 }
             })
-
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Image(
@@ -179,43 +176,74 @@ fun ListProductItem(
                     .padding(start = 8.dp)
                     .weight(1f) // This makes the column take available space
             ) {
-                Text(text = product.name)
+                Text(text = product.name, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(text = "Precio: ${product.price} €")
                 Text(text = "Precio por medida: ${product.price_by_standard_measure} €/${
                     if (product.measure.lowercase().contains("mg") ||
                         product.measure.lowercase().contains("g") ||
                         product.measure.lowercase().contains("kg")
-                    ){
+                    ) {
                         "Kg"
-                    }else if (product.measure.lowercase().contains("ml") ||
+                    } else if (product.measure.lowercase().contains("ml") ||
                         product.measure.lowercase().contains("cl") ||
                         product.measure.lowercase().contains("l")
-                    ){
+                    ) {
                         "L"
-                    }else{
+                    } else {
                         "Ud"
                     }
                 }", fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(5.dp))
-                Text(text = "Tienda: ${product.store_name}")
             }
 
-            Button(
-                onClick = {
-                    viewModel.deleteProduct(product)
-                    onDelete(product)
-                },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(69.dp) // Adjust size as needed
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(end = 8.dp)
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.delete),
-                    contentDescription = "Delete product",
-                    modifier = Modifier.size(24.dp) // Adjust size as needed
-                )
+                DeleteButton(viewModel, onDelete, product)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (product.store_name.trim().lowercase() == "mercadona") {
+                    Image(
+                        painter = painterResource(id = R.drawable.mercadona_logo),
+                        contentDescription = "mercadona",
+                        modifier = Modifier
+                            .size(40.dp)
+                    )
+                } else if (product.store_name.trim().lowercase() == "ahorramas") {
+                    Image(
+                        painter = painterResource(id = R.drawable.ahorramas),
+                        contentDescription = "ahorramas",
+                        modifier = Modifier
+                            .size(40.dp)
+                    )
+                } else if (product.store_name.trim().lowercase() == "carrefour") {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = product.store_image_url),
+                        contentDescription = "carrefour",
+                        modifier = Modifier
+                            .size(40.dp)
+                    )
+                }
             }
         }
     }
 }
+
+@Composable
+fun DeleteButton(viewModel: ListScreenViewModel, onDelete: (Product) -> Unit, product: Product) {
+    IconButton(onClick = {
+        viewModel.deleteProduct(product)
+        onDelete(product)
+    }) {
+        Icon(
+            painter = painterResource(id = R.drawable.delete),
+            contentDescription = "Delete"
+        )
+    }
+
+}
+
+
