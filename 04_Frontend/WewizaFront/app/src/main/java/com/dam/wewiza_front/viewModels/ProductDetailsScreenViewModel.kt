@@ -3,7 +3,6 @@ package com.dam.wewiza_front.viewModels
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dam.wewiza_front.models.Product
@@ -17,13 +16,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 
 class ProductDetailsScreenViewModel : ViewModel() {
 
@@ -34,14 +31,17 @@ class ProductDetailsScreenViewModel : ViewModel() {
     private var profile: Profile? = null
     private val profilesCollection = db.collection("profiles")
 
-    fun likeProductWithCallback(productId: String, callback: (Boolean) -> Unit) {
+    fun likeProductWithCallback(productId: String, callback: (Pair<Boolean, Int>) -> Unit) {
         viewModelScope.launch {
             try {
                 val serviceResult = withContext(Dispatchers.IO) {
                     service.likeProduct(auth.currentUser!!.email.toString(), productId)
                 }
                 val result = serviceResult.values.firstOrNull() ?: false
-                callback(result)
+                val newProduct = service.getProductById(productId)
+                val newLikes = newProduct.num_likes
+                val pairBooleanAndNewLikes = Pair(result, newLikes)
+                callback(pairBooleanAndNewLikes)
                 Log.d("ProductDetailsScreenViewModel", "likeProduct: ${result}")
             } catch (e: Exception) {
                 Log.d("ProductDetailsScreenViewModel", "likeProduct: ${e.message}")
@@ -49,14 +49,17 @@ class ProductDetailsScreenViewModel : ViewModel() {
         }
     }
 
-    fun unlikeProductWithCallback(productId: String, callback: (Boolean) -> Unit) {
+    fun unlikeProductWithCallback(productId: String, callback: (Pair<Boolean, Int>) -> Unit) {
         viewModelScope.launch {
             try {
                 val serviceResult = withContext(Dispatchers.IO) {
                     service.unlikeProduct(auth.currentUser!!.email.toString(), productId)
                 }
                 val result = serviceResult.values.firstOrNull() ?: false
-                callback(result)
+                val newProduct = service.getProductById(productId)
+                val newLikes = newProduct.num_likes
+                val pairBooleanAndNewLikes = Pair(result, newLikes)
+                callback(pairBooleanAndNewLikes)
                 Log.d("ProductDetailsScreenViewModel", "unlikeProduct: $result")
             } catch (e: Exception) {
                 Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${e.message}")
@@ -110,7 +113,6 @@ class ProductDetailsScreenViewModel : ViewModel() {
     }
 
 
-
     fun addProductToList(
         shoppingListUuid: String,
         productUuid: String,
@@ -144,8 +146,18 @@ class ProductDetailsScreenViewModel : ViewModel() {
             val year = calendar.get(Calendar.YEAR)
             val monthValue = index.toFloat()
 
-            if (!uniqueMonths.containsValue("${calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())} $year")) {
-                uniqueMonths[monthValue] = "${calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())} $year"
+            if (!uniqueMonths.containsValue(
+                    "${
+                        calendar.getDisplayName(
+                            Calendar.MONTH,
+                            Calendar.SHORT,
+                            Locale.getDefault()
+                        )
+                    } $year"
+                )
+            ) {
+                uniqueMonths[monthValue] =
+                    "${calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())} $year"
                 index++
             }
 

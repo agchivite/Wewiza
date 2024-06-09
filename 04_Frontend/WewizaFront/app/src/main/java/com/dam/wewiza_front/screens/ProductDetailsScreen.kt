@@ -9,28 +9,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -215,17 +197,17 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                 )
                 Text(
                     text = "Precio por medida: ${currentProduct.price_by_standard_measure} €/${
-                        if (currentProduct.measure.lowercase().contains("mg") || 
-                            currentProduct.measure.lowercase().contains("g") || 
+                        if (currentProduct.measure.lowercase().contains("mg") ||
+                            currentProduct.measure.lowercase().contains("g") ||
                             currentProduct.measure.lowercase().contains("kg")
-                        ){
+                        ) {
                             "Kg"
-                        }else if (currentProduct.measure.lowercase().contains("ml") ||
+                        } else if (currentProduct.measure.lowercase().contains("ml") ||
                             currentProduct.measure.lowercase().contains("cl") ||
                             currentProduct.measure.lowercase().contains("l")
-                        ){
+                        ) {
                             "L"
-                        }else{
+                        } else {
                             "Ud"
                         }
                     }",
@@ -272,9 +254,9 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                         viewModel.unlikeProductWithCallback(currentProduct.uuid) { result ->
                             // Manejar el resultado del unlike
                             buttonsEnabled = true
-                            if (result) {
-                                viewModel.updateUserReviews()
-                                currentProduct.num_likes -= 1
+                            if (result.first) {
+                                //viewModel.updateUserReviews()
+                                currentProduct.num_likes = result.second
                                 Toast.makeText(context, "No te gusta...", Toast.LENGTH_SHORT).show()
                                 Log.d(
                                     "ProductDetailsScreen",
@@ -309,9 +291,9 @@ fun ProductDetailsFields(currentProduct: Product, viewModel: ProductDetailsScree
                         viewModel.likeProductWithCallback(currentProduct.uuid) { result ->
                             // Manejar el resultado del like
                             buttonsEnabled = true
-                            if (result) {
-                                viewModel.updateUserReviews()
-                                currentProduct.num_likes += 1
+                            if (result.first) {
+                                //viewModel.updateUserReviews()
+                                currentProduct.num_likes = result.second
                                 Toast.makeText(context, "Te gusta!", Toast.LENGTH_SHORT).show()
                                 Log.d(
                                     "ProductDetailsScreen",

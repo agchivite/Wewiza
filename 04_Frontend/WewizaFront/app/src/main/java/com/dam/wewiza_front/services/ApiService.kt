@@ -1,12 +1,9 @@
 package com.dam.wewiza_front.services
 
-import com.dam.wewiza_front.models.Categories
-import com.dam.wewiza_front.models.Category
-import com.dam.wewiza_front.models.Markets
-import com.dam.wewiza_front.models.Product
-import com.dam.wewiza_front.models.TopProduct
+import com.dam.wewiza_front.models.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -20,8 +17,8 @@ interface ApiService {
     @GET("categories")
     suspend fun getAllCategories(): Categories
 
-    @GET
-    suspend fun testConnection()
+    @GET("docs")
+    suspend fun testConnection(): Response<Void>
 
     @GET("products")
     suspend fun getAllMarketsProduct(): Markets
