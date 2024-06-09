@@ -70,15 +70,19 @@ class ProductLikesService:
         likes_emails.append(email_user)
 
         update_query = {"uuid": product_id}
-        update_data = {
-            "$set": {"num_likes": new_num_likes, "likes_email": likes_emails}
-        }
+        update_data = {}
 
-        # Remove email from unlikes_email if it was there
         if email_user in product_data.get("unlikes_email", []):
-            update_data["$pull"] = {"unlikes_email": email_user}
-            # Sum one more like because it was unliked before
-            update_data["$set"]["num_likes"] = new_num_likes + 1
+            # Remove email from unlikes_email if it was there and add +2
+            update_data = {
+                "$set": {"num_likes": new_num_likes + 1, "likes_email": likes_emails},
+                "$pull": {"unlikes_email": email_user},
+            }
+        else:
+            # Only we add user to likes if it was not unliked before
+            update_data = {
+                "$set": {"num_likes": new_num_likes, "likes_email": likes_emails}
+            }
 
         self.product_likes_repository.update_product(update_query, update_data)
         return True
@@ -105,15 +109,22 @@ class ProductLikesService:
         unlikes_emails.append(email_user)
 
         update_query = {"uuid": product_id}
-        update_data = {
-            "$set": {"num_likes": new_num_likes, "unlikes_email": unlikes_emails}
-        }
+        update_data = {}
 
-        # Remove email from likes_email if it was there
         if email_user in product_data.get("likes_email", []):
-            update_data["$pull"] = {"likes_email": email_user}
-            # Subtract one like because it was liked before
-            update_data["$set"]["num_likes"] = new_num_likes - 1
+            # Remove email from likes_email if it was there and subtract -2
+            update_data = {
+                "$set": {
+                    "num_likes": new_num_likes - 1,
+                    "unlikes_email": unlikes_emails,
+                },
+                "$pull": {"likes_email": email_user},
+            }
+        else:
+            # Only we add user to unlikes if it was not liked before
+            update_data = {
+                "$set": {"num_likes": new_num_likes, "unlikes_email": unlikes_emails}
+            }
 
         self.product_likes_repository.update_product(update_query, update_data)
         return True
