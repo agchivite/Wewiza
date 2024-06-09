@@ -183,6 +183,7 @@ fun MarketSelectionDialog(showDialog: MutableState<Boolean>, onConfirm: (List<St
     val mercadonaChecked = remember { mutableStateOf(false) }
     val carrefourChecked = remember { mutableStateOf(false) }
     val ahorramasChecked = remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     if (showDialog.value) {
         AlertDialog(
@@ -222,7 +223,16 @@ fun MarketSelectionDialog(showDialog: MutableState<Boolean>, onConfirm: (List<St
                         if (carrefourChecked.value) selectedMarkets.add("carrefour")
                         if (ahorramasChecked.value) selectedMarkets.add("ahorramas")
 
-                        onConfirm(selectedMarkets)
+                        if (selectedMarkets.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                "Debes seleccionar al menos un mercado",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }else{
+                            onConfirm(selectedMarkets)
+                        }
+
                         showDialog.value = false
                     }
                 ) {
