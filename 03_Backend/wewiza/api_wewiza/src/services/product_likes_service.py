@@ -70,18 +70,13 @@ class ProductLikesService:
             return False
 
         if email_user in unlikes_emails:
-            # Remove email from unlikes_email if it was there and add +2
-            likes_emails.append(email_user)
+            # User previously unliked the product, so remove the unlike
             unlikes_emails.remove(email_user)
             update_data = {
-                "$set": {
-                    "num_likes": num_likes + 2,
-                    "likes_email": likes_emails,
-                    "unlikes_email": unlikes_emails,
-                },
+                "$set": {"num_likes": num_likes + 1, "unlikes_email": unlikes_emails},
             }
         else:
-            # Add user to likes if it was not unliked before
+            # User has not expressed opinion before, so add to likes
             likes_emails.append(email_user)
             update_data = {
                 "$set": {"num_likes": num_likes + 1, "likes_email": likes_emails},
@@ -105,26 +100,24 @@ class ProductLikesService:
         likes_emails = product_data.get("likes_email", [])
         unlikes_emails = product_data.get("unlikes_email", [])
 
-        if email_user in likes_emails:
-            print(
-                "PRODUCT_LIKES_SERVICE: (Unlike) Product was liked before by "
-                + email_user
-            )
-            likes_emails.remove(email_user)
-            update_data = {
-                "$set": {"num_likes": num_likes - 1, "likes_email": likes_emails},
-            }
-        elif email_user in unlikes_emails:
+        if email_user in unlikes_emails:
             print(
                 "PRODUCT_LIKES_SERVICE: (Unlike) Product was unliked before by "
                 + email_user
             )
             return False
+
+        if email_user in likes_emails:
+            # User previously liked the product, so remove the like
+            likes_emails.remove(email_user)
+            update_data = {
+                "$set": {"num_likes": num_likes - 1, "likes_email": likes_emails},
+            }
         else:
-            # Add user to unlikes if it was not liked before
+            # User has not expressed opinion before, so add to unlikes
             unlikes_emails.append(email_user)
             update_data = {
-                "$set": {"num_likes": num_likes, "unlikes_email": unlikes_emails},
+                "$set": {"num_likes": num_likes - 1, "unlikes_email": unlikes_emails},
             }
 
         update_query = {"uuid": product_id}
