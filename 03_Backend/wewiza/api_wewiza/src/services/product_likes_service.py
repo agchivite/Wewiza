@@ -72,8 +72,13 @@ class ProductLikesService:
         if email_user in unlikes_emails:
             # User previously unliked the product, so remove the unlike
             unlikes_emails.remove(email_user)
+            likes_emails.append(email_user)
             update_data = {
-                "$set": {"num_likes": num_likes + 1, "unlikes_email": unlikes_emails},
+                "$set": {
+                    "num_likes": num_likes + 2,
+                    "likes_email": likes_emails,
+                    "unlikes_email": unlikes_emails,
+                },
             }
         else:
             # User has not expressed opinion before, so add to likes
@@ -110,8 +115,13 @@ class ProductLikesService:
         if email_user in likes_emails:
             # User previously liked the product, so remove the like
             likes_emails.remove(email_user)
+            unlikes_emails.append(email_user)
             update_data = {
-                "$set": {"num_likes": num_likes - 1, "likes_email": likes_emails},
+                "$set": {
+                    "num_likes": num_likes - 2,
+                    "likes_email": likes_emails,
+                    "unlikes_email": unlikes_emails,
+                },
             }
         else:
             # User has not expressed opinion before, so add to unlikes
