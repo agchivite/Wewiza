@@ -134,8 +134,7 @@ fun GraphicField(viewModel: ProductDetailsScreenViewModel) {
 fun LineChartView(entries: List<Entry>, monthMap: Map<Float, String>) {
     Column(
         modifier = Modifier
-            .padding(50.dp)
-            .padding(bottom = 40.dp)
+            .padding(start = 50.dp, end = 50.dp, bottom = 150.dp)
     ) {
         AndroidView(
             factory = { context ->

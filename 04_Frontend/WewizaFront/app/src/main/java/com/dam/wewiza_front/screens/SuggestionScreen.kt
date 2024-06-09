@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,7 +51,6 @@ import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.SuggestionScreenViewModel
 import kotlinx.coroutines.launch
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -212,27 +212,101 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen y nombre del producto a la izquierda
-            Column(
-                modifier = Modifier.weight(1f)
+            Card(
+                shape = RoundedCornerShape(10.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                modifier = Modifier
+                    .padding(0.dp)
+                    .width(130.dp)
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(model = product.image_url),
-                    contentDescription = "Product Image",
-                    modifier = Modifier
-                        .size(80.dp)
-                )
-                Text(
-                    text = product.name,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                Box {
+                    Column(
+                        modifier = Modifier
+                            .padding(8.dp), // Padding inside the card
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(model = product.image_url),
+                            contentDescription = "Product Image",
+                            modifier = Modifier
+                                .size(70.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = product.name,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FirsNeue,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Precio: ${product.price} €",
+                            fontFamily = FirsNeue,
+                            fontSize = 10.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Precio/medida: ${product.price_by_standard_measure} €/${
+                                if (product.measure.lowercase().contains("mg") ||
+                                    product.measure.lowercase().contains("g") ||
+                                    product.measure.lowercase().contains("kg")
+                                ){
+                                    "Kg"
+                                }else if (product.measure.lowercase().contains("ml") ||
+                                    product.measure.lowercase().contains("cl") ||
+                                    product.measure.lowercase().contains("l")
+                                ){
+                                    "L"
+                                }else{
+                                    "Ud"
+                                }
+                            }",
+                            fontFamily = FirsNeue,
+                            fontSize = 10.sp
+                        )
+                    }
+
+                    // Store Icon
+                    when (product.store_name.trim().lowercase()) {
+                        "mercadona" -> {
+                            Image(
+                                painter = painterResource(id = R.drawable.mercadona_logo),
+                                contentDescription = "mercadona",
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .align(Alignment.TopStart)
+                                    .padding(2.dp)
+                            )
+                        }
+                        "ahorramas" -> {
+                            Image(
+                                painter = painterResource(id = R.drawable.ahorramas),
+                                contentDescription = "ahorramas",
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .align(Alignment.TopStart)
+                                    .padding(2.dp)
+                            )
+                        }
+                        "carrefour" -> {
+                            Image(
+                                painter = rememberAsyncImagePainter(model = product.store_image_url),
+                                contentDescription = "carrefour",
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .align(Alignment.TopStart)
+                                    .padding(2.dp)
+                            )
+                        }
+                    }
+                }
             }
 
-            // Flecha en el medio
             Box(
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = 0.dp)
             ) {
-                Text(text = "→", fontSize = 34.sp)
+                Text(text = "→", fontSize = 30.sp)
             }
 
             if (suggestedProducts.isEmpty()) {
@@ -240,7 +314,7 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
                     text = "No hay sugerencias para este producto",
                     modifier = Modifier.weight(2f)
                 )
-            }else{
+            } else {
                 LazyRow(
                     modifier = Modifier.weight(2f)
                 ) {
@@ -259,7 +333,7 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
 fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel, uuid: String) {
     var isAccepted by remember { mutableStateOf(false) }
 
-    // Animaciones para escala y posición Y
+    // Animations for scale and Y position
     val scale = remember { Animatable(1f) }
     val offsetY = remember { Animatable(0f) }
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
@@ -267,12 +341,12 @@ fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel,
 
     LaunchedEffect(isAccepted) {
         if (isAccepted) {
-            // Primero centramos el elemento en el LazyRow
+            // Center the element in the LazyRow first
             launch {
                 lazyListState.animateScrollToItem(lazyListState.layoutInfo.visibleItemsInfo.indexOfFirst { it.key == product.uuid })
                 bringIntoViewRequester.bringIntoView()
             }
-            // Luego ejecutamos la animación
+            // Then execute the animation
             launch {
                 offsetY.animateTo(
                     targetValue = -30f,
@@ -298,9 +372,10 @@ fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel,
 
     Card(
         shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier
-            .width(170.dp)
-            .padding(start =3.dp)
+            .width(180.dp)
+            .padding(start = 3.dp)
             .graphicsLayer {
                 translationY = offsetY.value
                 scaleX = scale.value
@@ -308,56 +383,117 @@ fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel,
             }
             .bringIntoViewRequester(bringIntoViewRequester)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(4.dp)
-        ) {
-            Image(
-                painter = rememberAsyncImagePainter(model = product.image_url),
-                contentDescription = "Suggested Product Image",
-                modifier = Modifier.size(100.dp)
-            )
-            Text(
-                text = product.name,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+        Box {
+
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(4.dp)
             ) {
-                // Cancel Icon
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_cancel_24),
-                    contentDescription = "cancel",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clickable(onClick = {
-                            viewModel.deleteProductFromSuggestions(product, uuid)
-                        })
-                        .padding(8.dp),
-                    tint = Color(0xFFD32F2F)
+                Image(
+                    painter = rememberAsyncImagePainter(model = product.image_url),
+                    contentDescription = "Suggested Product Image",
+                    modifier = Modifier.size(100.dp)
                 )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Accept Icon
-                Icon(
-                    painter = painterResource(id = R.drawable.accept),
-                    contentDescription = "accept",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clickable(onClick = {
-                            isAccepted = true  // Trigger the jump and shrink animation
-                            viewModel.addProductToChoosenProductsList(product, uuid)
-                        })
-                        .padding(8.dp),
-                    tint = Color(0xFF4CAF50)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = product.name, fontSize = 14.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 4.dp),
+                    fontFamily = FirsNeue
                 )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Precio: ${product.price} €", fontFamily = FirsNeue, fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Precio/medida: ${product.price_by_standard_measure} €/${
+                    if (product.measure.lowercase().contains("mg") ||
+                        product.measure.lowercase().contains("g") ||
+                        product.measure.lowercase().contains("kg")
+                    ){
+                        "Kg"
+                    }else if (product.measure.lowercase().contains("ml") ||
+                        product.measure.lowercase().contains("cl") ||
+                        product.measure.lowercase().contains("l")
+                    ){
+                        "L"
+                    }else{
+                        "Ud"
+                    }
+                }", fontFamily = FirsNeue, fontSize = 12.sp)
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Cancel Icon
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_cancel_24),
+                        contentDescription = "cancel",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clickable(onClick = {
+                                viewModel.deleteProductFromSuggestions(product, uuid)
+                            })
+                            .padding(8.dp),
+                        tint = Color(0xFFD32F2F)
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    // Accept Icon
+                    Icon(
+                        painter = painterResource(id = R.drawable.accept),
+                        contentDescription = "accept",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clickable(onClick = {
+                                isAccepted = true  // Trigger the jump and shrink animation
+                                viewModel.addProductToChoosenProductsList(product, uuid)
+                            })
+                            .padding(8.dp),
+                        tint = Color(0xFF4CAF50)
+                    )
+                }
+            }
+
+            // Store Icon
+            when (product.store_name.trim().lowercase()) {
+                "mercadona" -> {
+                    Image(
+                        painter = painterResource(id = R.drawable.mercadona_logo),
+                        contentDescription = "mercadona",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .align(Alignment.TopStart)
+                            .padding(2.dp)
+                    )
+                }
+
+                "ahorramas" -> {
+                    Image(
+                        painter = painterResource(id = R.drawable.ahorramas),
+                        contentDescription = "ahorramas",
+                        modifier = Modifier
+                            .size(50.dp)
+                            .align(Alignment.TopStart)
+                            .padding(2.dp)
+                    )
+                }
+
+                "carrefour" -> {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = product.store_image_url),
+                        contentDescription = "carrefour",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .align(Alignment.TopStart)
+                            .padding(2.dp)
+                    )
+                }
             }
         }
     }
 }
+
 
 
