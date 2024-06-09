@@ -58,32 +58,36 @@ class ProductLikesService:
             print("PRODUCT_LIKES_SERVICE: (Like) Product not found")
             return False
 
-        if email_user in product_data.get("likes_email", []):
+        num_likes = product_data.get("num_likes", 0)
+        likes_emails = product_data.get("likes_email", [])
+        unlikes_emails = product_data.get("unlikes_email", [])
+
+        if email_user in likes_emails:
             print(
                 "PRODUCT_LIKES_SERVICE: (Like) Product was liked before by "
                 + email_user
             )
             return False
 
-        new_num_likes = product_data.get("num_likes", 0) + 1
-        likes_emails = product_data.get("likes_email", [])
-        likes_emails.append(email_user)
-
-        update_query = {"uuid": product_id}
-        update_data = {}
-
-        if email_user in product_data.get("unlikes_email", []):
+        if email_user in unlikes_emails:
             # Remove email from unlikes_email if it was there and add +2
+            likes_emails.append(email_user)
+            unlikes_emails.remove(email_user)
             update_data = {
-                "$set": {"num_likes": new_num_likes + 1, "likes_email": likes_emails},
-                "$pull": {"unlikes_email": email_user},
+                "$set": {
+                    "num_likes": num_likes + 2,
+                    "likes_email": likes_emails,
+                    "unlikes_email": unlikes_emails,
+                },
             }
         else:
-            # Only we add user to likes if it was not unliked before
+            # Add user to likes if it was not unliked before
+            likes_emails.append(email_user)
             update_data = {
-                "$set": {"num_likes": new_num_likes, "likes_email": likes_emails}
+                "$set": {"num_likes": num_likes + 1, "likes_email": likes_emails},
             }
 
+        update_query = {"uuid": product_id}
         self.product_likes_repository.update_product(update_query, update_data)
         return True
 
@@ -97,35 +101,33 @@ class ProductLikesService:
             print("PRODUCT_LIKES_SERVICE: (Unlike) Product not found")
             return False
 
-        if email_user in product_data.get("unlikes_email", []):
+        num_likes = product_data.get("num_likes", 0)
+        likes_emails = product_data.get("likes_email", [])
+        unlikes_emails = product_data.get("unlikes_email", [])
+
+        if email_user in likes_emails:
+            print(
+                "PRODUCT_LIKES_SERVICE: (Unlike) Product was liked before by "
+                + email_user
+            )
+            likes_emails.remove(email_user)
+            update_data = {
+                "$set": {"num_likes": num_likes - 1, "likes_email": likes_emails},
+            }
+        elif email_user in unlikes_emails:
             print(
                 "PRODUCT_LIKES_SERVICE: (Unlike) Product was unliked before by "
                 + email_user
             )
             return False
-
-        new_num_likes = product_data.get("num_likes", 0) - 1
-        unlikes_emails = product_data.get("unlikes_email", [])
-        unlikes_emails.append(email_user)
+        else:
+            # Add user to unlikes if it was not liked before
+            unlikes_emails.append(email_user)
+            update_data = {
+                "$set": {"num_likes": num_likes, "unlikes_email": unlikes_emails},
+            }
 
         update_query = {"uuid": product_id}
-        update_data = {}
-
-        if email_user in product_data.get("likes_email", []):
-            # Remove email from likes_email if it was there and subtract -2
-            update_data = {
-                "$set": {
-                    "num_likes": new_num_likes - 1,
-                    "unlikes_email": unlikes_emails,
-                },
-                "$pull": {"likes_email": email_user},
-            }
-        else:
-            # Only we add user to unlikes if it was not liked before
-            update_data = {
-                "$set": {"num_likes": new_num_likes, "unlikes_email": unlikes_emails}
-            }
-
         self.product_likes_repository.update_product(update_query, update_data)
         return True
 
