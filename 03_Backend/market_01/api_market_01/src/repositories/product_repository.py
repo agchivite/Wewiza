@@ -295,38 +295,16 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
 
-            # I want get the products that has in price_by_standard_measure 0.1 or less
-            # an the date_created is the current month
+            # I want to update the products with uuid = 5d169ebb-977f-460a-a1a7-9f1c37ea9bf8
             documents = collection.find(
-                {
-                    "$and": [
-                        {"price_by_standard_measure": {"$lte": 0.1}},
-                        {
-                            "date_created": {
-                                "$regex": f"^{datetime.now().strftime('%Y-%m')}"
-                            }
-                        },
-                    ]
-                }
+                {"uuid": "5d169ebb-977f-460a-a1a7-9f1c37ea9bf8"}
             )
 
             for doc in documents:
-                price = doc["price"]
-                price_by_standard_measure = doc["price_by_standard_measure"]
-                # Reduce add 0.15 price by standard measure
-                rounded_price = round(price + 0.15, 2)
-                rounded_price_by_standard_measure = round(
-                    price_by_standard_measure + 0.15, 2
-                )
-                # Now update
+                # Update his price_by_standar_,measure
                 collection.update_one(
                     {"_id": doc["_id"]},
-                    {
-                        "$set": {
-                            "price": rounded_price,
-                            "price_by_standard_measure": rounded_price_by_standard_measure,
-                        }
-                    },
+                    {"$set": {"price_by_standard_measure": 0.27}},
                 )
 
             self.db_manager.close_database()
