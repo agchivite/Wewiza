@@ -86,11 +86,12 @@ fun SuggestionScreenBodyContent(
         val selectedList = viewModel.sharedViewModel.selectedList.value
         val wantedMarket = viewModel.sharedViewModel.getWantedMarket()
         var productsList by remember { mutableStateOf(emptyList<Product>()) }
-        val suggestions by viewModel.suggestions
+        var suggestions by viewModel.suggestions
 
         Column(modifier = Modifier.fillMaxSize()) {
             LaunchedEffect(selectedList!!.products.isNotEmpty()) {
-                viewModel.getSuggestions(wantedMarket, selectedList.products)
+                suggestions =
+                    viewModel.getSuggestions(wantedMarket, selectedList.products).toMutableMap()
                 val products = viewModel.getProductsFromList(selectedList)
                 productsList = products
                 Log.d("ListScreen", "Products: $products")
@@ -109,7 +110,8 @@ fun SuggestionScreenBodyContent(
                         Text(
                             text = "Este proceso puede tardar varios minutos...",
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color.Black
                         )
                     }
                 } else {
@@ -156,7 +158,8 @@ fun SuggestionScreenBodyContent(
                     Text(
                         text = "Añade un producto a la lista para recibir sugerencias",
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.Black
                     )
                 }
             }
@@ -251,14 +254,14 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
                                 if (product.measure.lowercase().contains("mg") ||
                                     product.measure.lowercase().contains("g") ||
                                     product.measure.lowercase().contains("kg")
-                                ){
+                                ) {
                                     "Kg"
-                                }else if (product.measure.lowercase().contains("ml") ||
+                                } else if (product.measure.lowercase().contains("ml") ||
                                     product.measure.lowercase().contains("cl") ||
                                     product.measure.lowercase().contains("l")
-                                ){
+                                ) {
                                     "L"
-                                }else{
+                                } else {
                                     "Ud"
                                 }
                             }",
@@ -279,6 +282,7 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
                                     .padding(2.dp)
                             )
                         }
+
                         "ahorramas" -> {
                             Image(
                                 painter = painterResource(id = R.drawable.ahorramas),
@@ -289,6 +293,7 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
                                     .padding(2.dp)
                             )
                         }
+
                         "carrefour" -> {
                             Image(
                                 painter = rememberAsyncImagePainter(model = product.store_image_url),
@@ -312,7 +317,8 @@ fun ProductItem(entry: Map.Entry<Product, List<Product>>, viewModel: SuggestionS
             if (suggestedProducts.isEmpty()) {
                 Text(
                     text = "No hay sugerencias para este producto",
-                    modifier = Modifier.weight(2f)
+                    modifier = Modifier.weight(2f),
+                    color = Color.Black
                 )
             } else {
                 LazyRow(
@@ -405,21 +411,23 @@ fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel,
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = "Precio: ${product.price} €", fontFamily = FirsNeue, fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = "Precio/medida: ${product.price_by_standard_measure} €/${
-                    if (product.measure.lowercase().contains("mg") ||
-                        product.measure.lowercase().contains("g") ||
-                        product.measure.lowercase().contains("kg")
-                    ){
-                        "Kg"
-                    }else if (product.measure.lowercase().contains("ml") ||
-                        product.measure.lowercase().contains("cl") ||
-                        product.measure.lowercase().contains("l")
-                    ){
-                        "L"
-                    }else{
-                        "Ud"
-                    }
-                }", fontFamily = FirsNeue, fontSize = 12.sp)
+                Text(
+                    text = "Precio/medida: ${product.price_by_standard_measure} €/${
+                        if (product.measure.lowercase().contains("mg") ||
+                            product.measure.lowercase().contains("g") ||
+                            product.measure.lowercase().contains("kg")
+                        ) {
+                            "Kg"
+                        } else if (product.measure.lowercase().contains("ml") ||
+                            product.measure.lowercase().contains("cl") ||
+                            product.measure.lowercase().contains("l")
+                        ) {
+                            "L"
+                        } else {
+                            "Ud"
+                        }
+                    }", fontFamily = FirsNeue, fontSize = 12.sp
+                )
 
                 Row(
                     horizontalArrangement = Arrangement.Center,
@@ -447,7 +455,7 @@ fun SuggestedProductItem(product: Product, viewModel: SuggestionScreenViewModel,
                         modifier = Modifier
                             .size(60.dp)
                             .clickable(onClick = {
-                                isAccepted = true  // Trigger the jump and shrink animation
+                                isAccepted = true
                                 viewModel.addProductToChoosenProductsList(product, uuid)
                             })
                             .padding(8.dp),

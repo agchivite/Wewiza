@@ -240,6 +240,8 @@ fun ProfileTopBar(navController: NavController) {
                     .align(Alignment.TopEnd)
                     .padding(end = 16.dp, top = 16.dp) // Margen desde el borde superior y derecho
                     .size(40.dp) // Tamaño del icono
+                    ,
+                tint = Color.Black
             )
         }
     }

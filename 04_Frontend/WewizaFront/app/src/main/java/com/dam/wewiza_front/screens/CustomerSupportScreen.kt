@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,10 +24,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -37,7 +39,7 @@ import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.CustomerSupportScreenViewModel
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CustomerSupportScreen(
@@ -51,22 +53,23 @@ fun CustomerSupportScreen(
         }
     ) {
         MyLightTheme {
-            CustomerSupportBodyContent(viewModel, navController)
+            CustomerSupportBodyContent(viewModel)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerSupportBodyContent(
-    viewModel: CustomerSupportScreenViewModel,
-    navController: NavHostController
+    viewModel: CustomerSupportScreenViewModel
 ) {
     val context = LocalContext.current
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface),
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(bottom = 80.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -76,7 +79,8 @@ fun CustomerSupportBodyContent(
             text = "¿Cómo podemos ayudarte?",
             fontFamily = FirsNeue,
             fontSize = 32.sp,
-            modifier = Modifier.padding(start = 20.dp)
+            modifier = Modifier.padding(start = 20.dp),
+            color = Color.Black
         )
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -96,14 +100,16 @@ fun CustomerSupportBodyContent(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        SendButton(viewModel, userMsg.value.text, context)
-
+        SendButton(viewModel, userMsg, context)
     }
 }
 
 @Composable
-fun SendButton(viewModel: CustomerSupportScreenViewModel, userMsg: String, context: Context) {
-    Button(onClick = { viewModel.sendMessage(userMsg, context) }) {
+fun SendButton(viewModel: CustomerSupportScreenViewModel, userMsg: MutableState<TextFieldValue>, context: Context) {
+    Button(onClick = {
+        viewModel.sendMessage(userMsg.value.text, context)
+        userMsg.value = TextFieldValue("")  // Clear the text field after sending the message
+    }) {
         Row(
             modifier = Modifier
                 .size(270.dp, 40.dp)
@@ -125,5 +131,3 @@ fun SendButton(viewModel: CustomerSupportScreenViewModel, userMsg: String, conte
         }
     }
 }
-
-

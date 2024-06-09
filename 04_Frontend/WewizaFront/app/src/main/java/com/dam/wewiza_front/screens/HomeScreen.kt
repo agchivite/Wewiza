@@ -134,7 +134,7 @@ fun ProductsSection(viewModel: HomeScreenViewModel, navController: NavController
 fun ProductsTextSubSection(viewModel: HomeScreenViewModel, navController: NavController) {
     Column(
         modifier = Modifier
-            .padding(top = 30.dp)
+            .padding(top = 10.dp)
     ) {
         Row {
             Text(

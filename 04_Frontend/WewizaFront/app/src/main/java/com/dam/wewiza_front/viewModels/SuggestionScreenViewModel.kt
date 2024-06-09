@@ -17,7 +17,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.withContext
 
@@ -32,17 +31,17 @@ class SuggestionScreenViewModel: ViewModel() {
     private val choosenSuggestionsList = mutableStateOf(mutableMapOf<String, String>())
 
 
-   private val ioDispatcher: CoroutineDispatcher = newFixedThreadPoolContext(3, "IOPool")
+   private val ioDispatcher: CoroutineDispatcher = newFixedThreadPoolContext(2, "IOPool")
 
-    fun getSuggestions(wantedMarkets: List<String>, products: List<String>) {
+    suspend fun getSuggestions(wantedMarkets: List<String>, products: List<String>): Map<String, List<Product>> {
         val baseUrl = "https://wewiza.ddns.net/suggest/id/"
-        viewModelScope.launch(ioDispatcher) {
+        return withContext(ioDispatcher) {
             try {
                 val resultMap = mutableMapOf<String, List<Product>>()
 
                 for (uuid in products) {
                     val url = buildUrl(baseUrl, uuid, wantedMarkets)
-                    val suggestedProducts = async {service.getSuggestions(url)}
+                    val suggestedProducts = async { service.getSuggestions(url) }
                     resultMap[uuid] = suggestedProducts.await()
                 }
 
@@ -50,11 +49,15 @@ class SuggestionScreenViewModel: ViewModel() {
                     Log.d("Suggestions", "getSuggestions: $resultMap")
                     suggestions.value = resultMap.toMutableMap()
                 }
+
+                resultMap
             } catch (e: Exception) {
                 Log.e("SuggestionScreenViewModel", "getSuggestions: ${e.message}")
+                emptyMap<String, List<Product>>()
             }
         }
     }
+
 
 
     private fun buildUrl(baseUrl: String, uuid: String, wantedMarkets: List<String>): String {
