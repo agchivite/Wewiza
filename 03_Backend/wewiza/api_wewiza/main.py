@@ -824,8 +824,15 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     products_user_to_add_suggestions_list = []
 
     print("filter_markets: ", filter_markets)
+    new_list = []
+    for item in filter_markets:
+        split_items = item.split(",")
 
-    for market_name in filter_markets:
+        # Extender la nueva lista con los elementos divididos
+        new_list.extend(split_items)
+    print("new_list: ", new_list)
+
+    for market_name in new_list:
         for product_user in list_all_products_user:
             list_products_similar = []
 
