@@ -1,4 +1,4 @@
-from typing import List
+from typing import Annotated, List, Union
 from fastapi import FastAPI, BackgroundTasks, Query
 from api_wewiza.src.database.database_manager import DatabaseManager
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
@@ -793,7 +793,9 @@ def start_likes_database(password: str):
 
 # https://127.0.0.2/suggest/id/36e79b3-4806-492c-ba2c-877395fc2ae5?filter_market=ahorramas
 @app.get("/suggest/id/{uuid}", tags=["products"])
-def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
+def get_suggest_products(
+    uuid: str, filter_markets: Annotated[Union[List[str], None], Query()] = None
+):
 
     list_all_products_user = []
     most_actual_uuid = find_actual_product_by_uuid_past(uuid)
