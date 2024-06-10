@@ -794,7 +794,7 @@ def start_likes_database(password: str):
 # https://127.0.0.2/suggest/id/36e79b3-4806-492c-ba2c-877395fc2ae5?filter_market=ahorramas
 @app.get("/suggest/id/{uuid}", tags=["products"])
 def get_suggest_products(
-    uuid: str, filter_markets: Annotated[Union[List[str], None], Query()] = None
+    uuid: str, filter_markets: Annotated[Union[List[str], None], Query(None)] = None
 ):
 
     list_all_products_user = []
