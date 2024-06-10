@@ -823,6 +823,8 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
 
     products_user_to_add_suggestions_list = []
 
+    print("filter_markets: ", filter_markets)
+
     for market_name in filter_markets:
         for product_user in list_all_products_user:
             list_products_similar = []
@@ -852,7 +854,7 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
 
             cheaper_products_suggestion = [
                 product_suggestion
-                for product_suggestion in list_products_similar.json()
+                for product_suggestion in list_products_similar
                 if product_suggestion.get("price_by_standard_measure", float("inf"))
                 < product_user.get("price_by_standard_measure", float("inf"))
             ]
