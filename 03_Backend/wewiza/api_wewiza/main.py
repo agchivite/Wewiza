@@ -824,8 +824,15 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
     products_user_to_add_suggestions_list = []
 
     print("filter_markets: ", filter_markets)
+    new_list = []
+    for item in filter_markets:
+        split_items = item.split(",")
 
-    for market_name in filter_markets:
+        # Extender la nueva lista con los elementos divididos
+        new_list.extend(split_items)
+    print("new_list: ", new_list)
+
+    for market_name in new_list:
         for product_user in list_all_products_user:
             list_products_similar = []
 
@@ -834,21 +841,21 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
                     f"http://api_market_01:8081/product/similar/name/{product_user['name']}"
                 )
                 print("response_01: ", response_01)
-                list_products_similar.append(response_01)
-            elif market_name.lower().strip() == "ahorramas":
+                list_products_similar.extend(response_01.json())
+
+            if market_name.lower().strip() == "ahorramas":
                 response_02 = requests.get(
                     f"http://api_market_02:8082/product/similar/name/{product_user['name']}"
                 )
                 print("response_02: ", response_02)
-                list_products_similar.append(response_02)
-            elif market_name.lower().strip() == "carrefour":
+                list_products_similar.extend(response_02.json())
+
+            if market_name.lower().strip() == "carrefour":
                 response_03 = requests.get(
                     f"http://api_market_03:8083/product/similar/name/{product_user['name']}"
                 )
                 print("response_03: ", response_03)
-                list_products_similar.append(response_03)
-            else:
-                continue
+                list_products_similar.extend(response_03.json())
 
             print("list_products_similar: ", list_products_similar)
 
