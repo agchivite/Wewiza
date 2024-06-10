@@ -250,7 +250,7 @@ fun HomeProductItem(
             )
             if (product.profit == 0.0 && product.profit_percentage == 0.0) {
                 Text(
-                    text = "MÁS GUSTADO!",
+                    text = "¡MÁS GUSTADO!",
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
