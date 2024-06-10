@@ -825,17 +825,25 @@ def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
 
     for market_name in filter_markets:
         for product_user in list_all_products_user:
+            list_products_similar = []
+
             if market_name.lower().strip() == "mercadona":
-                list_products_similar = requests.get(
-                    f"http://api_market_01:8081/product/similar/name/{product_user['name']}"
+                list_products_similar.extend(
+                    requests.get(
+                        f"http://api_market_01:8081/product/similar/name/{product_user['name']}"
+                    )
                 )
             elif market_name.lower().strip() == "ahorramas":
-                list_products_similar = requests.get(
-                    f"http://api_market_02:8082/product/similar/name/{product_user['name']}"
+                list_products_similar.extend(
+                    requests.get(
+                        f"http://api_market_02:8082/product/similar/name/{product_user['name']}"
+                    )
                 )
             elif market_name.lower().strip() == "carrefour":
-                list_products_similar = requests.get(
-                    f"http://api_market_03:8083/product/similar/name/{product_user['name']}"
+                list_products_similar.extend(
+                    requests.get(
+                        f"http://api_market_03:8083/product/similar/name/{product_user['name']}"
+                    )
                 )
             else:
                 continue
