@@ -66,7 +66,7 @@ class SuggestionScreenViewModel: ViewModel() {
         if (wantedMarkets.isNotEmpty()) {
             urlBuilder.append("?filter_markets=").append(wantedMarkets[0])
             for (i in 1 until wantedMarkets.size) {
-                urlBuilder.append("&").append(wantedMarkets[i])
+                urlBuilder.append(",").append(wantedMarkets[i])
             }
         }
 
