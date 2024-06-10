@@ -108,7 +108,7 @@ fun SuggestionScreenBodyContent(
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Este proceso puede tardar varios minutos...",
+                            text = "Este proceso puede tardar varios segundos...",
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth(),
                             color = Color.Black

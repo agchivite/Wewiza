@@ -2,6 +2,7 @@ package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -48,7 +49,7 @@ fun MainteinanceScreenBodyContent() {
 fun ServerMaintenanceScreen() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
     ) {
         Image(painter = painterResource(id = R.drawable.logo_letras), contentDescription = "logo")

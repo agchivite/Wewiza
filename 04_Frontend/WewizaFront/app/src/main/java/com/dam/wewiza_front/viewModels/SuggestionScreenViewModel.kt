@@ -59,16 +59,19 @@ class SuggestionScreenViewModel: ViewModel() {
     }
 
 
-
     private fun buildUrl(baseUrl: String, uuid: String, wantedMarkets: List<String>): String {
         val urlBuilder = StringBuilder(baseUrl)
         urlBuilder.append(uuid)
-        for (market in wantedMarkets) {
-            urlBuilder.append("?filter_markets=").append(market)
+
+        if (wantedMarkets.isNotEmpty()) {
+            urlBuilder.append("?filter_markets=").append(wantedMarkets[0])
+            for (i in 1 until wantedMarkets.size) {
+                urlBuilder.append("&").append(wantedMarkets[i])
+            }
         }
+
         return urlBuilder.toString()
     }
-
 
     suspend fun getProductsFromList(selectedProductsIds: ShoppingList?): List<Product> {
         var updatedProducts = listOf<Product>()
