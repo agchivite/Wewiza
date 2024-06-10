@@ -30,7 +30,7 @@ class CustomerSupportScreenViewModel : ViewModel() {
             db.collection("support")
                 .add(messageData)
                 .addOnSuccessListener {
-                    Toast.makeText(context, "Mensaje enviado!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "¡Mensaje enviado!", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(context, "Error al guardar el mensaje: ${e.message}", Toast.LENGTH_SHORT).show()
