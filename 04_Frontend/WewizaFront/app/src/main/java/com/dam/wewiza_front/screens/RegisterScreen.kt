@@ -112,7 +112,11 @@ fun RegisterTextInputs(viewModel: RegisterScreenViewModel) {
             label = { Text("Correo") },
             modifier = Modifier
                 .padding(top = 30.dp)
-                .width(350.dp)
+                .width(350.dp),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Done
+            )
         )
         TextField(
             value = password,

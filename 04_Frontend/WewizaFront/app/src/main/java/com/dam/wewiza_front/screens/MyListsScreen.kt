@@ -185,32 +185,70 @@ fun MarketSelectionDialog(showDialog: MutableState<Boolean>, onConfirm: (List<St
     val ahorramasChecked = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    // Variable para contar el número de checkboxes seleccionadas
+    val selectedCount = remember { mutableStateOf(0) }
+
     if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text("Selecciona los mercados de los que quieres recibir sugerencias: ") },
             text = {
                 Column {
-                    Row (horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("Mercadona")
                         Checkbox(
                             checked = mercadonaChecked.value,
-                            onCheckedChange = { mercadonaChecked.value = it }
+                            onCheckedChange = {
+                                if (it) {
+                                    if (selectedCount.value < 2) {
+                                        mercadonaChecked.value = it
+                                        selectedCount.value++
+                                    } else {
+                                        Toast.makeText(context, "Solo puedes seleccionar dos mercados.", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    mercadonaChecked.value = it
+                                    selectedCount.value--
+                                }
+                            }
                         )
                     }
-                    Row (horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("Carrefour")
                         Checkbox(
                             checked = carrefourChecked.value,
-                            onCheckedChange = { carrefourChecked.value = it }
+                            onCheckedChange = {
+                                if (it) {
+                                    if (selectedCount.value < 2) {
+                                        carrefourChecked.value = it
+                                        selectedCount.value++
+                                    } else {
+                                        Toast.makeText(context, "Solo puedes seleccionar dos mercados.", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    carrefourChecked.value = it
+                                    selectedCount.value--
+                                }
+                            }
                         )
                     }
-
-                    Row (horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("Ahorramas")
                         Checkbox(
                             checked = ahorramasChecked.value,
-                            onCheckedChange = { ahorramasChecked.value = it }
+                            onCheckedChange = {
+                                if (it) {
+                                    if (selectedCount.value < 2) {
+                                        ahorramasChecked.value = it
+                                        selectedCount.value++
+                                    } else {
+                                        Toast.makeText(context, "Solo puedes seleccionar dos mercados.", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    ahorramasChecked.value = it
+                                    selectedCount.value--
+                                }
+                            }
                         )
                     }
                 }
@@ -224,12 +262,8 @@ fun MarketSelectionDialog(showDialog: MutableState<Boolean>, onConfirm: (List<St
                         if (ahorramasChecked.value) selectedMarkets.add("ahorramas")
 
                         if (selectedMarkets.isEmpty()) {
-                            Toast.makeText(
-                                context,
-                                "Debes seleccionar al menos un mercado",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }else{
+                            Toast.makeText(context, "Debes seleccionar al menos un mercado", Toast.LENGTH_SHORT).show()
+                        } else {
                             onConfirm(selectedMarkets)
                         }
 
@@ -240,9 +274,7 @@ fun MarketSelectionDialog(showDialog: MutableState<Boolean>, onConfirm: (List<St
                 }
             },
             dismissButton = {
-                Button(
-                    onClick = { showDialog.value = false }
-                ) {
+                Button(onClick = { showDialog.value = false }) {
                     Text("Cancelar")
                 }
             }

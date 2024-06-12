@@ -75,8 +75,8 @@ object RetrofitServiceFactory {
 
     private val okHttpClient = OkHttpClient.Builder()
         .hostnameVerifier { hostname, _ -> hostname == "wewiza.ddns.net" }
-        .connectTimeout(1, TimeUnit.MINUTES) // Aumenta el tiempo de espera de conexión
-        .readTimeout(60, TimeUnit.SECONDS) // Aumenta el tiempo de espera de lectura
+        .connectTimeout(3, TimeUnit.MINUTES) // Aumenta el tiempo de espera de conexión
+        .readTimeout(2, TimeUnit.MINUTES) // Aumenta el tiempo de espera de lectura
         .writeTimeout(15, TimeUnit.SECONDS) // Aumenta el tiempo de espera de escritura
         .addInterceptor(interceptor)
         .build()
