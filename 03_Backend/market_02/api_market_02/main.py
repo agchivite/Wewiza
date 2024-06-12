@@ -19,6 +19,11 @@ product_repository = ProductRepository(database_manager, COLLECTION_NAME)
 product_service = ProductService(product_repository)
 
 
+@app.get("/check")
+def check_avaliable_api():
+    return {"message": "API is working"}
+
+
 @app.get("/update_all_date")
 def update_all_date():
     # Only update product with "date_created" in "2024-05-01 00:14:43"
@@ -33,12 +38,17 @@ def get_products_with_good_profit():
     sorted_products = sorted(
         top_profit_products_list, key=lambda x: x["profit_percentage"], reverse=True
     )
+    filtered_products = []
 
     for product in sorted_products:
-        if product["profit_percentage"] <= 0:
-            sorted_products.remove(product)
+        product["profit_percentage"] = round(product["profit_percentage"], 2)
 
-    return sorted_products[:10]
+        if product["profit_percentage"] <= 0.0 or product["profit_percentage"] >= 60.0:
+            continue
+
+        filtered_products.append(product)
+
+    return filtered_products[:10]
 
 
 @app.get("/products")
@@ -91,3 +101,13 @@ def get_product_by_similar_name(product_name: str):
 @app.get("/update/minor_random_price")
 def update_to_random_price_less():
     return product_service.update_to_random_price_less()
+
+
+@app.get("/update/zero")
+def updateZeroData():
+    return product_service.updateZeroData()
+
+
+@app.get("/find/actual/id/{uuid}")
+def find_actual_id(uuid: str):
+    return product_service.find_actual_id(uuid)

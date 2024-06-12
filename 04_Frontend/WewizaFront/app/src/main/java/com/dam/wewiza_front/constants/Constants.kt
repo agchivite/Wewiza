@@ -55,7 +55,7 @@ object Constants {
                     BottomMenuItem(
                         icon = R.drawable.buscador,
                         text = "Buscador",
-                        onClick = { navController.navigate(AppScreens.CategoriesScreen.route) }
+                        onClick = { navController.navigate(AppScreens.ProductScreen.route) }
                     )
                     BottomMenuItem(
                         icon = R.drawable.mis_listas,

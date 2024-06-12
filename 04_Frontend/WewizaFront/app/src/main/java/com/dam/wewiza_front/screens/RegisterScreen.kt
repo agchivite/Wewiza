@@ -85,7 +85,7 @@ fun RegisterScreenBodyContent(viewModel: RegisterScreenViewModel, navController:
                     fontSize = 30.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = Butler,
-                    color = Color(0xFF2E2C31)
+                    color = Color.Black
                 )
             )
 
@@ -112,7 +112,11 @@ fun RegisterTextInputs(viewModel: RegisterScreenViewModel) {
             label = { Text("Correo") },
             modifier = Modifier
                 .padding(top = 30.dp)
-                .width(350.dp)
+                .width(350.dp),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Done
+            )
         )
         TextField(
             value = password,

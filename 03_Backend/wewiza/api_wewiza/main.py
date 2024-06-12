@@ -3,6 +3,8 @@ from fastapi import FastAPI, BackgroundTasks, Query
 from api_wewiza.src.database.database_manager import DatabaseManager
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
 from api_wewiza.src.services.product_likes_service import ProductLikesService
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 import requests
 import datetime
 import requests
@@ -22,21 +24,57 @@ def main():
         if all(
             check_service_availability(url)
             for url in [
-                "http://api_market_01:8081/size",
-                "http://api_market_02:8082/size",
-                "http://api_market_03:8083/size",
+                "http://api_market_01:8081/check",
+                "http://api_market_02:8082/check",
+                "http://api_market_03:8083/check",
             ]
         ):
             print("All APIs Market are available.")
             break
         else:
-            print("At least one API Market is not available. Retrying in 2 seconds...")
-            time.sleep(2)
+            print("At least one API Market is not available. Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 main()
 
-app = FastAPI()
+tags_metadata = [
+    {"name": "especial", "description": "Especial operations"},
+    {"name": "products", "description": "Operations with products"},
+    {"name": "categories", "description": "Operations with categories"},
+    {"name": "markets", "description": "Operations with markets"},
+]
+
+description_api = """
+Wewiza API helps you to manage your monthly products ⭐
+
+## Actual markets
+
+- Mercadona
+- Ahorramas
+- Carrefour
+
+### Contributors
+
+https://github.com/JiaChengZhang14
+
+"""
+
+app = FastAPI(
+    title="Wewiza API ⭐",
+    description=description_api,
+    version="1.0",
+    contact={
+        "name": "Angel Maroto Chivite",
+        "url": "https://github.com/agchivite",
+        "email": "ag.chivite@gmail.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+)
+
 
 # TODO: Inyect with IoC
 CONNECTION_MONGO = "mongodb://root:root@mongo_wewiza:27017"
@@ -201,10 +239,36 @@ def get_all_categories():
     }
 
 
+def find_actual_product_by_uuid_past(uuid_past_product):
+    response_1 = requests.get(
+        "http://api_market_01:8081/find/actual/id/" + uuid_past_product
+    ).json()
+    if response_1["success"] == True:
+        return response_1["uuid"]
+
+    response_2 = requests.get(
+        "http://api_market_02:8082/find/actual/id/" + uuid_past_product
+    ).json()
+    if response_2["success"] == True:
+        return response_2["uuid"]
+
+    response_3 = requests.get(
+        "http://api_market_03:8083/find/actual/id/" + uuid_past_product
+    ).json()
+    if response_3["success"] == True:
+        return response_3["uuid"]
+
+    print("FINAL PRODUCT: " + uuid_past_product)
+    return uuid_past_product
+
+
 #####################----------------#####################
 
 
-@app.get("/")
+@app.get(
+    "/",
+    tags=["especial"],
+)
 def read_root():
     # Set all the endpoints
     return {
@@ -220,6 +284,7 @@ def read_root():
 @app.get(
     "/categories/top",
     description="Get maximum 6 top categories, it depends on top products",
+    tags=["categories"],
 )
 def get_top_categories():
     all_categories = get_all_categories()
@@ -234,54 +299,21 @@ def get_top_categories():
 @app.get(
     "/products/top",
     description="Get top products with benefits comparing the past or good likes, if the key ['profit'] and ['profit_percentage'] are 0 it means that the product is TOP because it has A LOT LIKES",
+    tags=["products"],
 )
 def get_top_products():
     return PRODUCTS_TOP
 
 
-@app.get("/categories", description="Get all categories")
+@app.get("/categories", description="Get all categories", tags=["categories"])
 def get_categories():
     return get_all_categories()
 
 
 @app.get(
-    "/products",
-    description="Get all products in the current month",
-)
-def get_all_products():
-    response_products_market_01_json_list = requests.get(
-        "http://api_market_01:8081/products"
-    ).json()
-
-    response_products_market_02_json_list = requests.get(
-        "http://api_market_02:8082/products"
-    ).json()
-
-    response_products_market_03_json_list = requests.get(
-        "http://api_market_03:8083/products"
-    ).json()
-
-    # Map objetcs with LIKES data
-    map_list_market_01 = product_service.map_products_json_list(
-        response_products_market_01_json_list
-    )
-    map_list_market_02 = product_service.map_products_json_list(
-        response_products_market_02_json_list
-    )
-    map_list_market_03 = product_service.map_products_json_list(
-        response_products_market_03_json_list
-    )
-
-    return {
-        "mercadona": filter_current_month_elements(map_list_market_01),
-        "ahorramas": filter_current_month_elements(map_list_market_02),
-        "carrefour": filter_current_month_elements(map_list_market_03),
-    }
-
-
-@app.get(
     "/products/category/id/{category_id}",
     description="Get all products by category in the current month",
+    tags=["products"],
 )
 def get_products_by_category(category_id: str):
     response_products_market_01_json_list = requests.get(
@@ -317,6 +349,7 @@ def get_products_by_category(category_id: str):
 @app.get(
     "/products/market/{market_name}",
     description="Get all products by market name (no case sensitive) in the current month, if not found returns empty list",
+    tags=["products"],
 )
 def get_all_products_by_market(market_name: str):
     if market_name.lower().strip() == "mercadona":
@@ -350,10 +383,16 @@ def get_all_products_by_market(market_name: str):
 
 
 @app.get(
-    "/product/id/{product_id}",
+    "/product/id/{uuid}",
     description="Product details by id, if not found returns 'name': 'Product not found'",
+    tags=["products"],
 )
-def get_product_by_id(product_id: str):
+def get_product_by_id(uuid: str):
+    product_id = find_actual_product_by_uuid_past(uuid)
+
+    if product_id is None:
+        return {"name": "Product not found"}
+
     response_product_market_01_raw_json = requests.get(
         "http://api_market_01:8081/product/id/" + product_id
     )
@@ -388,10 +427,16 @@ def get_product_by_id(product_id: str):
 
 
 @app.get(
-    "/product/details/id/{product_id}",
+    "/product/details/id/{uuid}",
     description="List of same product with different date_created, the latest one will be the main product, if not found returns empty list",
+    tags=["products"],
 )
-def get_product_details_by_id(product_id: str):
+def get_product_details_by_id(uuid: str):
+    product_id = find_actual_product_by_uuid_past(uuid)
+
+    if product_id is None:
+        return []
+
     # MARKET 01
     response_product_market_01_json = requests.get(
         "http://api_market_01:8081/product/id/" + product_id
@@ -475,6 +520,7 @@ def get_product_details_by_id(product_id: str):
 @app.get(
     "/products/market/{market_name}/range/{init_num}/{end_num}",
     description="Get all products by market and range (start index = 0), if not found returns empty list",
+    tags=["products"],
 )
 def get_products_by_range(market_name: str, init_num: int, end_num: int):
     if market_name.lower().strip() == "mercadona":
@@ -519,6 +565,7 @@ def get_products_by_range(market_name: str, init_num: int, end_num: int):
 @app.get(
     "/size/market/{market_name}",
     description="Get the size of products by market, return number",
+    tags=["markets"],
 )
 def get_size_by_market(market_name: str):
     if market_name.lower().strip() == "mercadona":
@@ -593,19 +640,34 @@ def calculate_top_products():
         "http://api_market_03:8083/products/past/profit"
     ).json()
 
-    top_profit_products_uuid_list = (
-        response_products_profit_market_01_json_list
-        + response_products_profit_market_02_json_list
-        + response_products_profit_market_03_json_list
+    print("RESPONSE-1: ", response_products_profit_market_01_json_list)
+    print("RESPONSE-2: ", response_products_profit_market_02_json_list)
+    print("RESPONSE-3: ", response_products_profit_market_03_json_list)
+
+    top_profit_products_uuid_list = []
+    top_profit_products_uuid_list.extend(response_products_profit_market_01_json_list)
+    top_profit_products_uuid_list.extend(response_products_profit_market_02_json_list)
+    top_profit_products_uuid_list.extend(response_products_profit_market_03_json_list)
+
+    # Sort by key "profit" and get the first 5
+    print("TOP PROFIT: ", top_profit_products_uuid_list)
+
+    # Parse all to items key profit_percentage to double round 2 decimales
+    for product in top_profit_products_uuid_list:
+        product["profit_percentage"] = round(product["profit_percentage"], 2)
+
+    sorted_top_profit_products_uuid_list = sorted(
+        top_profit_products_uuid_list,
+        key=lambda x: x["profit_percentage"],
+        reverse=True,
     )
 
-    # Sort by key "profit" and get the first 10
-    top_profit_products_uuid_list.sort(
-        key=lambda x: x["profit_percentage"], reverse=True
-    )
-    top_profit_products_uuid_list = top_profit_products_uuid_list[:10]
+    most_top_profit_products_uuid_list = sorted_top_profit_products_uuid_list[:5]
 
-    top_final_products = top_likes_product + top_profit_products_uuid_list
+    print("TOP PROFIT: ", most_top_profit_products_uuid_list)
+
+    # First show the most profitable products and then the most liked products
+    top_final_products = most_top_profit_products_uuid_list + top_likes_product
     map_products = product_service.map_products_json_list(top_final_products)
 
     return filter_current_month_elements(map_products)
@@ -622,56 +684,244 @@ def update_global_variables():
     CATEGORIES_TOP = calculate_top_categories()
     PRODUCTS_TOP = calculate_top_products()
 
+    print("NEW top likes: ", TOP_LIKES_AVERAGE)
+    print("NEW top categories: ", CATEGORIES_TOP)
+    print("NEW top products: ", PRODUCTS_TOP)
 
-# CASE 1: start server
-TOP_LIKES_AVERAGE = calculate_like_average()
-CATEGORIES_TOP = calculate_top_categories()
-PRODUCTS_TOP = calculate_top_products()
+
+##########------- Starting scheduler with server ---------#######
+
+
+def calculate_daily_tasks():
+    print("Daily execution for calculate tops", datetime.datetime.now())
+    update_global_variables()
+
+
+# calculate_daily_tasks()
+
+scheduler = BackgroundScheduler()
+trigger = CronTrigger(hour=3, minute=0)
+scheduler.add_job(calculate_daily_tasks, trigger)
+scheduler.start()
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    scheduler.shutdown()
+
+
 #####################----------------#####################
 
 
-@app.get("/calculate/topics")
-def calculate_topics(background_tasks: BackgroundTasks):
-    background_tasks.add_task(update_global_variables)
-    return {"result": "Topics updated it going to take some time to show in endpoints"}
-
-
 @app.get(
-    "/like/{product_id}/email/{email_user}",
+    "/like/{uuid}/email/{email_user}",
     description="Like a product only one time per user, return true if liked or false if was liked before",
+    tags=["products"],
 )
-def like_product(product_id: str, email_user: str, background_tasks: BackgroundTasks):
+def like_product(uuid: str, email_user: str):
+    product_id = find_actual_product_by_uuid_past(uuid)
+
+    if product_id is None:
+        return {"result": False}
+
     boolean_result = product_service.like_product(product_id, email_user)
-    # CASE 2: like/unlike
-    # background_tasks.add_task(update_global_variables)
+
     return {"result": boolean_result}
 
 
 @app.get(
-    "/unlike/{product_id}/email/{email_user}",
+    "/unlike/{uuid}/email/{email_user}",
     description="Unlike a product only one time per user, true if unliked or false if was unliked before",
+    tags=["products"],
 )
-def unlike_product(product_id: str, email_user: str, background_tasks: BackgroundTasks):
+def unlike_product(uuid: str, email_user: str):
+    product_id = find_actual_product_by_uuid_past(uuid)
+
+    if product_id is None:
+        return {"result": False}
+
     boolean_result = product_service.unlike_product(product_id, email_user)
-    # CASE 2: like/unlike
-    # background_tasks.add_task(update_global_variables)
+
     return {"result": boolean_result}
 
 
 @app.get(
-    "/reaction/email/{email_user}/product/id/{product_id}",
+    "/reaction/email/{email_user}/product/id/{uuid}",
     description="Check if a user has liked a product, returns 'liked', 'unliked' or 'none'",
+    tags=["products"],
 )
-def get_reaction(email_user: str, product_id: str):
+def get_reaction(email_user: str, uuid: str):
+    product_id = find_actual_product_by_uuid_past(uuid)
+
+    if product_id is None:
+        return {"reaction": "Product not found"}
+
     reaction = product_service.get_reaction(email_user, product_id)
     return {"reaction": reaction}
 
 
 @app.get(
-    "/start_likes",
+    "/start_month/password/{password}",
     description="Start the database with likes in the same month we are, this will reset all the likes, only is used when scrapping monthly",
+    tags=["especial"],
 )
-def start_likes_database():
+def start_likes_database(password: str):
+    if password == "wewiza":
+        response_products_market_01_json_list = requests.get(
+            "http://api_market_01:8081/products"
+        ).json()
+
+        response_products_market_02_json_list = requests.get(
+            "http://api_market_02:8082/products"
+        ).json()
+
+        response_products_market_03_json_list = requests.get(
+            "http://api_market_03:8083/products"
+        ).json()
+
+        # Directly delete all products in the current month to reset
+        product_service.delete_all_products_by_actual_month()
+
+        product_service.insert_products_json_list(response_products_market_01_json_list)
+        product_service.insert_products_json_list(response_products_market_02_json_list)
+        product_service.insert_products_json_list(response_products_market_03_json_list)
+
+        return {"message": "Database likes updated"}
+
+    return {"message": "Wrong password"}
+
+
+# https://127.0.0.2/suggest/id/36e79b3-4806-492c-ba2c-877395fc2ae5?filter_market=ahorramas
+@app.get("/suggest/id/{uuid}", tags=["products"])
+def get_suggest_products(uuid: str, filter_markets: List[str] = Query(...)):
+
+    list_all_products_user = []
+    most_actual_uuid = find_actual_product_by_uuid_past(uuid)
+
+    # Check in all market to get the complete data
+    response_market_01 = requests.get(
+        "http://api_market_01:8081/product/id/" + most_actual_uuid
+    )
+    response_market_02 = requests.get(
+        "http://api_market_02:8082/product/id/" + most_actual_uuid
+    )
+    response_market_03 = requests.get(
+        "http://api_market_03:8083/product/id/" + most_actual_uuid
+    )
+
+    list_all_products_user.append(response_market_01.json())
+    list_all_products_user.append(response_market_02.json())
+    list_all_products_user.append(response_market_03.json())
+
+    # Clear None items
+    list_all_products_user = list(filter(None, list_all_products_user))
+
+    if len(list_all_products_user) == 0:
+        return []
+
+    uuid_searched = list_all_products_user[0]["uuid"]
+
+    products_user_to_add_suggestions_list = []
+
+    print("filter_markets: ", filter_markets)
+    new_list = []
+    for item in filter_markets:
+        split_items = item.split(",")
+
+        # Extender la nueva lista con los elementos divididos
+        new_list.extend(split_items)
+    print("new_list: ", new_list)
+
+    for market_name in new_list:
+        for product_user in list_all_products_user:
+            list_products_similar = []
+
+            if market_name.lower().strip() == "mercadona":
+                response_01 = requests.get(
+                    f"http://api_market_01:8081/product/similar/name/{product_user['name']}"
+                )
+                print("response_01: ", response_01)
+                list_products_similar.extend(response_01.json())
+
+            if market_name.lower().strip() == "ahorramas":
+                response_02 = requests.get(
+                    f"http://api_market_02:8082/product/similar/name/{product_user['name']}"
+                )
+                print("response_02: ", response_02)
+                list_products_similar.extend(response_02.json())
+
+            if market_name.lower().strip() == "carrefour":
+                response_03 = requests.get(
+                    f"http://api_market_03:8083/product/similar/name/{product_user['name']}"
+                )
+                print("response_03: ", response_03)
+                list_products_similar.extend(response_03.json())
+
+            print("list_products_similar: ", list_products_similar)
+
+            cheaper_products_suggestion = [
+                product_suggestion
+                for product_suggestion in list_products_similar
+                if product_suggestion.get("price_by_standard_measure", float("inf"))
+                < product_user.get("price_by_standard_measure", float("inf"))
+            ]
+
+            products_user_to_add_suggestions_list.extend(cheaper_products_suggestion)
+
+    # Clear None items
+    products_user_to_add_suggestions_list = list(
+        filter(None, products_user_to_add_suggestions_list)
+    )
+
+    valid_products = [
+        x
+        for x in products_user_to_add_suggestions_list
+        if "price_by_standard_measure" in x
+    ]
+
+    # Filter products that not match with actual year and month
+    valid_products = filter_current_month_elements(valid_products)
+
+    # Delete prodcuts that have uuid or uuid_searched, to not repeat them, only get the suggest
+    valid_products = list(filter(lambda x: x["uuid"] != uuid, valid_products))
+    valid_products = list(filter(lambda x: x["uuid"] != uuid_searched, valid_products))
+    valid_products = list(
+        filter(lambda x: x["uuid"] != most_actual_uuid, valid_products)
+    )
+
+    products_user_to_add_suggestions_list = sorted(
+        valid_products,
+        key=lambda x: x["price_by_standard_measure"],
+        reverse=False,
+    )
+
+    return products_user_to_add_suggestions_list[:3]
+
+
+@app.get("/calculate/topics/password/{password}", tags=["especial"])
+def calculate_topics(password: str):
+    if password != "wewiza":
+        return {"result": "Wrong password"}
+
+    update_global_variables()
+
+    return {
+        "result": "Topics updated it going to take serveral minutes to show results"
+    }
+
+
+@app.get("/products/update/mercadona")
+def update_price_mercadona():
+    requests.get(f"http://api_market_01:8081/products/update/mercadona")
+    return {"message": "Price updated"}
+
+
+"""
+@app.get(
+    "/products",
+    description="Get all products in the current month",
+)
+def get_all_products():
     response_products_market_01_json_list = requests.get(
         "http://api_market_01:8081/products"
     ).json()
@@ -684,30 +934,34 @@ def start_likes_database():
         "http://api_market_03:8083/products"
     ).json()
 
-    # Directly delete all products in the current month to reset
-    product_service.delete_all_products_by_actual_month()
+    # Map objetcs with LIKES data
+    map_list_market_01 = product_service.map_products_json_list(
+        response_products_market_01_json_list
+    )
+    map_list_market_02 = product_service.map_products_json_list(
+        response_products_market_02_json_list
+    )
+    map_list_market_03 = product_service.map_products_json_list(
+        response_products_market_03_json_list
+    )
 
-    product_service.insert_products_json_list(response_products_market_01_json_list)
-    product_service.insert_products_json_list(response_products_market_02_json_list)
-    product_service.insert_products_json_list(response_products_market_03_json_list)
+    return {
+        "mercadona": filter_current_month_elements(map_list_market_01),
+        "ahorramas": filter_current_month_elements(map_list_market_02),
+        "carrefour": filter_current_month_elements(map_list_market_03),
+    }
+"""
 
-    # CASE 3: start new month
-    global TOP_LIKES_AVERAGE, CATEGORIES_TOP, PRODUCTS_TOP
-    TOP_LIKES_AVERAGE = calculate_like_average()
-    CATEGORIES_TOP = calculate_top_categories()
-    PRODUCTS_TOP = calculate_top_products()
-
-    return {"message": "Database likes updated"}
-
-
+"""
 @app.get(
     "/update/measure_carrefour",
 )
 def update():
     response = requests.get("http://api_market_03:8083/update/measure_carrefour")
     return response.json()
+"""
 
-
+"""
 @app.get("/update/minor_random_price")
 def update_to_random_price_less():
     response_1 = requests.get("http://api_market_01:8081/update/minor_random_price")
@@ -721,109 +975,12 @@ def update_to_random_price_less():
         + " "
         + str(response_3.json())
     }
-
-
-# TODO: list markets filter, NOT ONLY ONE
-# https://127.0.0.2/suggest?filter_market=ahorramas&uuids=c36e79b3-4806-492c-ba2c-877395fc2ae5&uuids=35038e15-b874-471b-afd6-d694bedaeacf
-@app.get("/suggest")
-def get_suggest_products(
-    filter_markets: List[str] = Query(...),
-    uuids: List[str] = Query(...),
-):
-    list_all_products_user = []
-    for uuid in uuids:
-        # Check in all market to get the complete data
-        response_market_01 = requests.get(
-            "http://api_market_01:8081/product/id/" + uuid
-        )
-        response_market_02 = requests.get(
-            "http://api_market_02:8082/product/id/" + uuid
-        )
-        response_market_03 = requests.get(
-            "http://api_market_03:8083/product/id/" + uuid
-        )
-
-        list_all_products_user.append(response_market_01.json())
-        list_all_products_user.append(response_market_02.json())
-        list_all_products_user.append(response_market_03.json())
-
-    # Clear None items
-    list_all_products_user = list(filter(None, list_all_products_user))
-
-    # Now I want to search the similar products name in all markets
-    # Create a dicctionary to store suggestion of list product for eacg uuid product
-    products_user_to_add_suggestions_list = {uuid: [] for uuid in uuids}
-
-    for market_name in filter_markets:
-        if market_name.lower().strip() == "mercadona":
-            for product_user in list_all_products_user:
-                list_products_similar = requests.get(
-                    "http://api_market_01:8081/product/similar/name/"
-                    + product_user["name"]
-                )
-                cheaper_products_suggestion = []
-
-                for product_suggestion in list_products_similar.json():
-                    if (
-                        product_suggestion["price_by_standard_measure"]
-                        < product_user["price_by_standard_measure"]
-                    ):
-                        cheaper_products_suggestion.append(product_suggestion)
-
-                existing_similar_products = products_user_to_add_suggestions_list.get(
-                    product_user["uuid"], []
-                )
-                products_user_to_add_suggestions_list[product_user["uuid"]] = (
-                    existing_similar_products + cheaper_products_suggestion
-                )
-
-        if market_name.lower().strip() == "ahorramas":
-            for product_user in list_all_products_user:
-                list_products_similar = requests.get(
-                    "http://api_market_02:8082/product/similar/name/"
-                    + product_user["name"]
-                )
-                cheaper_products_suggestion = []
-
-                for product_suggestion in list_products_similar.json():
-                    if (
-                        product_suggestion["price_by_standard_measure"]
-                        < product_user["price_by_standard_measure"]
-                    ):
-                        cheaper_products_suggestion.append(product_suggestion)
-
-                existing_similar_products = products_user_to_add_suggestions_list.get(
-                    product_user["uuid"], []
-                )
-                products_user_to_add_suggestions_list[product_user["uuid"]] = (
-                    existing_similar_products + cheaper_products_suggestion
-                )
-
-        if market_name.lower().strip() == "carrefour":
-            for product_user in list_all_products_user:
-                list_products_similar = requests.get(
-                    "http://api_market_03:8083/product/similar/name/"
-                    + product_user["name"]
-                )
-                cheaper_products_suggestion = []
-
-                for product_suggestion in list_products_similar.json():
-                    if (
-                        product_suggestion["price_by_standard_measure"]
-                        < product_user["price_by_standard_measure"]
-                    ):
-                        cheaper_products_suggestion.append(product_suggestion)
-
-                existing_similar_products = products_user_to_add_suggestions_list.get(
-                    product_user["uuid"], []
-                )
-                products_user_to_add_suggestions_list[product_user["uuid"]] = (
-                    existing_similar_products + cheaper_products_suggestion
-                )
-
-    # Clear None items # TODO: this is optional?
-    products_user_to_add_suggestions_list = dict(
-        filter(lambda x: x[1] != [], products_user_to_add_suggestions_list.items())
-    )
-
-    return products_user_to_add_suggestions_list
+"""
+"""
+@app.get("/update/zero")
+def update_zero():
+    # call all markets
+    response_1 = requests.get("http://api_market_01:8081/update/zero")
+    response_2 = requests.get("http://api_market_02:8082/update/zero")
+    return {response_1}
+"""

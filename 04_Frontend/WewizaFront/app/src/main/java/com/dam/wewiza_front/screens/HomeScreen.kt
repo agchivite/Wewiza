@@ -59,6 +59,7 @@ import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.TopProduct
 import com.dam.wewiza_front.ui.theme.MyLightTheme
 import com.dam.wewiza_front.viewModels.HomeScreenViewModel
+import com.dam.wewiza_front.viewModels.SharedViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,40 +86,17 @@ fun HomeBodyContent(
     viewModel: HomeScreenViewModel,
 ) {
 
-    val isConnectionError by viewModel.isConnectionError
-
-    if (isConnectionError) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxSize(),
-        ) {
-            ServerMaintenanceScreen()
-        }
-
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-        ) {
-            WewizaLogoSection()
-            FeaturedCategoriesSection(navController, viewModel)
-            FeaturedProductsSection(navController, viewModel)
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
+        WewizaLogoSection()
+        FeaturedCategoriesSection(navController, viewModel)
+        FeaturedProductsSection(navController, viewModel)
     }
 }
 
-@Composable
-fun ServerMaintenanceScreen() {
-    Text(
-        text = "Servidor en mantenimiento. Disculpe las molestias.",
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        textAlign = TextAlign.Center
-    )
-}
 
 @Composable
 fun FeaturedProductsSection(navController: NavController, viewModel: HomeScreenViewModel) {
@@ -156,7 +134,7 @@ fun ProductsSection(viewModel: HomeScreenViewModel, navController: NavController
 fun ProductsTextSubSection(viewModel: HomeScreenViewModel, navController: NavController) {
     Column(
         modifier = Modifier
-            .padding(top = 30.dp)
+            .padding(top = 10.dp)
     ) {
         Row {
             Text(
@@ -219,7 +197,6 @@ fun CategoriesSection(viewModel: HomeScreenViewModel, navController: NavControll
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeProductItem(
@@ -227,15 +204,15 @@ fun HomeProductItem(
     viewModel: HomeScreenViewModel,
     navController: NavController
 ) {
-    val painter: Painter = rememberImagePainter(data = product.image_url)
+    val painter: Painter = rememberAsyncImagePainter(model = product.image_url)
 
     Card(
         modifier = Modifier
             .width(140.dp)
             .padding(10.dp)
             .fillMaxWidth()
-            .height(130.dp), // Ajusta la altura según sea necesario
-        shape = RoundedCornerShape(10.dp), // Esquinas redondeadas
+            .height(130.dp),
+        shape = RoundedCornerShape(10.dp),
         onClick = {
             sharedViewModel.clearCurrentProduct()
             val parsedProduct = Product(
@@ -254,8 +231,9 @@ fun HomeProductItem(
                 product.num_likes
             )
             sharedViewModel.setCurrentProduct(parsedProduct)
-            sharedViewModel.setProductHistoryDetails()
-            viewModel.navigateToProductDetailsScreen(navController)
+            sharedViewModel.setProductHistoryDetails {
+                viewModel.navigateToProductDetailsScreen(navController)
+            }
         }
     ) {
         Column(
@@ -269,26 +247,24 @@ fun HomeProductItem(
                 modifier = Modifier
                     .size(100.dp)
                     .padding(bottom = 10.dp)
-
             )
-            if (product.profit == 0 && product.profit_percentage == 0) {
+            if (product.profit == 0.0 && product.profit_percentage == 0.0) {
                 Text(
-                    text = "MÁS GUSTADO!", style = TextStyle(
+                    text = "¡MÁS GUSTADO!",
+                    style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     )
-
                 )
             } else {
                 Text(
-                    text = "Ahorro: ${product.profit}€ (${product.profit_percentage}%)",
+                    text = "Ahorro: (${String.format("%.2f", product.profit_percentage)}%)",
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     )
                 )
             }
-
         }
     }
 }

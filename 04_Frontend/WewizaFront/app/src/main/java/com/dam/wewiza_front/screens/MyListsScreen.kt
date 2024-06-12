@@ -2,6 +2,7 @@ package com.dam.wewiza_front.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -102,6 +104,7 @@ private fun MyListItem(
 ) {
     val context = LocalContext.current
     val showDeleteDialog = remember { mutableStateOf(false) }
+    val showMarketDialog = remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -124,13 +127,16 @@ private fun MyListItem(
             }
 
             Column(horizontalAlignment = Alignment.End) {
-                Button(
-                    onClick = {
-                        Toast.makeText(context, "Por implementar...", Toast.LENGTH_SHORT).show()
+
+                    Button(
+                        onClick = {
+                            showMarketDialog.value = true
+                        },
+                        modifier = Modifier.size(85.dp)
+                    ) {
+                        Text(text = "Sugerencias", fontSize = 6.9.sp)
                     }
-                ) {
-                    Text(text = "Sugerir", fontSize = 10.sp)
-                }
+
             }
 
             // Delete button
@@ -159,6 +165,118 @@ private fun MyListItem(
             },
             onDismiss = {
                 showDeleteDialog.value = false
+            }
+        )
+    }
+
+
+    if (showMarketDialog.value) {
+        MarketSelectionDialog(showMarketDialog) { selectedMarkets ->
+            sharedViewModel.setWantedMarket(selectedMarkets)
+            viewModel.navigateToSuggestionScreen(navController, shoppingList.uuid)
+        }
+    }
+}
+
+@Composable
+fun MarketSelectionDialog(showDialog: MutableState<Boolean>, onConfirm: (List<String>) -> Unit) {
+    val mercadonaChecked = remember { mutableStateOf(false) }
+    val carrefourChecked = remember { mutableStateOf(false) }
+    val ahorramasChecked = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // Variable para contar el número de checkboxes seleccionadas
+    val selectedCount = remember { mutableStateOf(0) }
+
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Selecciona los mercados de los que quieres recibir sugerencias: ") },
+            text = {
+                Column {
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("Mercadona")
+                        Checkbox(
+                            checked = mercadonaChecked.value,
+                            onCheckedChange = {
+                                if (it) {
+                                    if (selectedCount.value < 2) {
+                                        mercadonaChecked.value = it
+                                        selectedCount.value++
+                                    } else {
+                                        Toast.makeText(context, "Solo puedes seleccionar dos mercados.", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    mercadonaChecked.value = it
+                                    selectedCount.value--
+                                }
+                            }
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("Carrefour")
+                        Checkbox(
+                            checked = carrefourChecked.value,
+                            onCheckedChange = {
+                                if (it) {
+                                    if (selectedCount.value < 2) {
+                                        carrefourChecked.value = it
+                                        selectedCount.value++
+                                    } else {
+                                        Toast.makeText(context, "Solo puedes seleccionar dos mercados.", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    carrefourChecked.value = it
+                                    selectedCount.value--
+                                }
+                            }
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("Ahorramas")
+                        Checkbox(
+                            checked = ahorramasChecked.value,
+                            onCheckedChange = {
+                                if (it) {
+                                    if (selectedCount.value < 2) {
+                                        ahorramasChecked.value = it
+                                        selectedCount.value++
+                                    } else {
+                                        Toast.makeText(context, "Solo puedes seleccionar dos mercados.", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    ahorramasChecked.value = it
+                                    selectedCount.value--
+                                }
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val selectedMarkets = mutableListOf<String>()
+                        if (mercadonaChecked.value) selectedMarkets.add("mercadona")
+                        if (carrefourChecked.value) selectedMarkets.add("carrefour")
+                        if (ahorramasChecked.value) selectedMarkets.add("ahorramas")
+
+                        if (selectedMarkets.isEmpty()) {
+                            Toast.makeText(context, "Debes seleccionar al menos un mercado", Toast.LENGTH_SHORT).show()
+                        } else {
+                            onConfirm(selectedMarkets)
+                        }
+
+                        showDialog.value = false
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("Cancelar")
+                }
             }
         )
     }

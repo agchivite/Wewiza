@@ -6,7 +6,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +34,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.ui.theme.MyLightTheme
@@ -55,7 +54,7 @@ fun AboutUsScreen(
         }
     ) {
         MyLightTheme {
-            AboutUsBodyContent(context, viewModel, navController)
+            AboutUsBodyContent(context, viewModel)
         }
 
     }
@@ -64,8 +63,7 @@ fun AboutUsScreen(
 @Composable
 fun AboutUsBodyContent(
     context: Context,
-    viewModel: AboutUsScreenViewModel,
-    navController: NavHostController
+    viewModel: AboutUsScreenViewModel
 ) {
     Column(
         modifier = Modifier
@@ -111,7 +109,8 @@ fun AboutUsBodyContent(
             Text(
                 text = "\u00A9 2024 Wewiza",
                 style = TextStyle(fontSize = 12.sp),
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
+                color = Color.Black
             )
         }
     }
@@ -133,7 +132,7 @@ private fun ImageFields(context: Context, viewModel: AboutUsScreenViewModel) {
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(
-                        painter = rememberImagePainter("https://avatars.githubusercontent.com/u/113429920?v=4"),
+                        painter = rememberAsyncImagePainter("https://avatars.githubusercontent.com/u/113429920?v=4"),
                         contentDescription = null,
                         modifier = Modifier
                             .size(150.dp)
@@ -145,7 +144,7 @@ private fun ImageFields(context: Context, viewModel: AboutUsScreenViewModel) {
                 Spacer(modifier = Modifier.size(20.dp))
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(
-                        painter = rememberImagePainter("https://avatars.githubusercontent.com/u/113969561?v=4"),
+                        painter = rememberAsyncImagePainter("https://avatars.githubusercontent.com/u/113969561?v=4"),
                         contentDescription = null,
                         modifier = Modifier
                             .size(150.dp)
@@ -162,9 +161,8 @@ private fun ImageFields(context: Context, viewModel: AboutUsScreenViewModel) {
 
 @Composable
 fun LinkField(label: String, url: String, context: Context, viewModel: AboutUsScreenViewModel) {
-    val painter = rememberImagePainter(
-        data = if (label.contains("GitHub")) R.drawable.github_logo else R.drawable.linkedin_logo,
-    )
+    val painter =
+        rememberAsyncImagePainter(model = if (label.contains("GitHub")) R.drawable.github_logo else R.drawable.linkedin_logo)
     Image(
         painter = painter,
         contentDescription = label,

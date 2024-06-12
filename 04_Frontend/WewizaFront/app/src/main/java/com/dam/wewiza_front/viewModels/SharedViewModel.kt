@@ -2,10 +2,12 @@ package com.dam.wewiza_front.viewModels
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dam.wewiza_front.models.Category
+import com.dam.wewiza_front.models.Markets
 import com.dam.wewiza_front.models.Product
 import com.dam.wewiza_front.models.Profile
 import com.dam.wewiza_front.models.ShoppingList
@@ -36,10 +38,12 @@ class SharedViewModel : ViewModel() {
         mutableStateOf(
             mutableStateOf(loadedCategories.associate { it.id to true }.toMutableMap())
         )
-    private val productHistoryDetails = mutableListOf<Product>()
+    private val _productHistoryDetails = mutableStateOf<MutableList<Product>>(mutableListOf())
+    val productHistoryDetails: State<MutableList<Product>> = _productHistoryDetails
     private val loggedUserProfile = mutableStateOf<Profile?>(null)
     private val localShoppingLists = mutableStateOf<List<ShoppingList>?>(null)
     val selectedList = mutableStateOf<ShoppingList?>(null)
+    private val wantedMarket = mutableStateOf<List<String>>(listOf())
 
 
     /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AFTER THIS, THERE ARE ALL THE FUNCTIONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
@@ -109,29 +113,23 @@ class SharedViewModel : ViewModel() {
         currentProduct.value = null
     }
 
-    fun setProductHistoryDetails() {
-        if (currentProduct.value != null) {
-            getProductHistoryDetails(currentProduct.value!!.uuid)
-        }
+
+    fun setProductHistoryDetails(callback: () -> Unit) {
+        val productId = currentProduct.value?.uuid ?: return
+        getProductHistoryDetails(productId, callback)
     }
 
-    fun getHistoryDetails(): MutableList<Product> {
-        return productHistoryDetails
-    }
-
-
-    private fun getProductHistoryDetails(product_id: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+    private fun getProductHistoryDetails(productId: String, callback: () -> Unit) {
+        viewModelScope.launch {
             try {
+                _productHistoryDetails.value.clear()
+                callback()
                 val products = withContext(Dispatchers.IO) {
-                    service.getProductHistoryDetails(product_id)
+                    service.getProductHistoryDetails(productId)
                 }
-                withContext(Dispatchers.Main) {
-                    productHistoryDetails.clear()
-                    productHistoryDetails.addAll(products)
-                }
+                _productHistoryDetails.value = products.toMutableList()
             } catch (e: Exception) {
-                Log.d("ProductDetailsScreenViewModel", "getProductHistoryDetails: ${e.message}")
+                Log.d("SharedViewModel", "getProductHistoryDetails: ${e.message}")
             }
         }
     }
@@ -140,9 +138,18 @@ class SharedViewModel : ViewModel() {
 
     fun resetLocalData() {
         loggedUserProfile.value = null
-        productHistoryDetails.clear()
+        productHistoryDetails.value.clear()
         localShoppingLists.value = null
     }
+
+    fun getWantedMarket(): List<String> {
+        return wantedMarket.value
+    }
+
+    fun setWantedMarket(markets: List<String>) {
+        wantedMarket.value = markets
+    }
+
 
 
 }

@@ -1,6 +1,7 @@
 from api_wewiza.src.repositories.product_likes_repository import ProductLikesRepository
 import json
 import requests
+from datetime import datetime
 
 
 class ProductLikesService:
@@ -18,12 +19,19 @@ class ProductLikesService:
         likes_sum = sum(product["num_likes"] for product in products_list_json)
         likes_count = len(products_list_json)
         average = likes_sum / likes_count
+        print("AVERAGE_LIKES not rounded: ", average)
         average = round(average, 2)
-        print("AVERAGE_LIKES: ", average)
         return average
 
     def get_top_products(self, TOP_LIKES_AVERAGE):
-        query = {"num_likes": {"$gt": TOP_LIKES_AVERAGE}}
+        actual_date_year_month = datetime.now().strftime("%Y-%m")
+        query = {
+            "$and": [
+                {"date_created": {"$regex": f"^{actual_date_year_month}"}},
+                {"num_likes": {"$gt": TOP_LIKES_AVERAGE}},
+            ]
+        }
+
         result = self.product_likes_repository.get_all_products_by_query(query)
 
         if result.is_failure():
@@ -31,7 +39,12 @@ class ProductLikesService:
             return []
 
         products_list_json = result.value
-        uuid_list = [product["uuid"] for product in products_list_json]
+        sorted_products = sorted(
+            products_list_json, key=lambda x: x["num_likes"], reverse=True
+        )
+        top_5_products = sorted_products[:5]
+        uuid_list = [product["uuid"] for product in top_5_products]
+        print("TOP_5_PRODUCTS: ", uuid_list)
 
         return uuid_list
 
@@ -45,28 +58,36 @@ class ProductLikesService:
             print("PRODUCT_LIKES_SERVICE: (Like) Product not found")
             return False
 
-        if email_user in product_data.get("likes_email", []):
+        num_likes = product_data.get("num_likes", 0)
+        likes_emails = product_data.get("likes_email", [])
+        unlikes_emails = product_data.get("unlikes_email", [])
+
+        if email_user in likes_emails:
             print(
                 "PRODUCT_LIKES_SERVICE: (Like) Product was liked before by "
                 + email_user
             )
             return False
 
-        new_num_likes = product_data.get("num_likes", 0) + 1
-        likes_emails = product_data.get("likes_email", [])
-        likes_emails.append(email_user)
+        if email_user in unlikes_emails:
+            # User previously unliked the product, so remove the unlike
+            unlikes_emails.remove(email_user)
+            likes_emails.append(email_user)
+            update_data = {
+                "$set": {
+                    "num_likes": num_likes + 2,
+                    "likes_email": likes_emails,
+                    "unlikes_email": unlikes_emails,
+                },
+            }
+        else:
+            # User has not expressed opinion before, so add to likes
+            likes_emails.append(email_user)
+            update_data = {
+                "$set": {"num_likes": num_likes + 1, "likes_email": likes_emails},
+            }
 
         update_query = {"uuid": product_id}
-        update_data = {
-            "$set": {"num_likes": new_num_likes, "likes_email": likes_emails}
-        }
-
-        # Remove email from unlikes_email if it was there
-        if email_user in product_data.get("unlikes_email", []):
-            update_data["$pull"] = {"unlikes_email": email_user}
-            # Sum one more like because it was unliked before
-            update_data["$set"]["num_likes"] = new_num_likes + 1
-
         self.product_likes_repository.update_product(update_query, update_data)
         return True
 
@@ -80,28 +101,36 @@ class ProductLikesService:
             print("PRODUCT_LIKES_SERVICE: (Unlike) Product not found")
             return False
 
-        if email_user in product_data.get("unlikes_email", []):
+        num_likes = product_data.get("num_likes", 0)
+        likes_emails = product_data.get("likes_email", [])
+        unlikes_emails = product_data.get("unlikes_email", [])
+
+        if email_user in unlikes_emails:
             print(
                 "PRODUCT_LIKES_SERVICE: (Unlike) Product was unliked before by "
                 + email_user
             )
             return False
 
-        new_num_likes = product_data.get("num_likes", 0) - 1
-        unlikes_emails = product_data.get("unlikes_email", [])
-        unlikes_emails.append(email_user)
+        if email_user in likes_emails:
+            # User previously liked the product, so remove the like
+            likes_emails.remove(email_user)
+            unlikes_emails.append(email_user)
+            update_data = {
+                "$set": {
+                    "num_likes": num_likes - 2,
+                    "likes_email": likes_emails,
+                    "unlikes_email": unlikes_emails,
+                },
+            }
+        else:
+            # User has not expressed opinion before, so add to unlikes
+            unlikes_emails.append(email_user)
+            update_data = {
+                "$set": {"num_likes": num_likes - 1, "unlikes_email": unlikes_emails},
+            }
 
         update_query = {"uuid": product_id}
-        update_data = {
-            "$set": {"num_likes": new_num_likes, "unlikes_email": unlikes_emails}
-        }
-
-        # Remove email from likes_email if it was there
-        if email_user in product_data.get("likes_email", []):
-            update_data["$pull"] = {"likes_email": email_user}
-            # Subtract one like because it was liked before
-            update_data["$set"]["num_likes"] = new_num_likes - 1
-
         self.product_likes_repository.update_product(update_query, update_data)
         return True
 

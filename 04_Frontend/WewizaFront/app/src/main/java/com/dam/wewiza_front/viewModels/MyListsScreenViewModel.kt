@@ -153,6 +153,20 @@ class MyListsScreenViewModel : ViewModel() {
         }
     }
 
+    fun navigateToSuggestionScreen(navController: NavHostController, uuid: String) {
+        viewModelScope.launch {
+            retrieveShoppingListFromProfile(auth.currentUser!!.email!!, uuid) { selectedList ->
+                selectedList?.let { // Verifica si la lista seleccionada no es nula
+                    Log.d("MyListsScreenViewModel", "selectedList: $selectedList")
+                    sharedViewModel.setSelectedList(selectedList)
+                    navController.navigate(AppScreens.SuggestionScreen.route)
+                } ?: run {
+
+                    Log.e("MyListsScreenViewModel", "Error: No se pudo recuperar la lista seleccionada")
+                }
+            }
+        }
+    }
 
 
 }
