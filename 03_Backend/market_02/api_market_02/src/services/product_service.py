@@ -55,7 +55,8 @@ class ProductService:
         for last_product in last_products_list_json:
             for actual_product in actual_products_list_json:
                 if (
-                    last_product["uuid"] == actual_product["uuid"]
+                    last_product["uuid"] != actual_product["uuid"]
+                    and last_product["name"] == actual_product["name"]
                     and last_product["price_by_standard_measure"]
                     != actual_product["price_by_standard_measure"]
                 ):
@@ -64,7 +65,7 @@ class ProductService:
                         - actual_product["price_by_standard_measure"]
                     )
                     actual_product["profit_percentage"] = (
-                        actual_product["profit"]
+                        actual_product["price_by_standard_measure"]
                         / last_product["price_by_standard_measure"]
                     ) * 100
 
@@ -212,3 +213,22 @@ class ProductService:
             return []
 
         return result.value
+
+    def updateZeroData(self):
+        result = self.product_repository.updateZeroData()
+
+        if result.is_failure():
+            print("Failed to update to random price less:", result.error)
+            return []
+
+        return result.value
+
+    def find_actual_id(self, uuid):
+        result = self.product_repository.find_actual_id(uuid)
+
+        if result.is_failure():
+            print("Failed to find actual id:", result.error)
+            return {"success": False, "failure": result.error, "uuid": None}
+
+        successJson = {"success": True, "failure": None, "uuid": result.value}
+        return successJson

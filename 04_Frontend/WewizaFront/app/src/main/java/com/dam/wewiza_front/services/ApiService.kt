@@ -1,16 +1,14 @@
 package com.dam.wewiza_front.services
 
-import com.dam.wewiza_front.models.Categories
-import com.dam.wewiza_front.models.Category
-import com.dam.wewiza_front.models.Markets
-import com.dam.wewiza_front.models.Product
-import com.dam.wewiza_front.models.TopProduct
+import com.dam.wewiza_front.models.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Url
 import java.util.concurrent.TimeUnit
 
 interface ApiService {
@@ -18,6 +16,9 @@ interface ApiService {
     //http://wewiza.ddns.net/get_categories/
     @GET("categories")
     suspend fun getAllCategories(): Categories
+
+    @GET("docs")
+    suspend fun testConnection(): Response<Void>
 
     @GET("products")
     suspend fun getAllMarketsProduct(): Markets
@@ -32,13 +33,13 @@ interface ApiService {
     suspend fun likeProduct(
         @Path("user_email") user_email: String,
         @Path("product_id") product_id: String
-    ):Map<String, Boolean>
+    ): Map<String, Boolean>
 
     @GET("unlike/{product_id}/email/{user_email}")
     suspend fun unlikeProduct(
         @Path("user_email") user_email: String,
         @Path("product_id") product_id: String
-    ):  Map<String, Boolean>
+    ): Map<String, Boolean>
 
     @GET("product/details/id/{product_id}")
     suspend fun getProductHistoryDetails(@Path("product_id") product_id: String): List<Product>
@@ -59,6 +60,10 @@ interface ApiService {
     @GET("categories/top")
     suspend fun getTopCategories(): List<Category>
 
+    @GET
+    suspend fun getSuggestions(
+        @Url url: String,
+    ): List<Product>
 }
 
 
@@ -70,8 +75,8 @@ object RetrofitServiceFactory {
 
     private val okHttpClient = OkHttpClient.Builder()
         .hostnameVerifier { hostname, _ -> hostname == "wewiza.ddns.net" }
-        .connectTimeout(200, TimeUnit.MILLISECONDS) // Aumenta el tiempo de espera de conexión
-        .readTimeout(30, TimeUnit.SECONDS) // Aumenta el tiempo de espera de lectura
+        .connectTimeout(3, TimeUnit.MINUTES) // Aumenta el tiempo de espera de conexión
+        .readTimeout(2, TimeUnit.MINUTES) // Aumenta el tiempo de espera de lectura
         .writeTimeout(15, TimeUnit.SECONDS) // Aumenta el tiempo de espera de escritura
         .addInterceptor(interceptor)
         .build()

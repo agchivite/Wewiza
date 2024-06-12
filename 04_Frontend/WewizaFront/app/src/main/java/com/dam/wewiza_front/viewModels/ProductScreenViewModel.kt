@@ -80,57 +80,6 @@ class ProductScreenViewModel : ViewModel() {
     }
 
 
-
-//
-//
-//    private fun getMercadonaProducts() {
-//        viewModelScope.launch {
-//            try {
-//                val products = withContext(Dispatchers.IO) {
-//                    service.getProductsPerMarket("mercadona")
-//                }
-//                withContext(Dispatchers.Main) {
-//                    allProductsList.value.addAll(products)
-//                }
-//                Log.d("HomeScreenViewModel", "getMercadonaProducts: ${products.size}")
-//            } catch (e: Exception) {
-//                Log.d("HomeScreenViewModel", "getMercadonaProducts: ${e.message}")
-//            }
-//        }
-//    }
-//
-//    private fun getAhorramasProducts() {
-//        viewModelScope.launch {
-//            try {
-//                val products = withContext(Dispatchers.IO) {
-//                    service.getProductsPerMarket("ahorramas")
-//                }
-//                withContext(Dispatchers.Main) {
-//                    allProductsList.value.addAll(products)
-//                }
-//                Log.d("HomeScreenViewModel", "getAhorramasProducts: ${products.size}")
-//            } catch (e: Exception) {
-//                Log.d("HomeScreenViewModel", "getAhorramasProducts: ${e.message}")
-//            }
-//        }
-//    }
-
-//    private fun getCarrefourProducts() {
-//        viewModelScope.launch {
-//            try {
-//                val products = withContext(Dispatchers.IO) {
-//                    service.getProductsPerMarket("carrefour")
-//                }
-//                withContext(Dispatchers.Main) {
-//                    allProductsList.value.addAll(products)
-//                }
-//                Log.d("HomeScreenViewModel", "getCarrefourProducts: ${products.size}")
-//            } catch (e: Exception) {
-//                Log.d("HomeScreenViewModel", "getCarrefourProducts: ${e.message}")
-//            }
-//        }
-//    }
-
     fun navigateToProductDetailsScreen(navController: NavHostController) {
         navController.navigate(AppScreens.ProductDetailsScreen.route)
     }

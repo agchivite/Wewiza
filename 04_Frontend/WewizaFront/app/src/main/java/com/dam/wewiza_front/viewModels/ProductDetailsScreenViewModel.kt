@@ -18,11 +18,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 
 class ProductDetailsScreenViewModel : ViewModel() {
 
@@ -33,14 +31,17 @@ class ProductDetailsScreenViewModel : ViewModel() {
     private var profile: Profile? = null
     private val profilesCollection = db.collection("profiles")
 
-    fun likeProductWithCallback(productId: String, callback: (Boolean) -> Unit) {
+    fun likeProductWithCallback(productId: String, callback: (Pair<Boolean, Int>) -> Unit) {
         viewModelScope.launch {
             try {
                 val serviceResult = withContext(Dispatchers.IO) {
                     service.likeProduct(auth.currentUser!!.email.toString(), productId)
                 }
                 val result = serviceResult.values.firstOrNull() ?: false
-                callback(result)
+                val newProduct = service.getProductById(productId)
+                val newLikes = newProduct.num_likes
+                val pairBooleanAndNewLikes = Pair(result, newLikes)
+                callback(pairBooleanAndNewLikes)
                 Log.d("ProductDetailsScreenViewModel", "likeProduct: ${result}")
             } catch (e: Exception) {
                 Log.d("ProductDetailsScreenViewModel", "likeProduct: ${e.message}")
@@ -48,24 +49,24 @@ class ProductDetailsScreenViewModel : ViewModel() {
         }
     }
 
-    fun unlikeProductWithCallback(productId: String, callback: (Boolean) -> Unit) {
+    fun unlikeProductWithCallback(productId: String, callback: (Pair<Boolean, Int>) -> Unit) {
         viewModelScope.launch {
             try {
                 val serviceResult = withContext(Dispatchers.IO) {
                     service.unlikeProduct(auth.currentUser!!.email.toString(), productId)
                 }
                 val result = serviceResult.values.firstOrNull() ?: false
-                callback(result)
-                Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${result}")
+                val newProduct = service.getProductById(productId)
+                val newLikes = newProduct.num_likes
+                val pairBooleanAndNewLikes = Pair(result, newLikes)
+                callback(pairBooleanAndNewLikes)
+                Log.d("ProductDetailsScreenViewModel", "unlikeProduct: $result")
             } catch (e: Exception) {
                 Log.d("ProductDetailsScreenViewModel", "unlikeProduct: ${e.message}")
             }
         }
     }
 
-    fun getProductHistoryDetails(): MutableList<Product> {
-        return sharedViewModel.getHistoryDetails()
-    }
 
     fun updateUserReviews() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -112,24 +113,6 @@ class ProductDetailsScreenViewModel : ViewModel() {
     }
 
 
-
-
-    private suspend fun updateProfileInFirebaseByEmail(userEmail: String, userProfile: Profile) {
-        try {
-            val querySnapshot = profilesCollection.whereEqualTo("email", userEmail).get().await()
-            if (!querySnapshot.isEmpty) {
-                // Se espera que haya solo un documento con el correo electrónico único
-                val profileDocument = querySnapshot.documents[0]
-                profileDocument.reference.set(userProfile).await()
-                Log.d("updateUserList", "Profile updated in Firebase for email: $userEmail")
-            } else {
-                Log.d("updateUserList", "User profile not found in Firebase for email: $userEmail")
-            }
-        } catch (e: Exception) {
-            Log.d("updateUserList", "Failed to update profile in Firebase: ${e.message}")
-        }
-    }
-
     fun addProductToList(
         shoppingListUuid: String,
         productUuid: String,
@@ -163,12 +146,22 @@ class ProductDetailsScreenViewModel : ViewModel() {
             val year = calendar.get(Calendar.YEAR)
             val monthValue = index.toFloat()
 
-            if (!uniqueMonths.containsValue("${calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())} $year")) {
-                uniqueMonths[monthValue] = "${calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())} $year"
+            if (!uniqueMonths.containsValue(
+                    "${
+                        calendar.getDisplayName(
+                            Calendar.MONTH,
+                            Calendar.SHORT,
+                            Locale.getDefault()
+                        )
+                    } $year"
+                )
+            ) {
+                uniqueMonths[monthValue] =
+                    "${calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())} $year"
                 index++
             }
 
-            val entry = Entry(monthValue, product.price.toFloat())
+            val entry = Entry(monthValue, product.price_by_standard_measure.toFloat())
             entries.add(entry)
         }
 

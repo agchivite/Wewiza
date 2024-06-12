@@ -244,17 +244,16 @@ class ScrappingService:
                 quantity_measure = 1
 
             current_date = datetime.now()
-            # current_date_str = current_date.strftime("%Y-%m-%d %H:%M:%S")
-            current_date_str = "2024-04-10 00:00:00"
+            current_date_str = current_date.strftime("%Y-%m-%d %H:%M:%S")
 
             product = Product(
                 str(uuid.uuid4()),
                 id_category,
                 name,
-                price_float,
+                round(price_float, 2),
                 float(quantity_measure),
                 measure,
-                price_per_standard_measure,
+                round(price_per_standard_measure, 2),
                 image_url,
                 url,
                 store_name,

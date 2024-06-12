@@ -17,10 +17,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.dam.wewiza_front.R
 import com.dam.wewiza_front.constants.Constants
 import com.dam.wewiza_front.models.Product
@@ -36,7 +37,7 @@ fun ListScreen(listScreenViewModel: ListScreenViewModel, navController: NavHostC
     Log.d("ListScreen", "Selected Products: ${selectedProductsIds!!.products.size}")
     var loading by remember { mutableStateOf(false) }
 
-    if (selectedProductsIds!!.products.isNotEmpty()) {
+    if (selectedProductsIds.products.isNotEmpty()) {
         LaunchedEffect(selectedProductsIds) {
             loading = true
             val products = listScreenViewModel.getProductsFromList(selectedProductsIds)
@@ -57,7 +58,11 @@ fun ListScreen(listScreenViewModel: ListScreenViewModel, navController: NavHostC
                     CircularProgressIndicator()
                 }
             } else {
-                ListScreenBodyContent(listScreenViewModel, navController, productsList) { updatedProductsList ->
+                ListScreenBodyContent(
+                    listScreenViewModel,
+                    navController,
+                    productsList
+                ) { updatedProductsList ->
                     productsList = updatedProductsList
                 }
             }
@@ -72,6 +77,9 @@ fun ListScreenBodyContent(
     productsList: List<Product>,
     onProductsListChanged: (List<Product>) -> Unit
 ) {
+
+    val showMarketDialog = remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,7 +91,11 @@ fun ListScreenBodyContent(
             modifier = Modifier.weight(1f) // Ocupa todo el espacio restante
         ) {
             items(productsList.size) { index ->
-                ListProductItem(product = productsList[index], viewModel, navController) { deletedProduct ->
+                ListProductItem(
+                    product = productsList[index],
+                    viewModel,
+                    navController
+                ) { deletedProduct ->
                     val updatedProductsList = productsList.toMutableList().apply {
                         remove(deletedProduct)
                     }
@@ -107,7 +119,6 @@ fun ListScreenBodyContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 //product list total price
                 Text(
                     text = "Total: ${"%.2f".format(productsList.sumOf { it.price })} €",
@@ -115,12 +126,21 @@ fun ListScreenBodyContent(
                     color = Color.Black
                 )
 
-                Button(onClick = { /* Aquí puedes colocar la lógica para sugerir */ }) {
-                    Text(text = "Sugerir")
+                Button(onClick = {
+                    showMarketDialog.value = true
+                }) {
+                    Text(text = "Sugerencias")
                 }
             }
         }
     }
+    if (showMarketDialog.value) {
+        MarketSelectionDialog(showMarketDialog) { selectedMarkets ->
+            sharedViewModel.setWantedMarket(selectedMarkets)
+            viewModel.navigateToSuggestionScreen(navController, sharedViewModel.selectedList.value!!.uuid)
+        }
+    }
+
 }
 
 @Composable
@@ -134,19 +154,18 @@ fun ListProductItem(
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp)
             .padding(8.dp)
             .clickable(onClick = {
                 sharedViewModel.clearCurrentProduct()
                 sharedViewModel.setCurrentProduct(product)
-                sharedViewModel.setProductHistoryDetails()
-                viewModel.navigateToProductDetailsScreen(navController)
+                sharedViewModel.setProductHistoryDetails {
+                    viewModel.navigateToProductDetailsScreen(navController)
+                }
             })
-
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Image(
-                painter = rememberImagePainter(data = product.image_url),
+                painter = rememberAsyncImagePainter(model = product.image_url),
                 contentDescription = "Product Image",
                 modifier = Modifier
                     .size(100.dp)
@@ -157,27 +176,74 @@ fun ListProductItem(
                     .padding(start = 8.dp)
                     .weight(1f) // This makes the column take available space
             ) {
-                Text(text = product.name)
+                Text(text = product.name, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "Price: ${product.price} €")
-                Text(text = "Store: ${product.store_name}")
+                Text(text = "Precio: ${product.price} €")
+                Text(text = "Precio por medida: ${product.price_by_standard_measure} €/${
+                    if (product.measure.lowercase().contains("mg") ||
+                        product.measure.lowercase().contains("g") ||
+                        product.measure.lowercase().contains("kg")
+                    ) {
+                        "Kg"
+                    } else if (product.measure.lowercase().contains("ml") ||
+                        product.measure.lowercase().contains("cl") ||
+                        product.measure.lowercase().contains("l")
+                    ) {
+                        "L"
+                    } else {
+                        "Ud"
+                    }
+                }", fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(5.dp))
             }
 
-            Button(
-                onClick = {
-                    viewModel.deleteProduct(product)
-                    onDelete(product)
-                },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(69.dp) // Adjust size as needed
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(end = 8.dp)
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.delete),
-                    contentDescription = "Delete product",
-                    modifier = Modifier.size(24.dp) // Adjust size as needed
-                )
+                DeleteButton(viewModel, onDelete, product)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (product.store_name.trim().lowercase() == "mercadona") {
+                    Image(
+                        painter = painterResource(id = R.drawable.mercadona_logo),
+                        contentDescription = "mercadona",
+                        modifier = Modifier
+                            .size(40.dp)
+                    )
+                } else if (product.store_name.trim().lowercase() == "ahorramas") {
+                    Image(
+                        painter = painterResource(id = R.drawable.ahorramas),
+                        contentDescription = "ahorramas",
+                        modifier = Modifier
+                            .size(40.dp)
+                    )
+                } else if (product.store_name.trim().lowercase() == "carrefour") {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = product.store_image_url),
+                        contentDescription = "carrefour",
+                        modifier = Modifier
+                            .size(40.dp)
+                    )
+                }
             }
         }
     }
 }
+
+@Composable
+fun DeleteButton(viewModel: ListScreenViewModel, onDelete: (Product) -> Unit, product: Product) {
+    IconButton(onClick = {
+        viewModel.deleteProduct(product)
+        onDelete(product)
+    }) {
+        Icon(
+            painter = painterResource(id = R.drawable.delete),
+            contentDescription = "Delete"
+        )
+    }
+
+}
+
+

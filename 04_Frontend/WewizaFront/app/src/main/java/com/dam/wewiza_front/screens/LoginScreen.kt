@@ -90,7 +90,7 @@ fun LoginScreenBodyContent(viewModel: LoginScreenViewModel, navController: NavCo
                     fontSize = 30.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = Butler,
-                    color = Color(0xFF2E2C31)
+                    color = Color.Black
                 )
             )
             LoginTextInputs(viewModel)
@@ -178,7 +178,11 @@ fun LoginTextInputs(viewModel: LoginScreenViewModel) {
             label = { Text("Correo") },
             modifier = Modifier
                 .padding(top = 30.dp)
-                .width(350.dp)
+                .width(350.dp),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Done
+            )
         )
         TextField(
             value = password,

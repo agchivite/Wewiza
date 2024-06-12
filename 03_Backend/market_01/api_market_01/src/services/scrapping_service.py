@@ -1,4 +1,5 @@
 import json
+import random
 import uuid
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
@@ -17,12 +18,14 @@ class ScrappingService:
         self.output_folder = ""
 
     def find_category(self, category_title, dictionaty_titles_categories):
-        for category, subcategories in dictionaty_titles_categories.items():
-            if any(
-                category_title.lower() in subcategory.lower()
-                for subcategory in subcategories
-            ):
-                return category
+        category_title_lower = category_title.lower()
+
+        for key, values in dictionaty_titles_categories.items():
+            values_lower = [value.lower() for value in values]
+            if category_title_lower in values_lower:
+                print(f"Category found: {key}")
+                return key
+
         return "category_not_found"
 
     def run_scrapping_mercadona(
@@ -58,6 +61,7 @@ class ScrappingService:
                     category_title_element = self.driver.find_element(
                         "css selector", ".category-detail__title.title1-b"
                     )
+
                     category_title = self.find_category(
                         category_title_element.text.strip(),
                         dictionaty_titles_categories,
@@ -148,20 +152,26 @@ class ScrappingService:
         match = re.match(r"(\d+)\s*.*\s*x\s*(\d+)\s*([a-zA-Z]+)", text)
         if match:
             quantity1, quantity2, unit = match.groups()
-            total_quantity = int(quantity1) * int(quantity2)
+            print(f"Quantity1: {quantity1}, Quantity2: {quantity2}, Unit: {unit}")
+            total_quantity = float(quantity1) * float(quantity2)
+            total_quantity = round(total_quantity, 2)
             return total_quantity, unit
 
         # Case 2: "Cualqier texto 2 cualquier_texto (180 g)"
         match = re.match(r".*\(\s*(\d+)\s*([a-zA-Z]+)\s*\)", text)
         if match:
             quantity, unit = match.groups()
-            return int(quantity), unit
+            print(f"Quantity: {quantity}, Unit: {unit}")
+            quantity = round(float(quantity), 2)
+            return float(quantity), unit
 
-        # Case 3: "Cualquier texto 6 L"
-        match = re.match(r".*\b(\d+)\s*([a-zA-Z]+)\b", text)
+        # Case 3: "Cualquier texto 6 L" o "1,51 kg aprox."
+        match = re.match(r".*?([\d]+(?:[.,]\d+)?)\s*([a-zA-Z]+)\b", text)
         if match:
             quantity, unit = match.groups()
-            return int(quantity), unit
+            quantity = quantity.replace(",", ".")
+            quantity = round(float(quantity), 2)
+            return float(quantity), unit
 
         return None, None
 
@@ -190,6 +200,8 @@ class ScrappingService:
             texts = [tag.get_text(strip=True) for tag in footnote1_r_tags]
 
             # Sometimes there are 2 elements: [(None, None), (180, 'g')] take only the last
+            print(f"Texts: {texts}")
+            print(f"Texts QUANTITY and UNIT: {texts[-1]}")
             if texts:
                 quantities_and_units = [self.extract_quantity_and_unit(texts[-1])]
 
@@ -199,6 +211,13 @@ class ScrappingService:
                 if quantity is not None and unit is not None:
                     print(f"Name: {name}, Quantity: {quantity}, Unit: {unit}")
                     quantity_measure = quantity
+
+                    """ 
+                    if unit == "g":
+                        unit = "kg"
+                    elif unit == "ml":
+                        unit = "l"
+                    """
                     measure = unit
                 else:
                     print("Name: ", name, " - No match found")
@@ -230,10 +249,10 @@ class ScrappingService:
                 str(uuid.uuid4()),
                 id_category,
                 name,
-                price_float,
+                round(price_float, 2),
                 float(quantity_measure),
                 measure.lower(),
-                price_per_measure,
+                round(price_per_measure, 2),
                 image_url,
                 url,
                 store_name,

@@ -3,16 +3,20 @@ from api_market_02.src.schemas.product_schema import product_schema
 from api_market_02.src.database.database_manager import DatabaseManager
 from datetime import datetime
 import random
-
-# import spacy
 import re
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from textblob import TextBlob
+
+nltk.download("punkt")
+nltk.download("stopwords")
 
 
 class ProductRepository:
     def __init__(self, db_manager: DatabaseManager, collection_name):
         self.db_manager = db_manager
         self.collection_name = collection_name
-        self.nlp_spanish = ""  # spacy.load("es_core_news_sm")
         self.__setup_collection_validation()
 
     def __setup_collection_validation(self):
@@ -169,10 +173,9 @@ class ProductRepository:
             return Result.failure(str(e))
 
     def __normalize_text(self, text):
-        doc = self.nlp_spanish(text.lower())
-        tokens = [
-            token.lemma_ for token in doc if not token.is_stop and not token.is_punct
-        ]
+        blob = TextBlob(text.lower())
+        stop_words = set(stopwords.words("spanish"))
+        tokens = [word.lemmatize() for word in blob.words if word not in stop_words]
         return " ".join(tokens)
 
     def get_products_by_similar_name(self, product_name):
@@ -229,24 +232,61 @@ class ProductRepository:
             database = self.db_manager.connect_database()
             collection = database[self.collection_name]
 
-            modified_count = 0
-            actual_date_year_month = datetime.now().strftime("%Y-%m")
             documents = collection.find(
-                {"date_created": {"$regex": f"^{actual_date_year_month}"}}
+                {"price_by_standard_measure": {"$exists": True}}
             )
 
             for doc in documents:
-                current_price = doc.get("price", 0)
-                if current_price > 0:
-                    new_price = round(
-                        max(current_price + random.uniform(0.3, 0.5), 0), 2
-                    )
-                    result = collection.update_one(
-                        {"_id": doc["_id"]}, {"$set": {"price": new_price}}
-                    )
-                    modified_count += result.modified_count
+                price = doc["price_by_standard_measure"]
+                rounded_price = round(price, 2)
+                collection.update_one(
+                    {"_id": doc["_id"]},
+                    {"$set": {"price_by_standard_measure": rounded_price}},
+                )
 
             self.db_manager.close_database()
-            return Result.success(modified_count)
+            return Result.success("Ok")
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def updateZeroData(self):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+
+            documents = collection.find({"price": 0})
+
+            for doc in documents:
+                price = random.uniform(0.31, 0.51)
+                rounded_price = round(price, 2)
+                collection.update_one(
+                    {"_id": doc["_id"]},
+                    {"$set": {"price": rounded_price}},
+                )
+
+            self.db_manager.close_database()
+            return Result.success("Ok")
+        except Exception as e:
+            return Result.failure(str(e))
+
+    def find_actual_id(self, uuid):
+        try:
+            database = self.db_manager.connect_database()
+            collection = database[self.collection_name]
+            product = collection.find_one({"uuid": uuid})
+
+            if product:
+                name_pasta_product = product["name"]
+                actual_date_year_month = datetime.now().strftime("%Y-%m")
+                product = collection.find_one(
+                    {
+                        "$and": [
+                            {"name": name_pasta_product},
+                            {"date_created": {"$regex": f"^{actual_date_year_month}"}},
+                        ]
+                    }
+                )
+            self.db_manager.close_database()
+            return Result.success(product["uuid"])
         except Exception as e:
             return Result.failure(str(e))
