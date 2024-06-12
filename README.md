@@ -20,13 +20,14 @@ Documentación de la API-Rest Servidor -> https://wewiza.ddns.net/docs
 
 Mediante una aplicación en fase beta donde cualquier usuario con un dispositivo móvil podrías instalar y realizar diversas listas de la compra para comprobar en que mercados les saldría más económico.
 
-Guía de instalación -> https://github.com/agchivite/Wewiza/tree/main/02_Documentacion
+Guía de instalación (Videos) -> https://drive.google.com/drive/folders/1AE-GyxmD73Sb07PEGNz2KZO4QuMgQr2l?usp=sharing
 
 ### Tecnologías Servidor
 
 ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
 ![FASTAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![Debian](https://img.shields.io/badge/Debian-D70A53?style=for-the-badge&logo=debian&logoColor=white)
 ![Raspberry Pi](https://img.shields.io/badge/-RaspberryPi-C51A4A?style=for-the-badge&logo=Raspberry-Pi)
 ![Selenium](https://img.shields.io/badge/-selenium-%43B02A?style=for-the-badge&logo=selenium&logoColor=white)
@@ -43,9 +44,9 @@ Guía de instalación -> https://github.com/agchivite/Wewiza/tree/main/02_Docume
 
 ### Desarrolladores
 
-![Jiacheng Zhang](https://github.com/JiaChengZhang14)
+<a href="https://github.com/JiaChengZhang14">Jiacheng Zhang<a>
 
-![Angel Maroto Chivite](https://github.com/agchivite)
+<a href="https://github.com/agchivite">Angel Maroto Chivite<a>
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
